@@ -1,10 +1,13 @@
+'use client';
+
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight, MessageCircle, Star, Users, Truck, Clock } from 'lucide-react';
-import { produtos, categorias, depoimentos, inspiracoes, posts } from '@/lib/data';
+import { useData } from '@/contexts/DataContext';
 import ProductCard from '@/components/ProductCard';
 
 export default function HomePage() {
+  const { produtos, categorias, depoimentos, inspiracoes, posts } = useData();
   const produtosDestaque = produtos.filter(p => p.destaque).slice(0, 6);
 
   return (
@@ -284,7 +287,7 @@ export default function HomePage() {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-            {posts.map((post) => (
+            {posts.slice(0, 3).map((post) => (
               <Link
                 key={post.id}
                 href={`/blog/${post.id}`}

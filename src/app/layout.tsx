@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import { Inter, DM_Sans } from "next/font/google";
-import Script from "next/script";
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import ErrorBoundary from "@/components/ErrorBoundary";
+import { DataProvider } from "@/contexts/DataContext";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -37,17 +38,18 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR">
-      <head>
-        <Script src="/lasy-bridge.js" strategy="beforeInteractive" />
-      </head>
       <body
         className={`${inter.variable} ${dmSans.variable} font-inter antialiased bg-[#f5f6f7]`}
       >
-        <Header />
-        <main className="pt-16">
-          {children}
-        </main>
-        <Footer />
+        <ErrorBoundary>
+          <DataProvider>
+            <Header />
+            <main className="pt-16">
+              {children}
+            </main>
+            <Footer />
+          </DataProvider>
+        </ErrorBoundary>
       </body>
     </html>
   );
