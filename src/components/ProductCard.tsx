@@ -37,12 +37,15 @@ export default function ProductCard({ produto, onAddToCart }: ProductCardProps) 
     }, 500);
   };
 
+  // Proteção contra imagem undefined - compatibilidade entre painel e site
+  const imagemSrc = produto.imagem || '/placeholder.webp';
+
   return (
     <div className="bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)] hover:scale-[1.02] transition-all duration-300 overflow-hidden group">
       {/* Imagem */}
       <div className="relative aspect-[4/3] overflow-hidden">
         <Image
-          src={produto.imagens[0]}
+          src={imagemSrc}
           alt={produto.nome}
           fill
           className="object-cover group-hover:scale-105 transition-transform duration-300"
@@ -53,7 +56,7 @@ export default function ProductCard({ produto, onAddToCart }: ProductCardProps) 
             Destaque
           </div>
         )}
-        {produto.pronta_entrega_disponivel && (
+        {produto.disponivel_pronta_entrega && (
           <div className="absolute top-3 right-3 bg-[#7FBA3D] text-white px-3 py-1 rounded-full text-xs font-inter font-semibold">
             Pronta Entrega
           </div>
@@ -67,7 +70,7 @@ export default function ProductCard({ produto, onAddToCart }: ProductCardProps) 
         </h3>
         
         <p className="text-[#6b7280] font-inter text-sm mb-4 line-clamp-2 text-center">
-          {produto.descricao_curta}
+          {produto.descricao}
         </p>
 
         {/* Seleção de Modalidade - Compacta */}
@@ -83,7 +86,7 @@ export default function ProductCard({ produto, onAddToCart }: ProductCardProps) 
             >
               Fábrica
             </button>
-            {produto.pronta_entrega_disponivel && produto.preco_pronta_entrega && (
+            {produto.disponivel_pronta_entrega && produto.preco_pronta_entrega && (
               <button
                 onClick={() => setSelectedModalidade('pronta_entrega')}
                 className={`flex-1 py-2.5 px-3 rounded-xl text-sm font-inter font-semibold transition-all duration-200 ${

@@ -3,13 +3,14 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Search, Filter, SortAsc } from 'lucide-react';
-import { produtos, categorias } from '@/lib/data';
+import { useData } from '@/contexts/DataContext';
 import { Produto } from '@/lib/types';
 import ProductCard from '@/components/ProductCard';
 
 export default function ProdutosPage() {
   const searchParams = useSearchParams();
-  const [filteredProdutos, setFilteredProdutos] = useState<Produto[]>(produtos);
+  const { produtos, categorias } = useData();
+  const [filteredProdutos, setFilteredProdutos] = useState<Produto[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState(searchParams.get('categoria') || '');
   const [sortBy, setSortBy] = useState('relevancia');
@@ -19,20 +20,17 @@ export default function ProdutosPage() {
 
     // Filtro por categoria
     if (selectedCategory) {
-      filtered = filtered.filter(produto => 
-        produto.categoria_id.some(catId => {
-          const categoria = categorias.find(c => c.id === catId);
-          return categoria?.slug === selectedCategory;
-        })
-      );
+      filtered = filtered.filter(produto => {
+        const categoria = categorias.find(c => c.id === produto.categoria);
+        return categoria?.slug === selectedCategory;
+      });
     }
 
     // Filtro por busca
     if (searchTerm) {
       filtered = filtered.filter(produto =>
         produto.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        produto.descricao_curta.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        produto.descricao_completa.toLowerCase().includes(searchTerm.toLowerCase())
+        produto.descricao.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
@@ -57,7 +55,7 @@ export default function ProdutosPage() {
     }
 
     setFilteredProdutos(filtered);
-  }, [searchTerm, selectedCategory, sortBy]);
+  }, [produtos, categorias, searchTerm, selectedCategory, sortBy]);
 
   const clearFilters = () => {
     setSearchTerm('');
