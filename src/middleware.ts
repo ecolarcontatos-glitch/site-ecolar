@@ -16,21 +16,13 @@ export function middleware(request: NextRequest) {
     '/admin/produtos'
   ];
 
-  // Verificar se é uma rota de API, arquivo estático ou recurso do Next.js
+  // Verificar se é uma rota de API ou arquivo estático
   if (
     pathname.startsWith('/api/') ||
     pathname.startsWith('/_next/') ||
     pathname.startsWith('/favicon') ||
-    pathname.startsWith('/lasy-bridge') ||
-    pathname.includes('.') ||
-    pathname === '/robots.txt' ||
-    pathname === '/sitemap.xml'
+    pathname.includes('.')
   ) {
-    return NextResponse.next();
-  }
-
-  // Permitir rotas dinâmicas do blog
-  if (pathname.startsWith('/blog/') && pathname !== '/blog/') {
     return NextResponse.next();
   }
 
@@ -50,8 +42,7 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
-     * - lasy-bridge.js (Lasy bridge script)
      */
-    '/((?!api|_next/static|_next/image|favicon.ico|lasy-bridge.js).*)',
+    '/((?!api|_next/static|_next/image|favicon.ico).*)',
   ],
 };

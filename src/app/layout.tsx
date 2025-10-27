@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, DM_Sans } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -38,6 +39,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR">
+      <head>
+        <Script src="/lasy-bridge.js" strategy="beforeInteractive" />
+      </head>
       <body
         className={`${inter.variable} ${dmSans.variable} font-inter antialiased bg-[#f5f6f7]`}
       >
