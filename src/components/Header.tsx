@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { Menu, X, ShoppingCart } from 'lucide-react';
 import { OrcamentoService } from '@/lib/orcamento';
@@ -8,6 +8,8 @@ import { OrcamentoService } from '@/lib/orcamento';
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [itemCount, setItemCount] = useState(0);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const firstMenuItemRef = useRef<HTMLAnchorElement>(null);
 
   useEffect(() => {
     const updateItemCount = () => {
@@ -32,7 +34,34 @@ export default function Header() {
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
-  const closeMenu = () => setIsMenuOpen(false);
+  const closeMenu = () => {
+    setIsMenuOpen(false);
+    // Retornar foco para o botão hambúrguer
+    setTimeout(() => {
+      menuButtonRef.current?.focus();
+    }, 100);
+  };
+
+  // Controle de scroll e acessibilidade
+  useEffect(() => {
+    if (isMenuOpen) {
+      // Bloquear scroll da página
+      document.body.style.overflow = 'hidden';
+      
+      // Focar no primeiro item do menu
+      setTimeout(() => {
+        firstMenuItemRef.current?.focus();
+      }, 100);
+    } else {
+      // Restaurar scroll da página
+      document.body.style.overflow = 'unset';
+    }
+
+    // Cleanup ao desmontar
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isMenuOpen]);
 
   // Fechar menu com ESC
   useEffect(() => {
@@ -112,12 +141,13 @@ export default function Header() {
               )}
             </Link>
             <button
+              ref={menuButtonRef}
               onClick={toggleMenu}
               className="p-2 text-[#6b7280] hover:text-[#7FBA3D] transition-colors"
-              aria-label="Abrir menu"
+              aria-label={isMenuOpen ? "Fechar menu" : "Abrir menu"}
               aria-expanded={isMenuOpen}
             >
-              {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              <Menu className="w-6 h-6" />
             </button>
           </div>
         </div>
@@ -126,28 +156,51 @@ export default function Header() {
       {/* Menu Mobile Drawer */}
       {isMenuOpen && (
         <>
-          {/* Overlay */}
+          {/* Overlay semitransparente */}
           <div
-            className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+            className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden transition-opacity duration-300"
             onClick={closeMenu}
             aria-hidden="true"
           />
           
           {/* Drawer */}
-          <div className="fixed top-16 right-0 w-64 h-[calc(100vh-4rem)] bg-white shadow-lg z-50 md:hidden">
+          <div className="fixed top-0 left-0 w-full h-full bg-white shadow-2xl z-50 md:hidden transform transition-transform duration-300 ease-in-out">
+            {/* Header do drawer com botão fechar */}
+            <div className="flex items-center justify-between p-6 border-b border-[#f1f5f9]">
+              <div className="flex items-center space-x-2">
+                <div className="w-6 h-6 bg-[#7FBA3D] rounded-lg flex items-center justify-center">
+                  <span className="text-white font-bold text-xs">E</span>
+                </div>
+                <span className="font-inter font-semibold text-[#111827]">
+                  ECOLAR
+                </span>
+              </div>
+              <button
+                onClick={closeMenu}
+                className="p-2 text-[#6b7280] hover:text-[#7FBA3D] transition-colors rounded-lg hover:bg-[#f8fafc]"
+                aria-label="Fechar menu"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            {/* Conteúdo do menu */}
             <nav className="p-6">
-              <div className="space-y-4">
-                {menuItems.map((item) => (
+              <div className="space-y-2">
+                {menuItems.map((item, index) => (
                   <Link
                     key={item.href}
+                    ref={index === 0 ? firstMenuItemRef : undefined}
                     href={item.href}
                     onClick={closeMenu}
-                    className="block text-[#6b7280] hover:text-[#7FBA3D] transition-colors duration-200 font-inter font-medium py-2"
+                    className="block text-[#6b7280] hover:text-[#7FBA3D] hover:bg-[#f8fafc] transition-all duration-200 font-inter font-medium py-3 px-4 rounded-lg"
                   >
                     {item.label}
                   </Link>
                 ))}
-                <div className="pt-4 border-t border-[#f1f5f9]">
+                
+                {/* Botão de orçamento */}
+                <div className="pt-6 border-t border-[#f1f5f9]">
                   <Link
                     href="/orcamento"
                     onClick={closeMenu}

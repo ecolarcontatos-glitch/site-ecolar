@@ -16,13 +16,13 @@ export default function HomePage() {
       <section className="relative h-[600px] md:h-[700px] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0">
           <Image
-            src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=1920&h=1080&fit=crop"
+            src="https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=1920&h=1080&fit=crop"
             alt="Materiais de construção"
             fill
             className="object-cover"
             priority
           />
-          <div className="absolute inset-0 bg-[#0A3D2E] bg-opacity-75" />
+          <div className="absolute inset-0 bg-[rgba(10,61,46,0.85)]" />
         </div>
         
         <div className="relative z-10 max-w-[1200px] mx-auto px-5 text-center text-white">
@@ -37,7 +37,7 @@ export default function HomePage() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Link
               href="/produtos"
-              className="flex items-center space-x-2 bg-[#7FBA3D] text-white px-8 py-4 rounded-2xl hover:bg-[#0A3D2E] transition-all duration-200 font-inter font-semibold text-lg shadow-lg hover:shadow-xl"
+              className="flex items-center space-x-2 bg-[#7FBA3D] text-white px-8 py-4 rounded-2xl hover:bg-white hover:text-[#7FBA3D] font-inter font-semibold text-lg shadow-lg"
             >
               <span>Ver Produtos</span>
               <ArrowRight className="w-5 h-5" />

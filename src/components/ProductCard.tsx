@@ -107,7 +107,10 @@ export default function ProductCard({ produto, onAddToCart }: ProductCardProps) 
             </label>
             <input
               type="number"
+              inputMode="numeric"
+              pattern="[0-9]*"
               min="1"
+              step="1"
               value={quantidade}
               onChange={(e) => setQuantidade(Math.max(1, parseInt(e.target.value) || 1))}
               className="w-16 px-2 py-1.5 border border-[#e5e7eb] rounded-lg text-sm font-inter text-center focus:outline-none focus:ring-2 focus:ring-[#7FBA3D] focus:border-transparent"
