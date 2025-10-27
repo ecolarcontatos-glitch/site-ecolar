@@ -4,29 +4,28 @@ export interface Categoria {
   slug: string;
   imagem: string;
   descricao: string;
+  cor?: string;
 }
 
 export interface Produto {
   id: string;
   nome: string;
-  slug: string;
-  categoria_id: string[];
-  descricao_curta: string;
-  descricao_completa: string;
-  imagens: string[];
+  categoria: string; // ID da categoria
+  descricao: string;
+  imagem: string;
   preco_fabrica: number;
-  preco_pronta_entrega?: number;
-  pronta_entrega_disponivel: boolean;
-  estoque_pronta_entrega?: number;
-  lead_time_fabrica: string;
+  preco_pronta_entrega: number;
+  disponivel_fabrica: boolean;
+  disponivel_pronta_entrega: boolean;
   destaque: boolean;
-  observacoes_logistica?: string;
 }
 
 export interface Depoimento {
   id: string;
   nome: string;
   texto: string;
+  estrelas: number;
+  foto?: string;
 }
 
 export interface Inspiracao {

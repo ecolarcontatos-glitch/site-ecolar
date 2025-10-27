@@ -1,40 +1,33 @@
 'use client';
 
-import { useState } from 'react';
 import AdminLayout from '@/components/AdminLayout';
 import { useData } from '@/contexts/DataContext';
-import { Plus, Search, Edit, Trash2, Eye, Star } from 'lucide-react';
+import { Package, Plus, Edit, Trash2, Search, Filter } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useState } from 'react';
 
 export default function AdminProdutos() {
   const { produtos, categorias, removerProduto } = useData();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('');
+  const [busca, setBusca] = useState('');
+  const [categoriaFiltro, setCategoriaFiltro] = useState('');
 
   const produtosFiltrados = produtos.filter(produto => {
-    const matchesSearch = produto.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         produto.descricao_curta.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = !selectedCategory || produto.categoria_id.includes(selectedCategory);
-    return matchesSearch && matchesCategory;
+    const matchBusca = produto.nome.toLowerCase().includes(busca.toLowerCase()) ||
+                      produto.descricao.toLowerCase().includes(busca.toLowerCase());
+    const matchCategoria = !categoriaFiltro || produto.categoria === categoriaFiltro;
+    return matchBusca && matchCategoria;
   });
 
-  const handleDelete = (id: string, nome: string) => {
-    if (confirm(`Tem certeza que deseja excluir o produto "${nome}"?`)) {
+  const handleRemover = (id: string, nome: string) => {
+    if (confirm(`Tem certeza que deseja remover o produto "${nome}"?`)) {
       removerProduto(id);
     }
   };
 
-  const getCategoriaName = (categoriaIds: string[]) => {
-    return categoriaIds
-      .map(id => categorias.find(c => c.id === id)?.nome)
-      .filter(Boolean)
-      .join(', ');
-  };
-
   return (
     <AdminLayout>
-      <div className="space-y-6">
+      <div className="space-y-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
@@ -42,43 +35,40 @@ export default function AdminProdutos() {
               Produtos
             </h1>
             <p className="font-inter text-[#6b7280]">
-              Gerencie todos os produtos do catálogo
+              Gerencie todos os produtos da ECOLAR
             </p>
           </div>
-          
           <Link
             href="/admin/produtos/novo"
-            className="flex items-center space-x-2 bg-[#7FBA3D] text-white px-6 py-3 rounded-2xl hover:bg-[#0A3D2E] transition-colors duration-200 font-inter font-semibold"
+            className="flex items-center space-x-2 bg-[#7FBA3D] text-white px-6 py-3 rounded-2xl hover:bg-[#0A3D2E] transition-colors duration-200 font-inter font-medium"
           >
             <Plus className="w-5 h-5" />
             <span>Novo Produto</span>
           </Link>
         </div>
 
-        {/* Filters */}
+        {/* Filtros */}
         <div className="bg-white rounded-2xl p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08)]">
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#6b7280] w-5 h-5" />
-                <input
-                  type="text"
-                  placeholder="Buscar produtos..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 border border-[#e5e7eb] rounded-xl font-inter focus:outline-none focus:ring-2 focus:ring-[#7FBA3D] focus:border-transparent"
-                />
-              </div>
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#6b7280] w-5 h-5" />
+              <input
+                type="text"
+                placeholder="Buscar produtos..."
+                value={busca}
+                onChange={(e) => setBusca(e.target.value)}
+                className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7FBA3D] focus:border-transparent font-inter"
+              />
             </div>
-            
-            <div className="sm:w-64">
+            <div className="relative">
+              <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#6b7280] w-5 h-5" />
               <select
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="w-full px-4 py-3 border border-[#e5e7eb] rounded-xl font-inter focus:outline-none focus:ring-2 focus:ring-[#7FBA3D] focus:border-transparent"
+                value={categoriaFiltro}
+                onChange={(e) => setCategoriaFiltro(e.target.value)}
+                className="pl-10 pr-8 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7FBA3D] focus:border-transparent font-inter bg-white min-w-[200px]"
               >
                 <option value="">Todas as categorias</option>
-                {categorias.map((categoria) => (
+                {categorias.map(categoria => (
                   <option key={categoria.id} value={categoria.id}>
                     {categoria.nome}
                   </option>
@@ -88,149 +78,181 @@ export default function AdminProdutos() {
           </div>
         </div>
 
-        {/* Products Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {produtosFiltrados.map((produto) => (
-            <div key={produto.id} className="bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)] transition-all duration-300 overflow-hidden">
-              {/* Image */}
-              <div className="relative aspect-[4/3]">
-                <Image
-                  src={produto.imagens[0]}
-                  alt={produto.nome}
-                  fill
-                  className="object-cover"
-                />
-                {produto.destaque && (
-                  <div className="absolute top-3 left-3 bg-[#C05A2B] text-white px-3 py-1 rounded-full text-xs font-inter font-semibold flex items-center space-x-1">
-                    <Star className="w-3 h-3" />
-                    <span>Destaque</span>
-                  </div>
-                )}
-                {produto.pronta_entrega_disponivel && (
-                  <div className="absolute top-3 right-3 bg-[#7FBA3D] text-white px-3 py-1 rounded-full text-xs font-inter font-semibold">
-                    Pronta Entrega
-                  </div>
-                )}
+        {/* Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div className="bg-white rounded-2xl p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08)]">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-inter text-[#6b7280] text-sm">Total</p>
+                <p className="font-inter font-bold text-2xl text-[#111827]">{produtos.length}</p>
               </div>
-
-              {/* Content */}
-              <div className="p-5">
-                <h3 className="font-inter font-semibold text-[#111827] text-lg mb-2 line-clamp-2">
-                  {produto.nome}
-                </h3>
-                
-                <p className="text-[#6b7280] font-inter text-sm mb-3 line-clamp-2">
-                  {produto.descricao_curta}
-                </p>
-
-                <div className="text-xs font-inter text-[#6b7280] mb-3">
-                  {getCategoriaName(produto.categoria_id)}
-                </div>
-
-                <div className="flex items-center justify-between mb-4">
-                  <div className="text-sm font-inter">
-                    <div className="text-[#6b7280]">Fábrica:</div>
-                    <div className="font-semibold text-[#111827]">
-                      R$ {produto.preco_fabrica.toFixed(2)}
-                    </div>
-                  </div>
-                  {produto.preco_pronta_entrega && (
-                    <div className="text-sm font-inter text-right">
-                      <div className="text-[#6b7280]">Pronta:</div>
-                      <div className="font-semibold text-[#111827]">
-                        R$ {produto.preco_pronta_entrega.toFixed(2)}
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Actions */}
-                <div className="flex space-x-2">
-                  <Link
-                    href={`/admin/produtos/${produto.id}`}
-                    className="flex-1 flex items-center justify-center space-x-2 bg-[#f1f5f9] text-[#6b7280] px-3 py-2 rounded-xl hover:bg-[#e5e7eb] transition-colors duration-200 font-inter font-medium text-sm"
-                  >
-                    <Eye className="w-4 h-4" />
-                    <span>Ver</span>
-                  </Link>
-                  
-                  <Link
-                    href={`/admin/produtos/${produto.id}/editar`}
-                    className="flex-1 flex items-center justify-center space-x-2 bg-[#7FBA3D] text-white px-3 py-2 rounded-xl hover:bg-[#0A3D2E] transition-colors duration-200 font-inter font-medium text-sm"
-                  >
-                    <Edit className="w-4 h-4" />
-                    <span>Editar</span>
-                  </Link>
-                  
-                  <button
-                    onClick={() => handleDelete(produto.id, produto.nome)}
-                    className="flex items-center justify-center bg-red-500 text-white px-3 py-2 rounded-xl hover:bg-red-600 transition-colors duration-200"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
+              <Package className="w-8 h-8 text-[#7FBA3D]" />
             </div>
-          ))}
+          </div>
+          <div className="bg-white rounded-2xl p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08)]">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-inter text-[#6b7280] text-sm">Em Destaque</p>
+                <p className="font-inter font-bold text-2xl text-[#111827]">
+                  {produtos.filter(p => p.destaque).length}
+                </p>
+              </div>
+              <Package className="w-8 h-8 text-[#C05A2B]" />
+            </div>
+          </div>
+          <div className="bg-white rounded-2xl p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08)]">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-inter text-[#6b7280] text-sm">Fábrica</p>
+                <p className="font-inter font-bold text-2xl text-[#111827]">
+                  {produtos.filter(p => p.disponivel_fabrica).length}
+                </p>
+              </div>
+              <Package className="w-8 h-8 text-blue-500" />
+            </div>
+          </div>
+          <div className="bg-white rounded-2xl p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08)]">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-inter text-[#6b7280] text-sm">Pronta Entrega</p>
+                <p className="font-inter font-bold text-2xl text-[#111827]">
+                  {produtos.filter(p => p.disponivel_pronta_entrega).length}
+                </p>
+              </div>
+              <Package className="w-8 h-8 text-purple-500" />
+            </div>
+          </div>
         </div>
 
-        {/* Empty State */}
-        {produtosFiltrados.length === 0 && (
-          <div className="bg-white rounded-2xl p-12 shadow-[0_2px_8px_rgba(0,0,0,0.08)] text-center">
-            <div className="w-16 h-16 bg-[#f1f5f9] rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <Search className="w-8 h-8 text-[#6b7280]" />
-            </div>
-            <h3 className="font-inter font-semibold text-[#111827] text-lg mb-2">
-              Nenhum produto encontrado
-            </h3>
-            <p className="font-inter text-[#6b7280] mb-6">
-              {searchTerm || selectedCategory 
-                ? 'Tente ajustar os filtros de busca'
-                : 'Comece adicionando seu primeiro produto'
-              }
-            </p>
-            {!searchTerm && !selectedCategory && (
+        {/* Lista de Produtos */}
+        <div className="bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] overflow-hidden">
+          {produtosFiltrados.length === 0 ? (
+            <div className="p-12 text-center">
+              <Package className="w-16 h-16 text-[#6b7280] mx-auto mb-4" />
+              <h3 className="font-inter font-semibold text-[#111827] text-lg mb-2">
+                Nenhum produto encontrado
+              </h3>
+              <p className="font-inter text-[#6b7280] mb-6">
+                {busca || categoriaFiltro ? 'Tente ajustar os filtros de busca.' : 'Comece adicionando seu primeiro produto.'}
+              </p>
               <Link
                 href="/admin/produtos/novo"
-                className="inline-flex items-center space-x-2 bg-[#7FBA3D] text-white px-6 py-3 rounded-2xl hover:bg-[#0A3D2E] transition-colors duration-200 font-inter font-semibold"
+                className="inline-flex items-center space-x-2 bg-[#7FBA3D] text-white px-6 py-3 rounded-2xl hover:bg-[#0A3D2E] transition-colors duration-200 font-inter font-medium"
               >
                 <Plus className="w-5 h-5" />
-                <span>Adicionar Produto</span>
+                <span>Novo Produto</span>
               </Link>
-            )}
-          </div>
-        )}
-
-        {/* Stats */}
-        <div className="bg-white rounded-2xl p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08)]">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
-            <div>
-              <div className="text-2xl font-inter font-bold text-[#111827] mb-1">
-                {produtos.length}
-              </div>
-              <div className="text-sm font-inter text-[#6b7280]">
-                Total de Produtos
-              </div>
             </div>
-            
-            <div>
-              <div className="text-2xl font-inter font-bold text-[#7FBA3D] mb-1">
-                {produtos.filter(p => p.destaque).length}
-              </div>
-              <div className="text-sm font-inter text-[#6b7280]">
-                Em Destaque
-              </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-[#f8fafc] border-b border-gray-200">
+                  <tr>
+                    <th className="text-left py-4 px-6 font-inter font-semibold text-[#111827] text-sm">
+                      Produto
+                    </th>
+                    <th className="text-left py-4 px-6 font-inter font-semibold text-[#111827] text-sm">
+                      Categoria
+                    </th>
+                    <th className="text-left py-4 px-6 font-inter font-semibold text-[#111827] text-sm">
+                      Preços
+                    </th>
+                    <th className="text-left py-4 px-6 font-inter font-semibold text-[#111827] text-sm">
+                      Status
+                    </th>
+                    <th className="text-right py-4 px-6 font-inter font-semibold text-[#111827] text-sm">
+                      Ações
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {produtosFiltrados.map((produto) => {
+                    const categoria = categorias.find(c => c.id === produto.categoria);
+                    return (
+                      <tr key={produto.id} className="hover:bg-[#f8fafc] transition-colors">
+                        <td className="py-4 px-6">
+                          <div className="flex items-center space-x-4">
+                            <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-gray-100">
+                              <Image
+                                src={produto.imagem}
+                                alt={produto.nome}
+                                fill
+                                className="object-cover"
+                              />
+                            </div>
+                            <div>
+                              <h3 className="font-inter font-semibold text-[#111827] text-sm">
+                                {produto.nome}
+                              </h3>
+                              <p className="font-inter text-[#6b7280] text-xs line-clamp-1">
+                                {produto.descricao}
+                              </p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-4 px-6">
+                          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-inter font-medium bg-[#7FBA3D] bg-opacity-10 text-[#0A3D2E]">
+                            {categoria?.nome || 'Sem categoria'}
+                          </span>
+                        </td>
+                        <td className="py-4 px-6">
+                          <div className="space-y-1">
+                            {produto.disponivel_fabrica && (
+                              <div className="text-xs font-inter text-[#111827]">
+                                Fábrica: R$ {produto.preco_fabrica.toFixed(2)}
+                              </div>
+                            )}
+                            {produto.disponivel_pronta_entrega && (
+                              <div className="text-xs font-inter text-[#111827]">
+                                Pronta: R$ {produto.preco_pronta_entrega.toFixed(2)}
+                              </div>
+                            )}
+                          </div>
+                        </td>
+                        <td className="py-4 px-6">
+                          <div className="flex flex-col space-y-1">
+                            {produto.destaque && (
+                              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-inter font-medium bg-[#C05A2B] bg-opacity-10 text-[#C05A2B]">
+                                Destaque
+                              </span>
+                            )}
+                            <div className="flex space-x-1">
+                              {produto.disponivel_fabrica && (
+                                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-inter font-medium bg-blue-100 text-blue-800">
+                                  Fábrica
+                                </span>
+                              )}
+                              {produto.disponivel_pronta_entrega && (
+                                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-inter font-medium bg-purple-100 text-purple-800">
+                                  Pronta
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-4 px-6">
+                          <div className="flex items-center justify-end space-x-2">
+                            <Link
+                              href={`/admin/produtos/${produto.id}/editar`}
+                              className="p-2 text-[#6b7280] hover:text-[#7FBA3D] hover:bg-[#7FBA3D] hover:bg-opacity-10 rounded-lg transition-colors"
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Link>
+                            <button
+                              onClick={() => handleRemover(produto.id, produto.nome)}
+                              className="p-2 text-[#6b7280] hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
-            
-            <div>
-              <div className="text-2xl font-inter font-bold text-[#C05A2B] mb-1">
-                {produtos.filter(p => p.pronta_entrega_disponivel).length}
-              </div>
-              <div className="text-sm font-inter text-[#6b7280]">
-                Pronta Entrega
-              </div>
-            </div>
-          </div>
+          )}
         </div>
       </div>
     </AdminLayout>
