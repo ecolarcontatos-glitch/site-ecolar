@@ -48,6 +48,15 @@ const STORAGE_KEYS = {
   inspiracoes: 'ecolar_inspiracoes'
 };
 
+// ✅ CORREÇÃO: Função para normalizar produtos (garantir campo disponivel)
+const normalizarProdutos = (produtos: Produto[]): Produto[] => {
+  return produtos.map(produto => ({
+    ...produto,
+    // Se disponivel não está definido, usar true por padrão
+    disponivel: produto.disponivel !== undefined ? produto.disponivel : true
+  }));
+};
+
 export function DataProvider({ children }: { children: ReactNode }) {
   const [produtos, setProdutos] = useState<Produto[]>([]);
   const [categorias, setCategorias] = useState<Categoria[]>([]);
@@ -61,9 +70,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
     if (typeof window === 'undefined') return;
 
     try {
-      // Carregar produtos
+      // Carregar produtos com normalização
       const produtosStored = localStorage.getItem(STORAGE_KEYS.produtos);
-      setProdutos(produtosStored ? JSON.parse(produtosStored) : produtosIniciais);
+      const produtosCarregados = produtosStored ? JSON.parse(produtosStored) : produtosIniciais;
+      setProdutos(normalizarProdutos(produtosCarregados));
 
       // Carregar categorias
       const categoriasStored = localStorage.getItem(STORAGE_KEYS.categorias);
@@ -84,8 +94,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
       setIsLoading(false);
     } catch (error) {
       console.error('Erro ao carregar dados:', error);
-      // Em caso de erro, usar dados iniciais
-      setProdutos(produtosIniciais);
+      // Em caso de erro, usar dados iniciais normalizados
+      setProdutos(normalizarProdutos(produtosIniciais));
       setCategorias(categoriasIniciais);
       setPosts(postsIniciais);
       setDepoimentos(depoimentosIniciais);
@@ -111,7 +121,12 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   // CRUD Produtos
   const adicionarProduto = (produto: Omit<Produto, 'id'>) => {
-    const novoProduto = { ...produto, id: Date.now().toString() };
+    const novoProduto = { 
+      ...produto, 
+      id: Date.now().toString(),
+      // ✅ CORREÇÃO: Garantir que novos produtos tenham disponivel = true por padrão
+      disponivel: produto.disponivel !== undefined ? produto.disponivel : true
+    };
     const novosProdutos = [...produtos, novoProduto];
     setProdutos(novosProdutos);
     salvarDados(STORAGE_KEYS.produtos, novosProdutos);

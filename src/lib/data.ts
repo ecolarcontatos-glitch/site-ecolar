@@ -56,7 +56,8 @@ export const produtos: Produto[] = [
     preco_pronta_entrega: 2.80,
     disponivel_fabrica: true,
     disponivel_pronta_entrega: true,
-    destaque: true
+    destaque: true,
+    disponivel: true // ✅ CORREÇÃO: Campo adicionado para controle geral
   },
   {
     id: '2',
@@ -68,7 +69,8 @@ export const produtos: Produto[] = [
     preco_pronta_entrega: 2.40,
     disponivel_fabrica: true,
     disponivel_pronta_entrega: false,
-    destaque: true
+    destaque: true,
+    disponivel: true // ✅ CORREÇÃO: Campo adicionado para controle geral
   },
   {
     id: '3',
@@ -80,7 +82,8 @@ export const produtos: Produto[] = [
     preco_pronta_entrega: 49.00,
     disponivel_fabrica: true,
     disponivel_pronta_entrega: true,
-    destaque: true
+    destaque: true,
+    disponivel: true // ✅ CORREÇÃO: Campo adicionado para controle geral
   },
   {
     id: '4',
@@ -92,7 +95,8 @@ export const produtos: Produto[] = [
     preco_pronta_entrega: 35.90,
     disponivel_fabrica: true,
     disponivel_pronta_entrega: true,
-    destaque: false
+    destaque: false,
+    disponivel: true // ✅ CORREÇÃO: Campo adicionado para controle geral
   },
   {
     id: '5',
@@ -104,7 +108,8 @@ export const produtos: Produto[] = [
     preco_pronta_entrega: 4.20,
     disponivel_fabrica: true,
     disponivel_pronta_entrega: true,
-    destaque: false
+    destaque: false,
+    disponivel: true // ✅ CORREÇÃO: Campo adicionado para controle geral
   },
   {
     id: '6',
@@ -116,7 +121,8 @@ export const produtos: Produto[] = [
     preco_pronta_entrega: 3.60,
     disponivel_fabrica: true,
     disponivel_pronta_entrega: true,
-    destaque: false
+    destaque: false,
+    disponivel: true // ✅ CORREÇÃO: Campo adicionado para controle geral
   }
 ];
 
@@ -126,21 +132,21 @@ export const depoimentos: Depoimento[] = [
     nome: 'Carlos Silva',
     texto: 'Excelente qualidade dos materiais e entrega sempre no prazo. A ECOLAR é nossa parceira há mais de 5 anos.',
     estrelas: 5,
-    foto: ''
+    foto: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face'
   },
   {
     id: '2',
     nome: 'Ana Rodrigues',
     texto: 'Atendimento excepcional e preços justos. Recomendo para todos os colegas arquitetos.',
     estrelas: 5,
-    foto: ''
+    foto: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face'
   },
   {
     id: '3',
     nome: 'João Santos',
     texto: 'A dupla opção de preços (fábrica e pronta entrega) facilita muito o planejamento das obras.',
     estrelas: 5,
-    foto: ''
+    foto: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face'
   }
 ];
 
@@ -198,17 +204,17 @@ export const posts: Post[] = [
     titulo: 'Tijolo estrutural vs tijolo de vedação',
     imagem: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=800&h=600&fit=crop',
     resumo: 'Entenda as diferenças e quando usar cada tipo de tijolo.',
-    conteudo: 'A escolha correta do tipo de tijolo é essencial para a segurança e durabilidade da construção. Vamos explicar as principais diferenças entre tijolos estruturais e de vedação.\\n\\nOs tijolos estruturais são projetados para suportar cargas e fazer parte da estrutura do edifício. Possuem maior resistência à compressão e são fundamentais em construções de alvenaria estrutural.\\n\\nJá os tijolos de vedação são utilizados para fechamento de vãos e divisórias internas, não tendo função estrutural. São mais leves e econômicos.',
+    conteudo: 'Os tijolos são elementos fundamentais na construção civil, mas nem todos são iguais. Existem diferenças importantes entre tijolos estruturais e de vedação que todo profissional deve conhecer.\\n\\nTijolos estruturais são projetados para suportar cargas e fazer parte da estrutura do edifício. Já os tijolos de vedação são utilizados apenas para fechar vãos, sem função estrutural.\\n\\nA escolha correta do tipo de tijolo é essencial para a segurança e durabilidade da construção.',
     autor: 'Eng. Maria Santos',
     data: '2024-01-10T14:30:00.000Z'
   },
   {
     id: '3',
-    titulo: 'Tendências em pisos cerâmicos para 2024',
+    titulo: 'Tendências em pisos cerâmicos 2024',
     imagem: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&h=600&fit=crop',
     resumo: 'Descubra as principais tendências em revestimentos cerâmicos.',
-    conteudo: 'O mercado de pisos cerâmicos está em constante evolução. Confira as principais tendências para 2024 e como incorporá-las em seus projetos.\\n\\nFormatos grandes e retangulares continuam em alta, proporcionando ambientes mais amplos e modernos. As texturas que imitam materiais naturais como madeira e pedra também são muito procuradas.\\n\\nCores neutras e tons terrosos dominam as preferências, criando ambientes aconchegantes e atemporais.',
-    autor: 'Arq. João Silva',
+    conteudo: 'O mercado de pisos cerâmicos está em constante evolução, trazendo novas texturas, cores e formatos que atendem às demandas contemporâneas de design e funcionalidade.\\n\\nEm 2024, destacam-se os formatos grandes, que proporcionam ambientes mais amplos e modernos, além das texturas que imitam materiais naturais como madeira e pedra.\\n\\nA sustentabilidade também é uma tendência forte, com produtos que utilizam materiais reciclados em sua composição.',
+    autor: 'Arq. Pedro Lima',
     data: '2024-01-05T09:15:00.000Z'
   }
 ];
