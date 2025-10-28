@@ -16,12 +16,14 @@ export default function NovoProduto() {
     nome: '',
     descricao: '',
     imagem: '',
-    categoria_id: '',
+    categoria: '', // Corrigido para 'categoria' em vez de 'categoria_id'
     preco_fabrica: '',
     preco_pronta_entrega: '',
     unidade: 'unidade',
     destaque: false,
-    disponivel: true
+    disponivel: true, // Campo para controle geral de disponibilidade
+    disponivel_fabrica: true,
+    disponivel_pronta_entrega: true
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -29,7 +31,7 @@ export default function NovoProduto() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.nome || !formData.descricao || !formData.imagem || !formData.categoria_id) {
+    if (!formData.nome || !formData.descricao || !formData.imagem || !formData.categoria) {
       alert('Por favor, preencha todos os campos obrigatórios.');
       return;
     }
@@ -46,12 +48,14 @@ export default function NovoProduto() {
         nome: formData.nome,
         descricao: formData.descricao,
         imagem: formData.imagem,
-        categoria_id: formData.categoria_id,
+        categoria: formData.categoria, // Corrigido
         preco_fabrica: parseFloat(formData.preco_fabrica),
         preco_pronta_entrega: parseFloat(formData.preco_pronta_entrega),
         unidade: formData.unidade,
         destaque: formData.destaque,
-        disponivel: formData.disponivel
+        disponivel: formData.disponivel, // Adicionado
+        disponivel_fabrica: formData.disponivel_fabrica,
+        disponivel_pronta_entrega: formData.disponivel_pronta_entrega
       });
 
       router.push('/admin/produtos');
@@ -136,8 +140,8 @@ export default function NovoProduto() {
                       Categoria *
                     </label>
                     <select
-                      value={formData.categoria_id ?? ''}
-                      onChange={(e) => handleChange('categoria_id', e.target.value)}
+                      value={formData.categoria ?? ''}
+                      onChange={(e) => handleChange('categoria', e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#7FBA3D] focus:border-transparent"
                       required
                     >
@@ -257,7 +261,33 @@ export default function NovoProduto() {
                       className="h-4 w-4 text-[#7FBA3D] focus:ring-[#7FBA3D] border-gray-300 rounded"
                     />
                     <label htmlFor="disponivel" className="ml-2 block text-sm text-gray-700">
-                      Produto disponível
+                      Produto disponível no site
+                    </label>
+                  </div>
+
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      id="disponivel_fabrica"
+                      checked={formData.disponivel_fabrica ?? true}
+                      onChange={(e) => handleChange('disponivel_fabrica', e.target.checked)}
+                      className="h-4 w-4 text-[#7FBA3D] focus:ring-[#7FBA3D] border-gray-300 rounded"
+                    />
+                    <label htmlFor="disponivel_fabrica" className="ml-2 block text-sm text-gray-700">
+                      Disponível direto da fábrica
+                    </label>
+                  </div>
+
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      id="disponivel_pronta_entrega"
+                      checked={formData.disponivel_pronta_entrega ?? true}
+                      onChange={(e) => handleChange('disponivel_pronta_entrega', e.target.checked)}
+                      className="h-4 w-4 text-[#7FBA3D] focus:ring-[#7FBA3D] border-gray-300 rounded"
+                    />
+                    <label htmlFor="disponivel_pronta_entrega" className="ml-2 block text-sm text-gray-700">
+                      Disponível para pronta entrega
                     </label>
                   </div>
                 </div>

@@ -1,6 +1,7 @@
 'use client';
 
 import AdminLayout from '@/components/AdminLayout';
+import ImageUpload from '@/components/ImageUpload';
 import { useData } from '@/contexts/DataContext';
 import { ArrowLeft, Save, FileText, Eye } from 'lucide-react';
 import Link from 'next/link';
@@ -45,9 +46,8 @@ export default function NovoPost() {
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+  const handleChange = (field: string, value: any) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   return (
@@ -85,114 +85,119 @@ export default function NovoPost() {
         {!showPreview ? (
           /* Formulário */
           <form onSubmit={handleSubmit} className="space-y-8">
-            <div className="bg-white rounded-2xl p-8 shadow-[0_2px_8px_rgba(0,0,0,0.08)]">
-              <div className="flex items-center space-x-3 mb-6">
-                <FileText className="w-6 h-6 text-blue-500" />
-                <h2 className="font-inter font-semibold text-xl text-[#111827]">
-                  Informações do Post
-                </h2>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              {/* Coluna Principal */}
+              <div className="lg:col-span-2 space-y-6">
+                <div className="bg-white rounded-2xl p-8 shadow-[0_2px_8px_rgba(0,0,0,0.08)]">
+                  <div className="flex items-center space-x-3 mb-6">
+                    <FileText className="w-6 h-6 text-blue-500" />
+                    <h2 className="font-inter font-semibold text-xl text-[#111827]">
+                      Informações do Post
+                    </h2>
+                  </div>
+
+                  <div className="space-y-6">
+                    <div>
+                      <label className="block font-inter font-medium text-[#111827] mb-2">
+                        Título do Post *
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.titulo ?? ''}
+                        onChange={(e) => handleChange('titulo', e.target.value)}
+                        required
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent font-inter text-lg"
+                        placeholder="Ex: Como escolher os melhores tijolos para sua obra"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block font-inter font-medium text-[#111827] mb-2">
+                        Autor
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.autor ?? ''}
+                        onChange={(e) => handleChange('autor', e.target.value)}
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent font-inter"
+                        placeholder="Nome do autor"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block font-inter font-medium text-[#111827] mb-2">
+                        Resumo *
+                      </label>
+                      <textarea
+                        value={formData.resumo ?? ''}
+                        onChange={(e) => handleChange('resumo', e.target.value)}
+                        required
+                        rows={3}
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent font-inter resize-none"
+                        placeholder="Escreva um resumo atrativo do post..."
+                      />
+                      <p className="text-sm text-[#6b7280] font-inter mt-1">
+                        Este resumo aparecerá na listagem de posts e na página inicial
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="block font-inter font-medium text-[#111827] mb-2">
+                        Conteúdo *
+                      </label>
+                      <textarea
+                        value={formData.conteudo ?? ''}
+                        onChange={(e) => handleChange('conteudo', e.target.value)}
+                        required
+                        rows={15}
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent font-inter resize-none"
+                        placeholder="Escreva o conteúdo completo do post..."
+                      />
+                      <p className="text-sm text-[#6b7280] font-inter mt-1">
+                        Use quebras de linha para separar parágrafos
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </div>
 
+              {/* Sidebar */}
               <div className="space-y-6">
-                <div>
-                  <label className="block font-inter font-medium text-[#111827] mb-2">
-                    Título do Post *
-                  </label>
-                  <input
-                    type="text"
-                    name="titulo"
-                    value={formData.titulo}
-                    onChange={handleChange}
-                    required
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent font-inter text-lg"
-                    placeholder="Ex: Como escolher os melhores tijolos para sua obra"
+                {/* Imagem de Capa */}
+                <div className="bg-white rounded-2xl p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08)]">
+                  <h2 className="font-inter font-semibold text-[#111827] text-lg mb-6">
+                    Imagem de Capa
+                  </h2>
+                  
+                  <ImageUpload
+                    value={formData.imagem ?? ''}
+                    onChange={(url) => handleChange('imagem', url)}
+                    placeholder="Adicione uma imagem de capa para o post"
+                    aspectRatio="aspect-[16/9]"
                   />
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block font-inter font-medium text-[#111827] mb-2">
-                      Autor
-                    </label>
-                    <input
-                      type="text"
-                      name="autor"
-                      value={formData.autor}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent font-inter"
-                      placeholder="Nome do autor"
-                    />
+                {/* Ações */}
+                <div className="bg-white rounded-2xl p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08)]">
+                  <div className="space-y-3">
+                    <button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="w-full flex items-center justify-center space-x-2 bg-blue-500 text-white px-6 py-3 rounded-2xl hover:bg-blue-600 transition-colors duration-200 font-inter font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <Save className="w-5 h-5" />
+                      <span>{isSubmitting ? 'Salvando...' : 'Publicar Post'}</span>
+                    </button>
+
+                    <Link
+                      href="/admin/blog"
+                      className="w-full flex items-center justify-center space-x-2 border border-gray-300 text-gray-700 px-6 py-3 rounded-2xl hover:bg-gray-50 transition-colors duration-200 font-inter font-medium"
+                    >
+                      <span>Cancelar</span>
+                    </Link>
                   </div>
-
-                  <div>
-                    <label className="block font-inter font-medium text-[#111827] mb-2">
-                      URL da Imagem de Capa
-                    </label>
-                    <input
-                      type="url"
-                      name="imagem"
-                      value={formData.imagem}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent font-inter"
-                      placeholder="https://exemplo.com/imagem.jpg"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block font-inter font-medium text-[#111827] mb-2">
-                    Resumo *
-                  </label>
-                  <textarea
-                    name="resumo"
-                    value={formData.resumo}
-                    onChange={handleChange}
-                    required
-                    rows={3}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent font-inter resize-none"
-                    placeholder="Escreva um resumo atrativo do post..."
-                  />
-                  <p className="text-sm text-[#6b7280] font-inter mt-1">
-                    Este resumo aparecerá na listagem de posts e na página inicial
-                  </p>
-                </div>
-
-                <div>
-                  <label className="block font-inter font-medium text-[#111827] mb-2">
-                    Conteúdo *
-                  </label>
-                  <textarea
-                    name="conteudo"
-                    value={formData.conteudo}
-                    onChange={handleChange}
-                    required
-                    rows={15}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent font-inter resize-none"
-                    placeholder="Escreva o conteúdo completo do post..."
-                  />
-                  <p className="text-sm text-[#6b7280] font-inter mt-1">
-                    Use quebras de linha para separar parágrafos
-                  </p>
                 </div>
               </div>
-            </div>
-
-            {/* Botões */}
-            <div className="flex flex-col sm:flex-row gap-4 sm:justify-end">
-              <Link
-                href="/admin/blog"
-                className="flex items-center justify-center space-x-2 px-6 py-3 border border-gray-200 text-[#6b7280] rounded-2xl hover:bg-gray-50 transition-colors duration-200 font-inter font-medium"
-              >
-                <span>Cancelar</span>
-              </Link>
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="flex items-center justify-center space-x-2 bg-blue-500 text-white px-6 py-3 rounded-2xl hover:bg-blue-600 transition-colors duration-200 font-inter font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <Save className="w-5 h-5" />
-                <span>{isSubmitting ? 'Salvando...' : 'Publicar Post'}</span>
-              </button>
             </div>
           </form>
         ) : (

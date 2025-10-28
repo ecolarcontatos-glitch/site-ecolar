@@ -18,6 +18,8 @@ export interface Produto {
   disponivel_fabrica: boolean;
   disponivel_pronta_entrega: boolean;
   destaque: boolean;
+  unidade?: string;
+  disponivel?: boolean; // Campo adicional para controle geral de disponibilidade
 }
 
 export interface Depoimento {
@@ -26,6 +28,7 @@ export interface Depoimento {
   texto: string;
   estrelas: number;
   foto?: string;
+  imagem?: string; // Alias para compatibilidade
 }
 
 export interface Inspiracao {

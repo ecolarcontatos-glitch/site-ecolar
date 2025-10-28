@@ -18,6 +18,9 @@ export default function ProdutosPageContent() {
   useEffect(() => {
     let filtered = produtos;
 
+    // FILTRO CRÍTICO: Apenas produtos disponíveis aparecem no site
+    filtered = filtered.filter(produto => produto.disponivel !== false);
+
     // Filtro por categoria
     if (selectedCategory) {
       filtered = filtered.filter(produto => {

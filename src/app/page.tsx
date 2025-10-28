@@ -9,7 +9,10 @@ import { useState, useEffect } from 'react';
 
 export default function HomePage() {
   const { produtos, categorias, depoimentos, inspiracoes, posts } = useData();
-  const produtosDestaque = produtos.filter(p => p.destaque).slice(0, 6);
+  
+  // FILTRO CRÍTICO: Apenas produtos disponíveis aparecem no site
+  const produtosDisponiveis = produtos.filter(p => p.disponivel !== false);
+  const produtosDestaque = produtosDisponiveis.filter(p => p.destaque).slice(0, 6);
   const categoriasPrincipais = categorias.slice(0, 4); // Apenas 4 categorias
 
   // Carrossel de imagens do Hero
@@ -301,11 +304,11 @@ export default function HomePage() {
                 key={depoimento.id}
                 className="bg-white rounded-2xl p-8 shadow-[0_2px_8px_rgba(0,0,0,0.08)] text-center"
               >
-                {/* Imagem do cliente - acima das estrelas */}
-                {depoimento.imagem && (
+                {/* Imagem do cliente - acima das estrelas - usando foto ou imagem */}
+                {(depoimento.foto || depoimento.imagem) && (
                   <div className="relative w-16 h-16 mx-auto mb-4 rounded-full overflow-hidden">
                     <Image
-                      src={depoimento.imagem}
+                      src={depoimento.foto || depoimento.imagem || ''}
                       alt={depoimento.nome}
                       fill
                       className="object-cover"
