@@ -1,32 +1,14 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import AdminLayout from '@/components/AdminLayout';
 import { useData } from '@/contexts/DataContext';
+import { useAuth } from '@/hooks/useAuth';
 import { Package, FolderOpen, FileText, MessageSquare, Image as ImageIcon, TrendingUp } from 'lucide-react';
 import Link from 'next/link';
 
 export default function AdminDashboard() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const router = useRouter();
+  const { isAuthenticated, isLoading } = useAuth();
   const { produtos, categorias, posts, depoimentos, inspiracoes } = useData();
-
-  useEffect(() => {
-    // Verificar se o usuário está autenticado
-    const authenticated = localStorage.getItem('admin_authenticated');
-    
-    if (authenticated === 'true') {
-      setIsAuthenticated(true);
-    } else {
-      // Redirecionar para página de login
-      router.push('/admin');
-      return;
-    }
-    
-    setIsLoading(false);
-  }, [router]);
 
   // Mostrar loading enquanto verifica autenticação
   if (isLoading) {

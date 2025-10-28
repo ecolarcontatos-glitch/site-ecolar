@@ -23,20 +23,22 @@ export default function ImageUpload({
 }: ImageUploadProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
+  const [error, setError] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileSelect = async (file: File) => {
     if (!file.type.startsWith('image/')) {
-      alert('Por favor, selecione apenas arquivos de imagem.');
+      setError('Por favor, selecione apenas arquivos de imagem.');
       return;
     }
 
     if (file.size > 10 * 1024 * 1024) { // 10MB
-      alert('O arquivo deve ter no máximo 10MB.');
+      setError('O arquivo deve ter no máximo 10MB.');
       return;
     }
 
     setIsUploading(true);
+    setError('');
 
     try {
       const formData = new FormData();
@@ -48,14 +50,15 @@ export default function ImageUpload({
       });
 
       if (!response.ok) {
-        throw new Error('Erro no upload');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Erro no upload');
       }
 
       const data = await response.json();
       onImageUploaded(data.url);
     } catch (error) {
       console.error('Erro no upload:', error);
-      alert('Erro ao fazer upload da imagem. Tente novamente.');
+      setError(error instanceof Error ? error.message : 'Erro ao fazer upload da imagem. Tente novamente.');
     } finally {
       setIsUploading(false);
     }
@@ -92,6 +95,7 @@ export default function ImageUpload({
     if (onImageRemoved) {
       onImageRemoved();
     }
+    setError('');
   };
 
   return (
@@ -99,6 +103,13 @@ export default function ImageUpload({
       <label className="block text-sm font-medium text-gray-700 mb-2">
         {label}
       </label>
+      
+      {/* Mensagem de erro */}
+      {error && (
+        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl">
+          <p className="text-sm text-red-600">{error}</p>
+        </div>
+      )}
       
       {currentImage ? (
         <div className="relative">

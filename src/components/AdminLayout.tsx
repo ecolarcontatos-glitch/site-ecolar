@@ -21,7 +21,7 @@ interface AdminLayoutProps {
 }
 
 const menuItems = [
-  { href: '/admin', icon: Home, label: 'Dashboard', exact: true },
+  { href: '/admin/dashboard', icon: Home, label: 'Dashboard', exact: true },
   { href: '/admin/produtos', icon: Package, label: 'Produtos' },
   { href: '/admin/categorias', icon: FolderOpen, label: 'Categorias' },
   { href: '/admin/blog', icon: FileText, label: 'Blog' },
@@ -47,8 +47,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     localStorage.removeItem('admin_authenticated');
     localStorage.removeItem('admin_user');
     
+    // Remover cookie
+    document.cookie = 'admin_authenticated=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+    
     // Redirecionar para página de login
-    router.push('/admin/login');
+    router.push('/admin');
   };
 
   return (
@@ -91,12 +94,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         </div>
       </header>
 
-      <div className="flex pt-16">
+      <div className="flex">
         {/* Sidebar */}
         <aside className={`
           fixed lg:static inset-y-0 left-0 z-40 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-          pt-16 lg:pt-0
+          pt-16 lg:pt-16
         `}>
           <nav className="p-4 space-y-2">
             {menuItems.map((item) => {
@@ -133,7 +136,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         )}
 
         {/* Main Content */}
-        <main className="flex-1 lg:ml-0">
+        <main className="flex-1 lg:ml-0 pt-16">
           <div className="p-6">
             {children}
           </div>

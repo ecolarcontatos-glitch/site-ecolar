@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Eye, EyeOff, Lock, User } from 'lucide-react';
@@ -15,6 +15,14 @@ export default function AdminLoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
+  useEffect(() => {
+    // Verificar se já está autenticado
+    const authenticated = localStorage.getItem('admin_authenticated');
+    if (authenticated === 'true') {
+      router.push('/admin/dashboard');
+    }
+  }, [router]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -25,9 +33,12 @@ export default function AdminLoginPage() {
 
     // Validação das credenciais
     if (credentials.username === 'useradmin' && credentials.password === 'adminuser') {
-      // Salvar estado de autenticação no localStorage
+      // Salvar estado de autenticação no localStorage e cookie
       localStorage.setItem('admin_authenticated', 'true');
       localStorage.setItem('admin_user', credentials.username);
+      
+      // Definir cookie para o middleware
+      document.cookie = 'admin_authenticated=true; path=/; max-age=86400'; // 24 horas
       
       // Redirecionar para o dashboard
       router.push('/admin/dashboard');

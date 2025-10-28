@@ -54,8 +54,8 @@ export default function HomePage() {
               />
             </div>
           ))}
-          {/* Camada preta translúcida */}
-          <div className="absolute inset-0 bg-black bg-opacity-55" />
+          {/* Camada preta MUITO transparente para contraste */}
+          <div className="absolute inset-0 bg-black/15" />
         </div>
         
         <div className="relative z-10 max-w-[1200px] mx-auto px-5 text-center text-white">

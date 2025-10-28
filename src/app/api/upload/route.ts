@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { put } from '@vercel/blob';
 
 export async function POST(request: NextRequest) {
   try {
@@ -10,29 +9,34 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Nenhum arquivo enviado' }, { status: 400 });
     }
 
-    // Verificar se é uma imagem
+    // Validar tipo de arquivo
     if (!file.type.startsWith('image/')) {
       return NextResponse.json({ error: 'Apenas arquivos de imagem são permitidos' }, { status: 400 });
     }
 
-    // Verificar tamanho (máximo 10MB)
+    // Validar tamanho (10MB)
     if (file.size > 10 * 1024 * 1024) {
       return NextResponse.json({ error: 'Arquivo muito grande. Máximo 10MB.' }, { status: 400 });
     }
 
-    // Gerar nome único para o arquivo
-    const timestamp = Date.now();
-    const extension = file.name.split('.').pop();
-    const filename = `ecolar-${timestamp}.${extension}`;
+    // Converter para base64 para simular upload
+    const bytes = await file.arrayBuffer();
+    const buffer = Buffer.from(bytes);
+    const base64 = buffer.toString('base64');
+    const mimeType = file.type;
+    
+    // Simular URL de upload (em produção seria Vercel Blob, Cloudinary, etc.)
+    const imageUrl = `data:${mimeType};base64,${base64}`;
 
-    // Upload para Vercel Blob
-    const blob = await put(filename, file, {
-      access: 'public',
+    return NextResponse.json({ 
+      url: imageUrl,
+      message: 'Upload realizado com sucesso' 
     });
 
-    return NextResponse.json({ url: blob.url });
   } catch (error) {
     console.error('Erro no upload:', error);
-    return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 });
+    return NextResponse.json({ 
+      error: 'Erro interno do servidor' 
+    }, { status: 500 });
   }
 }
