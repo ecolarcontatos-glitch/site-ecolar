@@ -5,33 +5,66 @@ import Image from 'next/image';
 import { ArrowRight, MessageCircle, Star, Users, Truck, Clock } from 'lucide-react';
 import { useData } from '@/contexts/DataContext';
 import ProductCard from '@/components/ProductCard';
+import { useState, useEffect } from 'react';
 
 export default function HomePage() {
   const { produtos, categorias, depoimentos, inspiracoes, posts } = useData();
   const produtosDestaque = produtos.filter(p => p.destaque).slice(0, 6);
+  const categoriasPrincipais = categorias.slice(0, 4); // Apenas 4 categorias
+
+  // Carrossel de imagens do Hero
+  const heroImages = [
+    "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=1920&h=1080&fit=crop",
+    "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=1920&h=1080&fit=crop",
+    "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1920&h=1080&fit=crop",
+    "https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=1920&h=1080&fit=crop"
+  ];
+
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prevIndex) => 
+        prevIndex === heroImages.length - 1 ? 0 : prevIndex + 1
+      );
+    }, 7000); // Troca a cada 7 segundos
+
+    return () => clearInterval(interval);
+  }, [heroImages.length]);
 
   return (
     <div className="min-h-screen">
-      {/* Hero Section */}
+      {/* Hero Section com Carrossel */}
       <section className="relative h-[600px] md:h-[700px] flex items-center justify-center overflow-hidden">
+        {/* Carrossel de imagens */}
         <div className="absolute inset-0">
-          <Image
-            src="https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=1920&h=1080&fit=crop"
-            alt="Materiais de construção"
-            fill
-            className="object-cover"
-            priority
-          />
-          <div className="absolute inset-0 bg-[rgba(10,61,46,0.85)]" />
+          {heroImages.map((image, index) => (
+            <div
+              key={index}
+              className={`absolute inset-0 transition-opacity duration-1000 ${
+                index === currentImageIndex ? 'opacity-100' : 'opacity-0'
+              }`}
+            >
+              <Image
+                src={image}
+                alt={`Materiais de construção ${index + 1}`}
+                fill
+                className="object-cover"
+                priority={index === 0}
+              />
+            </div>
+          ))}
+          {/* Fundo verde translúcido com máxima transparência */}
+          <div className="absolute inset-0 bg-[rgba(10,61,46,0.6)]" />
         </div>
         
         <div className="relative z-10 max-w-[1200px] mx-auto px-5 text-center text-white">
-          <h1 className="font-inter font-bold text-4xl md:text-6xl lg:text-7xl mb-6 leading-tight">
+          <h1 className="font-inter font-bold text-4xl md:text-6xl lg:text-7xl mb-6 leading-tight" style={{ textShadow: '0 2px 4px rgba(0,0,0,0.3)' }}>
             Materiais de construção
             <br />
             <span className="text-[#7FBA3D]">& decoração</span>
           </h1>
-          <p className="font-inter text-lg md:text-xl text-gray-200 mb-8 max-w-2xl mx-auto leading-relaxed">
+          <p className="font-inter text-lg md:text-xl text-gray-200 mb-8 max-w-2xl mx-auto leading-relaxed" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.3)' }}>
             Telhas, tijolos, pisos e sob medida — orçamento rápido e entrega por carrada.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
@@ -85,7 +118,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Categorias */}
+      {/* Categorias - Apenas 4 principais */}
       <section className="py-16 md:py-20 bg-white">
         <div className="max-w-[1200px] mx-auto px-5">
           <div className="text-center mb-12">
@@ -97,8 +130,8 @@ export default function HomePage() {
             </p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {categorias.map((categoria) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            {categoriasPrincipais.map((categoria) => (
               <Link
                 key={categoria.id}
                 href={`/produtos?categoria=${categoria.slug}`}
@@ -122,6 +155,17 @@ export default function HomePage() {
                 </div>
               </Link>
             ))}
+          </div>
+
+          {/* Botão Ver Todas */}
+          <div className="text-center">
+            <Link
+              href="/produtos"
+              className="inline-flex items-center space-x-2 bg-[#7FBA3D] text-white px-6 py-3 rounded-2xl hover:bg-[#0A3D2E] transition-colors duration-200 font-inter font-medium"
+            >
+              <span>Ver todas as categorias</span>
+              <ArrowRight className="w-4 h-4" />
+            </Link>
           </div>
         </div>
       </section>
@@ -239,7 +283,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Depoimentos */}
+      {/* Depoimentos - Com imagens acima das estrelas */}
       <section className="py-16 md:py-20">
         <div className="max-w-[1200px] mx-auto px-5">
           <div className="text-center mb-12">
@@ -257,6 +301,18 @@ export default function HomePage() {
                 key={depoimento.id}
                 className="bg-white rounded-2xl p-8 shadow-[0_2px_8px_rgba(0,0,0,0.08)] text-center"
               >
+                {/* Imagem do cliente - acima das estrelas */}
+                {depoimento.imagem && (
+                  <div className="relative w-16 h-16 mx-auto mb-4 rounded-full overflow-hidden">
+                    <Image
+                      src={depoimento.imagem}
+                      alt={depoimento.nome}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                )}
+                
                 <div className="flex justify-center mb-4">
                   {[...Array(5)].map((_, i) => (
                     <Star key={i} className="w-5 h-5 text-[#7FBA3D] fill-current" />

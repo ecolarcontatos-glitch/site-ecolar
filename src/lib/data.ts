@@ -1,11 +1,11 @@
 import { Categoria, Produto, Depoimento, Inspiracao, Post, Config } from './types';
 
 export const config: Config = {
-  whatsapp: '5511999999999',
+  whatsapp: '558393661690',
   empresa: {
     nome: 'ECOLAR Construção & Decoração',
-    email: 'contato@ecolar.com.br',
-    endereco: 'Rua das Construções, 123 - Centro, São Paulo - SP',
+    email: 'ecolar.contatos@gmail.com',
+    endereco: 'R. Pres. Washington Luís, 592 - Bessa, João Pessoa - PB, 58035-340',
     horario: 'Segunda a Sexta: 8h às 18h | Sábado: 8h às 12h'
   }
 };
@@ -189,7 +189,7 @@ export const posts: Post[] = [
     titulo: 'Como escolher a telha ideal para sua obra',
     imagem: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&h=600&fit=crop',
     resumo: 'Guia completo para escolher entre telhas coloniais, francesas e especiais.',
-    conteudo: 'A escolha da telha é fundamental para o sucesso de qualquer projeto de cobertura. Neste artigo, vamos abordar os principais tipos de telhas disponíveis no mercado e suas características específicas.\n\nAs telhas coloniais são ideais para projetos que buscam um visual tradicional e aconchegante. Já as telhas francesas oferecem maior resistência e durabilidade, sendo perfeitas para regiões com clima mais severo.\n\nPara projetos modernos, as telhas especiais com acabamento esmaltado proporcionam um visual diferenciado e maior proteção contra intempéries.',
+    conteudo: 'A escolha da telha é fundamental para o sucesso de qualquer projeto de cobertura. Neste artigo, vamos abordar os principais tipos de telhas disponíveis no mercado e suas características específicas.\\n\\nAs telhas coloniais são ideais para projetos que buscam um visual tradicional e aconchegante. Já as telhas francesas oferecem maior resistência e durabilidade, sendo perfeitas para regiões com clima mais severo.\\n\\nPara projetos modernos, as telhas especiais com acabamento esmaltado proporcionam um visual diferenciado e maior proteção contra intempéries.',
     autor: 'Equipe ECOLAR',
     data: '2024-01-15T10:00:00.000Z'
   },
@@ -198,7 +198,7 @@ export const posts: Post[] = [
     titulo: 'Tijolo estrutural vs tijolo de vedação',
     imagem: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=800&h=600&fit=crop',
     resumo: 'Entenda as diferenças e quando usar cada tipo de tijolo.',
-    conteudo: 'A escolha correta do tipo de tijolo é essencial para a segurança e durabilidade da construção. Vamos explicar as principais diferenças entre tijolos estruturais e de vedação.\n\nOs tijolos estruturais são projetados para suportar cargas e fazer parte da estrutura do edifício. Possuem maior resistência à compressão e são fundamentais em construções de alvenaria estrutural.\n\nJá os tijolos de vedação são utilizados para fechamento de vãos e divisórias internas, não tendo função estrutural. São mais leves e econômicos.',
+    conteudo: 'A escolha correta do tipo de tijolo é essencial para a segurança e durabilidade da construção. Vamos explicar as principais diferenças entre tijolos estruturais e de vedação.\\n\\nOs tijolos estruturais são projetados para suportar cargas e fazer parte da estrutura do edifício. Possuem maior resistência à compressão e são fundamentais em construções de alvenaria estrutural.\\n\\nJá os tijolos de vedação são utilizados para fechamento de vãos e divisórias internas, não tendo função estrutural. São mais leves e econômicos.',
     autor: 'Eng. Maria Santos',
     data: '2024-01-10T14:30:00.000Z'
   },
@@ -207,7 +207,7 @@ export const posts: Post[] = [
     titulo: 'Tendências em pisos cerâmicos para 2024',
     imagem: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&h=600&fit=crop',
     resumo: 'Descubra as principais tendências em revestimentos cerâmicos.',
-    conteudo: 'O mercado de pisos cerâmicos está em constante evolução. Confira as principais tendências para 2024 e como incorporá-las em seus projetos.\n\nFormatos grandes e retangulares continuam em alta, proporcionando ambientes mais amplos e modernos. As texturas que imitam materiais naturais como madeira e pedra também são muito procuradas.\n\nCores neutras e tons terrosos dominam as preferências, criando ambientes aconchegantes e atemporais.',
+    conteudo: 'O mercado de pisos cerâmicos está em constante evolução. Confira as principais tendências para 2024 e como incorporá-las em seus projetos.\\n\\nFormatos grandes e retangulares continuam em alta, proporcionando ambientes mais amplos e modernos. As texturas que imitam materiais naturais como madeira e pedra também são muito procuradas.\\n\\nCores neutras e tons terrosos dominam as preferências, criando ambientes aconchegantes e atemporais.',
     autor: 'Arq. João Silva',
     data: '2024-01-05T09:15:00.000Z'
   }

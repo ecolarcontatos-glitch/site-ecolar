@@ -1,26 +1,39 @@
 'use client';
 
+import { useState, useEffect } from 'react';
+import { useRouter, useParams } from 'next/navigation';
 import AdminLayout from '@/components/AdminLayout';
 import ImageUpload from '@/components/ImageUpload';
 import { useData } from '@/contexts/DataContext';
 import { ArrowLeft, Save } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
 
-export default function NovaCategoria() {
-  const { adicionarCategoria } = useData();
+export default function EditarCategoria() {
   const router = useRouter();
-  
+  const params = useParams();
+  const { categorias, atualizarCategoria } = useData();
+  const [loading, setLoading] = useState(false);
+
   const [formData, setFormData] = useState({
     nome: '',
     descricao: '',
     slug: '',
     imagem: '',
-    cor: '#C05A2B'
+    cor: '#7FBA3D'
   });
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  useEffect(() => {
+    const categoria = categorias.find(c => c.id === params.id);
+    if (categoria) {
+      setFormData({
+        nome: categoria.nome,
+        descricao: categoria.descricao,
+        slug: categoria.slug,
+        imagem: categoria.imagem,
+        cor: categoria.cor || '#7FBA3D'
+      });
+    }
+  }, [categorias, params.id]);
 
   const generateSlug = (nome: string) => {
     return nome
@@ -41,10 +54,10 @@ export default function NovaCategoria() {
       return;
     }
 
-    setIsSubmitting(true);
+    setLoading(true);
 
     try {
-      adicionarCategoria({
+      atualizarCategoria(params.id as string, {
         nome: formData.nome,
         descricao: formData.descricao,
         slug: formData.slug || generateSlug(formData.nome),
@@ -54,10 +67,10 @@ export default function NovaCategoria() {
 
       router.push('/admin/categorias');
     } catch (error) {
-      console.error('Erro ao criar categoria:', error);
-      alert('Erro ao criar categoria. Tente novamente.');
+      console.error('Erro ao atualizar categoria:', error);
+      alert('Erro ao atualizar categoria. Tente novamente.');
     } finally {
-      setIsSubmitting(false);
+      setLoading(false);
     }
   };
 
@@ -67,6 +80,23 @@ export default function NovaCategoria() {
       [field]: value
     }));
   };
+
+  const categoria = categorias.find(c => c.id === params.id);
+  if (!categoria) {
+    return (
+      <AdminLayout>
+        <div className="text-center py-12">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Categoria não encontrada</h1>
+          <Link
+            href="/admin/categorias"
+            className="text-[#7FBA3D] hover:text-[#0A3D2E] font-medium"
+          >
+            Voltar para categorias
+          </Link>
+        </div>
+      </AdminLayout>
+    );
+  }
 
   return (
     <AdminLayout>
@@ -81,10 +111,10 @@ export default function NovaCategoria() {
           </Link>
           <div>
             <h1 className="font-inter font-bold text-3xl text-[#111827] mb-2">
-              Nova Categoria
+              Editar Categoria
             </h1>
             <p className="font-inter text-[#6b7280]">
-              Adicione uma nova categoria de produtos
+              Atualize as informações da categoria "{categoria.nome}"
             </p>
           </div>
         </div>
@@ -165,7 +195,7 @@ export default function NovaCategoria() {
                         value={formData.cor}
                         onChange={(e) => handleChange('cor', e.target.value)}
                         className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C05A2B] focus:border-transparent"
-                        placeholder="#C05A2B"
+                        placeholder="#7FBA3D"
                       />
                     </div>
                   </div>
@@ -184,7 +214,7 @@ export default function NovaCategoria() {
                 <ImageUpload
                   value={formData.imagem}
                   onChange={(url) => handleChange('imagem', url)}
-                  placeholder="Adicione uma imagem da categoria"
+                  placeholder="Atualize a imagem da categoria"
                 />
               </div>
 
@@ -193,11 +223,11 @@ export default function NovaCategoria() {
                 <div className="space-y-3">
                   <button
                     type="submit"
-                    disabled={isSubmitting}
+                    disabled={loading}
                     className="w-full flex items-center justify-center space-x-2 bg-[#C05A2B] text-white px-6 py-3 rounded-2xl hover:bg-[#A0481F] transition-colors duration-200 font-inter font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <Save className="w-5 h-5" />
-                    <span>{isSubmitting ? 'Salvando...' : 'Salvar Categoria'}</span>
+                    <span>{loading ? 'Salvando...' : 'Salvar Alterações'}</span>
                   </button>
 
                   <Link

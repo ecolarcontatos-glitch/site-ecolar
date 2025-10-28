@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { 
   Home, 
   Package, 
@@ -12,7 +12,8 @@ import {
   Image as ImageIcon,
   Settings,
   Menu,
-  X
+  X,
+  LogOut
 } from 'lucide-react';
 
 interface AdminLayoutProps {
@@ -32,12 +33,22 @@ const menuItems = [
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
 
   const isActive = (href: string, exact = false) => {
     if (exact) {
       return pathname === href;
     }
     return pathname.startsWith(href);
+  };
+
+  const handleLogout = () => {
+    // Remover dados de autenticação
+    localStorage.removeItem('admin_authenticated');
+    localStorage.removeItem('admin_user');
+    
+    // Redirecionar para página de login
+    router.push('/admin/login');
   };
 
   return (
@@ -69,6 +80,13 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             >
               Ver Site
             </Link>
+            <button
+              onClick={handleLogout}
+              className="flex items-center space-x-2 text-[#6b7280] hover:text-red-600 font-inter font-medium transition-colors duration-200"
+            >
+              <LogOut className="w-4 h-4" />
+              <span>Sair</span>
+            </button>
           </div>
         </div>
       </header>

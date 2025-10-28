@@ -1,30 +1,47 @@
 'use client';
 
+import { useState, useEffect } from 'react';
+import { useRouter, useParams } from 'next/navigation';
 import AdminLayout from '@/components/AdminLayout';
 import ImageUpload from '@/components/ImageUpload';
 import { useData } from '@/contexts/DataContext';
 import { ArrowLeft, Save } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
 
-export default function NovoProduto() {
-  const { categorias, adicionarProduto } = useData();
+export default function EditarProduto() {
   const router = useRouter();
-  
+  const params = useParams();
+  const { produtos, categorias, atualizarProduto } = useData();
+  const [loading, setLoading] = useState(false);
+
   const [formData, setFormData] = useState({
     nome: '',
     descricao: '',
-    imagem: '',
     categoria_id: '',
     preco_fabrica: '',
     preco_pronta_entrega: '',
     unidade: 'unidade',
+    imagem: '',
     destaque: false,
     disponivel: true
   });
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  useEffect(() => {
+    const produto = produtos.find(p => p.id === params.id);
+    if (produto) {
+      setFormData({
+        nome: produto.nome,
+        descricao: produto.descricao,
+        categoria_id: produto.categoria_id,
+        preco_fabrica: produto.preco_fabrica.toString(),
+        preco_pronta_entrega: produto.preco_pronta_entrega.toString(),
+        unidade: produto.unidade || 'unidade',
+        imagem: produto.imagem,
+        destaque: produto.destaque,
+        disponivel: produto.disponivel
+      });
+    }
+  }, [produtos, params.id]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,27 +56,27 @@ export default function NovoProduto() {
       return;
     }
 
-    setIsSubmitting(true);
+    setLoading(true);
 
     try {
-      adicionarProduto({
+      atualizarProduto(params.id as string, {
         nome: formData.nome,
         descricao: formData.descricao,
-        imagem: formData.imagem,
         categoria_id: formData.categoria_id,
         preco_fabrica: parseFloat(formData.preco_fabrica),
         preco_pronta_entrega: parseFloat(formData.preco_pronta_entrega),
         unidade: formData.unidade,
+        imagem: formData.imagem,
         destaque: formData.destaque,
         disponivel: formData.disponivel
       });
 
       router.push('/admin/produtos');
     } catch (error) {
-      console.error('Erro ao criar produto:', error);
-      alert('Erro ao criar produto. Tente novamente.');
+      console.error('Erro ao atualizar produto:', error);
+      alert('Erro ao atualizar produto. Tente novamente.');
     } finally {
-      setIsSubmitting(false);
+      setLoading(false);
     }
   };
 
@@ -69,6 +86,23 @@ export default function NovoProduto() {
       [field]: value
     }));
   };
+
+  const produto = produtos.find(p => p.id === params.id);
+  if (!produto) {
+    return (
+      <AdminLayout>
+        <div className="text-center py-12">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Produto não encontrado</h1>
+          <Link
+            href="/admin/produtos"
+            className="text-[#7FBA3D] hover:text-[#0A3D2E] font-medium"
+          >
+            Voltar para produtos
+          </Link>
+        </div>
+      </AdminLayout>
+    );
+  }
 
   return (
     <AdminLayout>
@@ -83,10 +117,10 @@ export default function NovoProduto() {
           </Link>
           <div>
             <h1 className="font-inter font-bold text-3xl text-[#111827] mb-2">
-              Novo Produto
+              Editar Produto
             </h1>
             <p className="font-inter text-[#6b7280]">
-              Adicione um novo produto ao catálogo da ECOLAR
+              Atualize as informações do produto "{produto.nome}"
             </p>
           </div>
         </div>
@@ -224,7 +258,7 @@ export default function NovoProduto() {
                 <ImageUpload
                   value={formData.imagem}
                   onChange={(url) => handleChange('imagem', url)}
-                  placeholder="Adicione uma imagem do produto"
+                  placeholder="Atualize a imagem do produto"
                 />
               </div>
 
@@ -268,11 +302,11 @@ export default function NovoProduto() {
                 <div className="space-y-3">
                   <button
                     type="submit"
-                    disabled={isSubmitting}
+                    disabled={loading}
                     className="w-full flex items-center justify-center space-x-2 bg-[#7FBA3D] text-white px-6 py-3 rounded-2xl hover:bg-[#0A3D2E] transition-colors duration-200 font-inter font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <Save className="w-5 h-5" />
-                    <span>{isSubmitting ? 'Salvando...' : 'Salvar Produto'}</span>
+                    <span>{loading ? 'Salvando...' : 'Salvar Alterações'}</span>
                   </button>
 
                   <Link

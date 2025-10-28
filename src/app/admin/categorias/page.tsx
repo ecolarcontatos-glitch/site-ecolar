@@ -17,7 +17,7 @@ export default function AdminCategorias() {
   );
 
   const handleRemover = (id: string, nome: string) => {
-    const produtosNaCategoria = produtos.filter(p => p.categoria === id).length;
+    const produtosNaCategoria = produtos.filter(p => p.categoria_id === id).length;
     
     if (produtosNaCategoria > 0) {
       alert(`Não é possível remover a categoria "${nome}" pois ela possui ${produtosNaCategoria} produto(s) vinculado(s).`);
@@ -81,7 +81,7 @@ export default function AdminCategorias() {
               <div>
                 <p className="font-inter text-[#6b7280] text-sm">Produtos Categorizados</p>
                 <p className="font-inter font-bold text-2xl text-[#111827]">
-                  {produtos.filter(p => p.categoria).length}
+                  {produtos.filter(p => p.categoria_id).length}
                 </p>
               </div>
               <FolderOpen className="w-8 h-8 text-[#7FBA3D]" />
@@ -92,7 +92,7 @@ export default function AdminCategorias() {
               <div>
                 <p className="font-inter text-[#6b7280] text-sm">Sem Categoria</p>
                 <p className="font-inter font-bold text-2xl text-[#111827]">
-                  {produtos.filter(p => !p.categoria).length}
+                  {produtos.filter(p => !p.categoria_id).length}
                 </p>
               </div>
               <FolderOpen className="w-8 h-8 text-red-500" />
@@ -122,7 +122,7 @@ export default function AdminCategorias() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
               {categoriasFiltradas.map((categoria) => {
-                const produtosNaCategoria = produtos.filter(p => p.categoria === categoria.id).length;
+                const produtosNaCategoria = produtos.filter(p => p.categoria_id === categoria.id).length;
                 return (
                   <div
                     key={categoria.id}
@@ -137,7 +137,7 @@ export default function AdminCategorias() {
                       />
                       <div className="absolute top-4 right-4 flex space-x-2">
                         <Link
-                          href={`/admin/categorias/${categoria.id}/editar`}
+                          href={`/admin/categorias/editar/${categoria.id}`}
                           className="p-2 bg-white bg-opacity-90 text-[#6b7280] hover:text-[#C05A2B] rounded-lg transition-colors"
                         >
                           <Edit className="w-4 h-4" />
@@ -158,7 +158,7 @@ export default function AdminCategorias() {
                         {categoria.descricao}
                       </p>
                       <div className="flex items-center justify-between">
-                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-inter font-medium bg-[#C05A2B] bg-opacity-10 text-[#C05A2B]">
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-inter font-medium bg-[#C05A2B] text-white">
                           {produtosNaCategoria} produto{produtosNaCategoria !== 1 ? 's' : ''}
                         </span>
                         {categoria.cor && (

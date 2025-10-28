@@ -2,7 +2,7 @@ import { MapPin, Phone, Mail, Clock, MessageCircle } from 'lucide-react';
 
 export default function ContatoPage() {
   return (
-    <div className="min-h-screen pt-16">
+    <div className="min-h-screen">
       {/* Hero Section */}
       <section className="py-16 md:py-20 bg-gradient-to-br from-[#7FBA3D] to-[#0A3D2E]">
         <div className="max-w-[1200px] mx-auto px-5 text-center">
@@ -39,13 +39,13 @@ export default function ContatoPage() {
                       Atendimento rápido e orçamento em até 1 hora
                     </p>
                     <a
-                      href="https://wa.me/5511999999999"
+                      href="https://wa.me/558393661690"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center space-x-2 bg-[#25D366] text-white px-4 py-2 rounded-2xl hover:bg-[#128C7E] transition-colors duration-200 font-inter font-medium"
                     >
                       <MessageCircle className="w-4 h-4" />
-                      <span>(11) 99999-9999</span>
+                      <span>(83) 9366-1690</span>
                     </a>
                   </div>
                 </div>
@@ -63,11 +63,11 @@ export default function ContatoPage() {
                       Atendimento comercial e suporte técnico
                     </p>
                     <a
-                      href="tel:+551133334444"
+                      href="tel:+558321777553"
                       className="inline-flex items-center space-x-2 text-[#7FBA3D] hover:text-[#0A3D2E] font-inter font-medium"
                     >
                       <Phone className="w-4 h-4" />
-                      <span>(11) 3333-4444</span>
+                      <span>(83) 2177-7553</span>
                     </a>
                   </div>
                 </div>
@@ -85,11 +85,11 @@ export default function ContatoPage() {
                       Para orçamentos detalhados e parcerias
                     </p>
                     <a
-                      href="mailto:contato@ecolar.com.br"
+                      href="mailto:ecolar.contatos@gmail.com"
                       className="inline-flex items-center space-x-2 text-[#7FBA3D] hover:text-[#0A3D2E] font-inter font-medium"
                     >
                       <Mail className="w-4 h-4" />
-                      <span>contato@ecolar.com.br</span>
+                      <span>ecolar.contatos@gmail.com</span>
                     </a>
                   </div>
                 </div>
@@ -104,12 +104,12 @@ export default function ContatoPage() {
                       Endereço
                     </h3>
                     <p className="font-inter text-[#6b7280] mb-3">
-                      Rua dos Materiais, 123<br />
-                      Vila Construção - São Paulo/SP<br />
-                      CEP: 01234-567
+                      R. Pres. Washington Luís, 592<br />
+                      Bessa, João Pessoa - PB<br />
+                      CEP: 58035-340
                     </p>
                     <a
-                      href="https://maps.google.com/?q=Rua+dos+Materiais+123+São+Paulo"
+                      href="https://maps.google.com/?q=R.+Pres.+Washington+Luís,+592+-+Bessa,+João+Pessoa+-+PB,+58035-340"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center space-x-2 text-[#7FBA3D] hover:text-[#0A3D2E] font-inter font-medium"
@@ -169,7 +169,7 @@ export default function ContatoPage() {
                   Fale conosco pelo WhatsApp e receba sua cotação em até 1 hora!
                 </p>
                 <a
-                  href="https://wa.me/5511999999999?text=Olá! Preciso de um orçamento rápido."
+                  href="https://wa.me/558393661690?text=Olá! Preciso de um orçamento rápido."
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center space-x-2 bg-white text-[#7FBA3D] px-6 py-3 rounded-2xl hover:bg-gray-100 transition-colors duration-200 font-inter font-semibold"

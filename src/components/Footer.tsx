@@ -1,60 +1,67 @@
 import Link from 'next/link';
-import { Facebook, Instagram, Mail, MapPin, Clock, Phone } from 'lucide-react';
-import { categorias } from '@/lib/data';
+import Image from 'next/image';
+import { MapPin, Phone, Mail, MessageCircle } from 'lucide-react';
 
 export default function Footer() {
   return (
-    <footer className="bg-[#111827] text-white">
-      <div className="max-w-[1200px] mx-auto px-5 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+    <footer className="bg-[#0A3D2E] text-white">
+      <div className="max-w-[1200px] mx-auto px-5 py-12">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Logo e Descrição */}
-          <div className="lg:col-span-1">
-            <div className="flex items-center space-x-2 mb-4">
-              <div className="w-8 h-8 bg-[#7FBA3D] rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">E</span>
-              </div>
-              <span className="font-inter font-semibold text-white text-lg">
-                ECOLAR
-              </span>
-            </div>
-            <p className="text-[#6b7280] font-inter mb-6 leading-relaxed">
+          <div className="md:col-span-1">
+            <Link href="/" className="inline-block mb-4">
+              <Image
+                src="https://k6hrqrxuu8obbfwn.public.blob.vercel-storage.com/temp/fa155124-8442-4fa3-aede-ff541b4163a7.png"
+                alt="ECOLAR"
+                width={150}
+                height={50}
+                className="h-6 w-auto brightness-0 invert"
+              />
+            </Link>
+            <p className="font-inter text-gray-300 text-sm leading-relaxed">
               Materiais de construção e decoração com qualidade e tradição. 
-              Telhas, tijolos, pisos e elementos decorativos para sua obra.
+              Sua obra merece o melhor.
             </p>
-            <div className="flex space-x-4">
-              <a
-                href="#"
-                className="w-10 h-10 bg-[#7FBA3D] rounded-lg flex items-center justify-center hover:bg-[#0A3D2E] transition-colors duration-200"
-                aria-label="Facebook"
-              >
-                <Facebook className="w-5 h-5" />
-              </a>
-              <a
-                href="#"
-                className="w-10 h-10 bg-[#7FBA3D] rounded-lg flex items-center justify-center hover:bg-[#0A3D2E] transition-colors duration-200"
-                aria-label="Instagram"
-              >
-                <Instagram className="w-5 h-5" />
-              </a>
-            </div>
           </div>
 
-          {/* Categorias */}
+          {/* Links Rápidos */}
           <div>
             <h3 className="font-inter font-semibold text-white text-lg mb-4">
-              Categorias
+              Links Rápidos
             </h3>
-            <ul className="space-y-3">
-              {categorias.map((categoria) => (
-                <li key={categoria.id}>
-                  <Link
-                    href={`/produtos?categoria=${categoria.slug}`}
-                    className="text-[#6b7280] hover:text-[#7FBA3D] transition-colors duration-200 font-inter"
-                  >
-                    {categoria.nome}
-                  </Link>
-                </li>
-              ))}
+            <ul className="space-y-2">
+              <li>
+                <Link
+                  href="/produtos"
+                  className="font-inter text-gray-300 hover:text-[#7FBA3D] transition-colors duration-200"
+                >
+                  Produtos
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/parcerias"
+                  className="font-inter text-gray-300 hover:text-[#7FBA3D] transition-colors duration-200"
+                >
+                  Parcerias
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/blog"
+                  className="font-inter text-gray-300 hover:text-[#7FBA3D] transition-colors duration-200"
+                >
+                  Blog
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/contato"
+                  className="font-inter text-gray-300 hover:text-[#7FBA3D] transition-colors duration-200"
+                >
+                  Contato
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -63,37 +70,37 @@ export default function Footer() {
             <h3 className="font-inter font-semibold text-white text-lg mb-4">
               Serviços
             </h3>
-            <ul className="space-y-3">
+            <ul className="space-y-2">
               <li>
                 <Link
-                  href="/parcerias"
-                  className="text-[#6b7280] hover:text-[#7FBA3D] transition-colors duration-200 font-inter"
+                  href="/orcamento"
+                  className="font-inter text-gray-300 hover:text-[#7FBA3D] transition-colors duration-200"
                 >
-                  Entrega por carrada
+                  Orçamento Online
                 </Link>
               </li>
               <li>
                 <Link
                   href="/parcerias"
-                  className="text-[#6b7280] hover:text-[#7FBA3D] transition-colors duration-200 font-inter"
+                  className="font-inter text-gray-300 hover:text-[#7FBA3D] transition-colors duration-200"
                 >
-                  Clique & Retire
+                  Entrega por Carrada
                 </Link>
               </li>
               <li>
                 <Link
                   href="/parcerias"
-                  className="text-[#6b7280] hover:text-[#7FBA3D] transition-colors duration-200 font-inter"
+                  className="font-inter text-gray-300 hover:text-[#7FBA3D] transition-colors duration-200"
                 >
-                  Parcerias B2B
+                  Consultoria Técnica
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/contato"
-                  className="text-[#6b7280] hover:text-[#7FBA3D] transition-colors duration-200 font-inter"
+                  href="/parcerias"
+                  className="font-inter text-gray-300 hover:text-[#7FBA3D] transition-colors duration-200"
                 >
-                  Orçamento em 1h
+                  Produtos Sob Medida
                 </Link>
               </li>
             </ul>
@@ -104,68 +111,57 @@ export default function Footer() {
             <h3 className="font-inter font-semibold text-white text-lg mb-4">
               Contato
             </h3>
-            <ul className="space-y-3">
-              <li>
+            <div className="space-y-3">
+              <div className="flex items-start space-x-3">
+                <MapPin className="w-5 h-5 text-[#7FBA3D] mt-0.5 flex-shrink-0" />
+                <span className="font-inter text-gray-300 text-sm">
+                  R. Pres. Washington Luís, 592<br />
+                  Bessa, João Pessoa - PB<br />
+                  CEP: 58035-340
+                </span>
+              </div>
+              <div className="flex items-center space-x-3">
+                <Phone className="w-5 h-5 text-[#7FBA3D] flex-shrink-0" />
                 <a
-                  href="https://wa.me/5511999999999"
-                  className="flex items-center space-x-2 text-[#6b7280] hover:text-[#7FBA3D] transition-colors duration-200 font-inter"
+                  href="tel:+558321777553"
+                  className="font-inter text-gray-300 hover:text-[#7FBA3D] transition-colors duration-200 text-sm"
+                >
+                  (83) 2177-7553
+                </a>
+              </div>
+              <div className="flex items-center space-x-3">
+                <Mail className="w-5 h-5 text-[#7FBA3D] flex-shrink-0" />
+                <a
+                  href="mailto:ecolar.contatos@gmail.com"
+                  className="font-inter text-gray-300 hover:text-[#7FBA3D] transition-colors duration-200 text-sm"
+                >
+                  ecolar.contatos@gmail.com
+                </a>
+              </div>
+              <div className="flex items-center space-x-3">
+                <MessageCircle className="w-5 h-5 text-[#7FBA3D] flex-shrink-0" />
+                <a
+                  href="https://wa.me/558393661690"
                   target="_blank"
                   rel="noopener noreferrer"
+                  className="font-inter text-gray-300 hover:text-[#7FBA3D] transition-colors duration-200 text-sm"
                 >
-                  <Phone className="w-4 h-4" />
-                  <span>(11) 99999-9999</span>
+                  (83) 9366-1690
                 </a>
-              </li>
-              <li>
-                <a
-                  href="mailto:contato@ecolar.com.br"
-                  className="flex items-center space-x-2 text-[#6b7280] hover:text-[#7FBA3D] transition-colors duration-200 font-inter"
-                >
-                  <Mail className="w-4 h-4" />
-                  <span>contato@ecolar.com.br</span>
-                </a>
-              </li>
-              <li>
-                <a
-                  href="https://maps.google.com"
-                  className="flex items-start space-x-2 text-[#6b7280] hover:text-[#7FBA3D] transition-colors duration-200 font-inter"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                  <span>Rua das Construções, 123<br />Centro, São Paulo - SP</span>
-                </a>
-              </li>
-              <li>
-                <div className="flex items-start space-x-2 text-[#6b7280] font-inter">
-                  <Clock className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                  <span>Segunda a Sexta: 8h às 18h<br />Sábado: 8h às 12h</span>
-                </div>
-              </li>
-            </ul>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Linha Legal */}
-        <div className="border-t border-[#374151] mt-12 pt-8">
-          <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-            <p className="text-[#6b7280] font-inter text-sm">
-              © 2024 ECOLAR — Construção & Decoração. Todos os direitos reservados.
+        {/* Linha divisória */}
+        <div className="border-t border-gray-700 mt-8 pt-8">
+          <div className="flex flex-col md:flex-row justify-between items-center">
+            <p className="font-inter text-gray-400 text-sm">
+              © 2024 ECOLAR. Todos os direitos reservados.
             </p>
-            <div className="flex space-x-6">
-              <Link
-                href="/privacidade"
-                className="text-[#6b7280] hover:text-[#7FBA3D] transition-colors duration-200 font-inter text-sm"
-              >
-                Política de Privacidade
-              </Link>
-              <Link
-                href="/termos"
-                className="text-[#6b7280] hover:text-[#7FBA3D] transition-colors duration-200 font-inter text-sm"
-              >
-                Termos de Uso
-              </Link>
-            </div>
+            <p className="font-inter text-gray-400 text-sm mt-2 md:mt-0">
+              Materiais de construção com qualidade e sustentabilidade.
+            </p>
           </div>
         </div>
       </div>

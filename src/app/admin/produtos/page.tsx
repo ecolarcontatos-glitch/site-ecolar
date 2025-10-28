@@ -15,7 +15,7 @@ export default function AdminProdutos() {
   const produtosFiltrados = produtos.filter(produto => {
     const matchBusca = produto.nome.toLowerCase().includes(busca.toLowerCase()) ||
                       produto.descricao.toLowerCase().includes(busca.toLowerCase());
-    const matchCategoria = !categoriaFiltro || produto.categoria === categoriaFiltro;
+    const matchCategoria = !categoriaFiltro || produto.categoria_id === categoriaFiltro;
     return matchBusca && matchCategoria;
   });
 
@@ -103,9 +103,9 @@ export default function AdminProdutos() {
           <div className="bg-white rounded-2xl p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08)]">
             <div className="flex items-center justify-between">
               <div>
-                <p className="font-inter text-[#6b7280] text-sm">Fábrica</p>
+                <p className="font-inter text-[#6b7280] text-sm">Disponíveis</p>
                 <p className="font-inter font-bold text-2xl text-[#111827]">
-                  {produtos.filter(p => p.disponivel_fabrica).length}
+                  {produtos.filter(p => p.disponivel).length}
                 </p>
               </div>
               <Package className="w-8 h-8 text-blue-500" />
@@ -114,12 +114,12 @@ export default function AdminProdutos() {
           <div className="bg-white rounded-2xl p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08)]">
             <div className="flex items-center justify-between">
               <div>
-                <p className="font-inter text-[#6b7280] text-sm">Pronta Entrega</p>
+                <p className="font-inter text-[#6b7280] text-sm">Indisponíveis</p>
                 <p className="font-inter font-bold text-2xl text-[#111827]">
-                  {produtos.filter(p => p.disponivel_pronta_entrega).length}
+                  {produtos.filter(p => !p.disponivel).length}
                 </p>
               </div>
-              <Package className="w-8 h-8 text-purple-500" />
+              <Package className="w-8 h-8 text-red-500" />
             </div>
           </div>
         </div>
@@ -167,7 +167,7 @@ export default function AdminProdutos() {
                 </thead>
                 <tbody className="divide-y divide-gray-200">
                   {produtosFiltrados.map((produto) => {
-                    const categoria = categorias.find(c => c.id === produto.categoria);
+                    const categoria = categorias.find(c => c.id === produto.categoria_id);
                     return (
                       <tr key={produto.id} className="hover:bg-[#f8fafc] transition-colors">
                         <td className="py-4 px-6">
@@ -197,43 +197,34 @@ export default function AdminProdutos() {
                         </td>
                         <td className="py-4 px-6">
                           <div className="space-y-1">
-                            {produto.disponivel_fabrica && (
-                              <div className="text-xs font-inter text-[#111827]">
-                                Fábrica: R$ {produto.preco_fabrica.toFixed(2)}
-                              </div>
-                            )}
-                            {produto.disponivel_pronta_entrega && (
-                              <div className="text-xs font-inter text-[#111827]">
-                                Pronta: R$ {produto.preco_pronta_entrega.toFixed(2)}
-                              </div>
-                            )}
+                            <div className="text-xs font-inter text-[#111827]">
+                              Fábrica: R$ {produto.preco_fabrica.toFixed(2)}
+                            </div>
+                            <div className="text-xs font-inter text-[#111827]">
+                              Pronta: R$ {produto.preco_pronta_entrega.toFixed(2)}
+                            </div>
                           </div>
                         </td>
                         <td className="py-4 px-6">
                           <div className="flex flex-col space-y-1">
                             {produto.destaque && (
-                              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-inter font-medium bg-[#C05A2B] bg-opacity-10 text-[#C05A2B]">
+                              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-inter font-medium bg-[#C05A2B] text-white">
                                 Destaque
                               </span>
                             )}
-                            <div className="flex space-x-1">
-                              {produto.disponivel_fabrica && (
-                                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-inter font-medium bg-blue-100 text-blue-800">
-                                  Fábrica
-                                </span>
-                              )}
-                              {produto.disponivel_pronta_entrega && (
-                                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-inter font-medium bg-purple-100 text-purple-800">
-                                  Pronta
-                                </span>
-                              )}
-                            </div>
+                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-inter font-medium ${
+                              produto.disponivel 
+                                ? 'bg-green-100 text-green-800' 
+                                : 'bg-red-100 text-red-800'
+                            }`}>
+                              {produto.disponivel ? 'Disponível' : 'Indisponível'}
+                            </span>
                           </div>
                         </td>
                         <td className="py-4 px-6">
                           <div className="flex items-center justify-end space-x-2">
                             <Link
-                              href={`/admin/produtos/${produto.id}/editar`}
+                              href={`/admin/produtos/editar/${produto.id}`}
                               className="p-2 text-[#6b7280] hover:text-[#7FBA3D] hover:bg-[#7FBA3D] hover:bg-opacity-10 rounded-lg transition-colors"
                             >
                               <Edit className="w-4 h-4" />

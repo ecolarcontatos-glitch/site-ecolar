@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Users, Truck, Clock, Package, MessageCircle, ArrowRight, CheckCircle } from 'lucide-react';
+import { Users, Truck, Clock, Leaf, MessageCircle, ArrowRight, CheckCircle } from 'lucide-react';
 
 export default function ParceriasPage() {
   return (
@@ -19,8 +19,8 @@ export default function ParceriasPage() {
         <section className="mb-20">
           <div className="bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] overflow-hidden">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
-              <div className="p-8 md:p-12">
-                <div className="w-16 h-16 bg-[#7FBA3D] rounded-2xl flex items-center justify-center mb-6">
+              <div className="p-8 md:p-12 text-center">
+                <div className="w-16 h-16 bg-[#7FBA3D] rounded-2xl flex items-center justify-center mx-auto mb-6">
                   <Users className="w-8 h-8 text-white" />
                 </div>
                 <h2 className="font-inter font-bold text-2xl md:text-3xl text-[#111827] mb-4">
@@ -49,20 +49,22 @@ export default function ParceriasPage() {
                   </div>
                 </div>
 
-                <a
-                  href="https://wa.me/5511999999999?text=Olá! Sou um profissional da construção e gostaria de saber sobre as parcerias da ECOLAR."
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center space-x-2 bg-[#7FBA3D] text-white px-6 py-3 rounded-2xl hover:bg-[#0A3D2E] transition-colors duration-200 font-inter font-medium"
-                >
-                  <MessageCircle className="w-4 h-4" />
-                  <span>Solicitar parceria</span>
-                </a>
+                <div className="text-center">
+                  <a
+                    href="https://wa.me/558393661690?text=Olá! Sou um profissional da construção e gostaria de saber sobre as parcerias da ECOLAR."
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center space-x-2 bg-[#7FBA3D] text-white px-6 py-3 rounded-2xl hover:bg-[#0A3D2E] transition-colors duration-200 font-inter font-medium"
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                    <span>Solicitar parceria</span>
+                  </a>
+                </div>
               </div>
               
               <div className="bg-[#f1f5f9] p-8 md:p-12 flex items-center">
                 <div className="w-full">
-                  <h3 className="font-inter font-semibold text-[#111827] text-xl mb-4">
+                  <h3 className="font-inter font-semibold text-[#111827] text-xl mb-4 text-center">
                     Como funciona?
                   </h3>
                   <div className="space-y-4">
@@ -123,22 +125,22 @@ export default function ParceriasPage() {
               <p className="font-inter text-[#6b7280] mb-6">
                 Logística especializada para grandes volumes. Entrega direta na sua obra com equipamentos adequados.
               </p>
-              <div className="space-y-2 mb-6 text-left">
-                <div className="flex items-center space-x-2">
+              <div className="space-y-2 mb-6">
+                <div className="flex items-center space-x-2 justify-center">
                   <CheckCircle className="w-4 h-4 text-[#C05A2B]" />
                   <span className="font-inter text-sm text-[#6b7280]">Caminhões especializados</span>
                 </div>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 justify-center">
                   <CheckCircle className="w-4 h-4 text-[#C05A2B]" />
                   <span className="font-inter text-sm text-[#6b7280]">Entrega programada</span>
                 </div>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 justify-center">
                   <CheckCircle className="w-4 h-4 text-[#C05A2B]" />
-                  <span className="font-inter text-sm text-[#6b7280]">Cobertura Grande São Paulo</span>
+                  <span className="font-inter text-sm text-[#6b7280]">Cobertura João Pessoa e região</span>
                 </div>
               </div>
               <a
-                href="https://wa.me/5511999999999?text=Olá! Gostaria de saber sobre a entrega por carrada."
+                href="https://wa.me/558393661690?text=Olá! Gostaria de saber sobre a entrega por carrada."
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center space-x-2 text-[#C05A2B] hover:text-[#0A3D2E] font-inter font-medium"
@@ -148,36 +150,36 @@ export default function ParceriasPage() {
               </a>
             </div>
 
-            {/* Clique & Retire */}
+            {/* Produtos Sustentáveis */}
             <div className="bg-white rounded-2xl p-8 shadow-[0_2px_8px_rgba(0,0,0,0.08)] text-center">
               <div className="w-16 h-16 bg-[#7FBA3D] rounded-2xl flex items-center justify-center mx-auto mb-6">
-                <Package className="w-8 h-8 text-white" />
+                <Leaf className="w-8 h-8 text-white" />
               </div>
               <h3 className="font-inter font-semibold text-[#111827] text-xl mb-4">
-                Clique & Retire
+                Qualidade Sustentável
               </h3>
               <p className="font-inter text-[#6b7280] mb-6">
-                Faça seu pedido online e retire na nossa loja. Praticidade e economia no frete.
+                Produtos de qualidade real de uma empresa sustentável e ecológica.
               </p>
-              <div className="space-y-2 mb-6 text-left">
-                <div className="flex items-center space-x-2">
+              <div className="space-y-2 mb-6">
+                <div className="flex items-center space-x-2 justify-center">
                   <CheckCircle className="w-4 h-4 text-[#7FBA3D]" />
-                  <span className="font-inter text-sm text-[#6b7280]">Pedido online</span>
+                  <span className="font-inter text-sm text-[#6b7280]">Materiais certificados</span>
                 </div>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 justify-center">
                   <CheckCircle className="w-4 h-4 text-[#7FBA3D]" />
-                  <span className="font-inter text-sm text-[#6b7280]">Retirada em 2h</span>
+                  <span className="font-inter text-sm text-[#6b7280]">Processos ecológicos</span>
                 </div>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 justify-center">
                   <CheckCircle className="w-4 h-4 text-[#7FBA3D]" />
-                  <span className="font-inter text-sm text-[#6b7280]">Sem custo de frete</span>
+                  <span className="font-inter text-sm text-[#6b7280]">Responsabilidade ambiental</span>
                 </div>
               </div>
               <Link
                 href="/produtos"
                 className="inline-flex items-center space-x-2 text-[#7FBA3D] hover:text-[#0A3D2E] font-inter font-medium"
               >
-                <span>Fazer pedido</span>
+                <span>Ver produtos</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
@@ -193,16 +195,16 @@ export default function ParceriasPage() {
               <p className="font-inter text-[#6b7280] mb-6">
                 Resposta rápida para seus orçamentos via WhatsApp. Preços atualizados e condições especiais.
               </p>
-              <div className="space-y-2 mb-6 text-left">
-                <div className="flex items-center space-x-2">
+              <div className="space-y-2 mb-6">
+                <div className="flex items-center space-x-2 justify-center">
                   <CheckCircle className="w-4 h-4 text-[#7FBA3D]" />
                   <span className="font-inter text-sm text-[#6b7280]">Resposta em até 1h</span>
                 </div>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 justify-center">
                   <CheckCircle className="w-4 h-4 text-[#7FBA3D]" />
                   <span className="font-inter text-sm text-[#6b7280]">Preços atualizados</span>
                 </div>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 justify-center">
                   <CheckCircle className="w-4 h-4 text-[#7FBA3D]" />
                   <span className="font-inter text-sm text-[#6b7280]">Atendimento personalizado</span>
                 </div>
@@ -229,7 +231,7 @@ export default function ParceriasPage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <a
-                href="https://wa.me/5511999999999?text=Olá! Gostaria de saber mais sobre as parcerias da ECOLAR."
+                href="https://wa.me/558393661690?text=Olá! Gostaria de saber mais sobre as parcerias da ECOLAR."
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center space-x-2 bg-white text-[#7FBA3D] px-8 py-4 rounded-2xl hover:bg-gray-100 transition-colors duration-200 font-inter font-semibold text-lg"

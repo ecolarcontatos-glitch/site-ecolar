@@ -139,11 +139,17 @@ export default function ProdutosPageContent() {
           </p>
         </div>
 
-        {/* Grid de Produtos */}
+        {/* Grid de Produtos - 1 coluna no mobile, 2+ no tablet/desktop */}
         {filteredProdutos.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredProdutos.map((produto) => (
-              <ProductCard key={produto.id} produto={produto} />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+            {filteredProdutos.map((produto, index) => (
+              <div 
+                key={produto.id}
+                className="animate-fade-in"
+                style={{ animationDelay: `${index * 0.1}s` }}
+              >
+                <ProductCard produto={produto} />
+              </div>
             ))}
           </div>
         ) : (
@@ -166,6 +172,24 @@ export default function ProdutosPageContent() {
           </div>
         )}
       </div>
+
+      <style jsx>{`
+        @keyframes fade-in {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        
+        .animate-fade-in {
+          animation: fade-in 0.6s ease-out forwards;
+          opacity: 0;
+        }
+      `}</style>
     </div>
   );
 }
