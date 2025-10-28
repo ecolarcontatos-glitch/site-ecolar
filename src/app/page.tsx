@@ -54,8 +54,8 @@ export default function HomePage() {
               />
             </div>
           ))}
-          {/* Fundo verde translúcido com máxima transparência */}
-          <div className="absolute inset-0 bg-[rgba(10,61,46,0.6)]" />
+          {/* Camada preta translúcida */}
+          <div className="absolute inset-0 bg-black bg-opacity-55" />
         </div>
         
         <div className="relative z-10 max-w-[1200px] mx-auto px-5 text-center text-white">
@@ -76,7 +76,7 @@ export default function HomePage() {
               <ArrowRight className="w-5 h-5" />
             </Link>
             <a
-              href="https://wa.me/5511999999999"
+              href="https://wa.me/558393661690"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center space-x-2 border-2 border-white text-white px-8 py-4 rounded-2xl hover:bg-white hover:text-[#0A3D2E] transition-all duration-200 font-inter font-semibold text-lg"

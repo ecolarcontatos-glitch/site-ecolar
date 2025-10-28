@@ -1,4 +1,4 @@
-import { MapPin, Phone, Mail, Clock, MessageCircle } from 'lucide-react';
+import { MapPin, Phone, Mail, Clock, MessageCircle, Users, Truck, Handshake } from 'lucide-react';
 
 export default function ContatoPage() {
   return (
@@ -210,7 +210,7 @@ export default function ContatoPage() {
             
             <div className="text-center p-6">
               <div className="w-16 h-16 bg-[#C05A2B] rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <MapPin className="w-8 h-8 text-white" />
+                <Truck className="w-8 h-8 text-white" />
               </div>
               <h3 className="font-inter font-semibold text-[#111827] text-lg mb-2">
                 Entrega por Carrada
@@ -222,13 +222,13 @@ export default function ContatoPage() {
             
             <div className="text-center p-6">
               <div className="w-16 h-16 bg-[#111827] rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <Clock className="w-8 h-8 text-white" />
+                <Handshake className="w-8 h-8 text-white" />
               </div>
               <h3 className="font-inter font-semibold text-[#111827] text-lg mb-2">
-                Clique & Retire
+                Parcerias
               </h3>
               <p className="font-inter text-[#6b7280] text-sm">
-                Retire no balcão com agilidade e praticidade
+                Soluções completas para profissionais e clientes finais
               </p>
             </div>
           </div>

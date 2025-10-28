@@ -5,47 +5,57 @@ import { Upload, X, Image as ImageIcon } from 'lucide-react';
 import Image from 'next/image';
 
 interface ImageUploadProps {
-  value?: string;
-  onChange: (url: string) => void;
-  placeholder?: string;
+  onImageUploaded: (url: string) => void;
+  currentImage?: string;
+  onImageRemoved?: () => void;
+  label?: string;
+  aspectRatio?: string;
   className?: string;
 }
 
 export default function ImageUpload({ 
-  value, 
-  onChange, 
-  placeholder = "Clique para fazer upload ou cole uma URL",
+  onImageUploaded, 
+  currentImage, 
+  onImageRemoved, 
+  label = "Imagem",
+  aspectRatio = "aspect-video",
   className = ""
 }: ImageUploadProps) {
   const [isUploading, setIsUploading] = useState(false);
-  const [urlInput, setUrlInput] = useState(value || '');
+  const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFileUpload = async (file: File) => {
+  const handleFileSelect = async (file: File) => {
     if (!file.type.startsWith('image/')) {
       alert('Por favor, selecione apenas arquivos de imagem.');
       return;
     }
 
-    if (file.size > 5 * 1024 * 1024) { // 5MB
-      alert('O arquivo deve ter no máximo 5MB.');
+    if (file.size > 10 * 1024 * 1024) { // 10MB
+      alert('O arquivo deve ter no máximo 10MB.');
       return;
     }
 
     setIsUploading(true);
 
     try {
-      // Criar URL temporária local para preview
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const result = e.target?.result as string;
-        onChange(result);
-        setUrlInput(result);
-      };
-      reader.readAsDataURL(file);
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Erro no upload');
+      }
+
+      const data = await response.json();
+      onImageUploaded(data.url);
     } catch (error) {
       console.error('Erro no upload:', error);
-      alert('Erro ao fazer upload da imagem.');
+      alert('Erro ao fazer upload da imagem. Tente novamente.');
     } finally {
       setIsUploading(false);
     }
@@ -53,98 +63,101 @@ export default function ImageUpload({
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
+    setDragActive(false);
+    
     const files = Array.from(e.dataTransfer.files);
     if (files.length > 0) {
-      handleFileUpload(files[0]);
+      handleFileSelect(files[0]);
     }
   };
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files && files.length > 0) {
-      handleFileUpload(files[0]);
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragActive(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragActive(false);
+  };
+
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length > 0) {
+      handleFileSelect(files[0]);
     }
   };
 
-  const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const url = e.target.value;
-    setUrlInput(url);
-    onChange(url);
-  };
-
-  const clearImage = () => {
-    setUrlInput('');
-    onChange('');
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+  const handleRemove = () => {
+    if (onImageRemoved) {
+      onImageRemoved();
     }
   };
 
   return (
-    <div className={`space-y-4 ${className}`}>
-      {/* Preview da imagem */}
-      {value && (
+    <div className={className}>
+      <label className="block text-sm font-medium text-gray-700 mb-2">
+        {label}
+      </label>
+      
+      {currentImage ? (
         <div className="relative">
-          <div className="relative w-full h-48 rounded-xl overflow-hidden bg-gray-100">
+          <div className={`relative ${aspectRatio} bg-gray-100 rounded-2xl overflow-hidden`}>
             <Image
-              src={value}
-              alt="Preview"
+              src={currentImage}
+              alt={label}
               fill
               className="object-cover"
             />
           </div>
           <button
-            type="button"
-            onClick={clearImage}
-            className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+            onClick={handleRemove}
+            className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
+      ) : (
+        <div
+          className={`relative ${aspectRatio} border-2 border-dashed rounded-2xl transition-colors ${
+            dragActive 
+              ? 'border-[#7FBA3D] bg-green-50' 
+              : 'border-gray-300 hover:border-[#7FBA3D]'
+          } ${isUploading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+          onDrop={handleDrop}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onClick={() => !isUploading && fileInputRef.current?.click()}
+        >
+          <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
+            {isUploading ? (
+              <>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#7FBA3D] mb-4"></div>
+                <p className="text-sm text-gray-600">Fazendo upload...</p>
+              </>
+            ) : (
+              <>
+                <ImageIcon className="w-12 h-12 text-gray-400 mb-4" />
+                <p className="text-sm text-gray-600 mb-2">
+                  Clique para selecionar ou arraste uma imagem
+                </p>
+                <p className="text-xs text-gray-500">
+                  PNG, JPG, WEBP até 10MB
+                </p>
+              </>
+            )}
+          </div>
+          
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleFileInputChange}
+            className="hidden"
+            disabled={isUploading}
+          />
+        </div>
       )}
-
-      {/* Área de upload */}
-      <div
-        onDrop={handleDrop}
-        onDragOver={(e) => e.preventDefault()}
-        className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-[#7FBA3D] transition-colors cursor-pointer"
-        onClick={() => fileInputRef.current?.click()}
-      >
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          onChange={handleFileSelect}
-          className="hidden"
-        />
-        
-        {isUploading ? (
-          <div className="flex flex-col items-center space-y-2">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#7FBA3D]"></div>
-            <p className="text-sm text-gray-500">Fazendo upload...</p>
-          </div>
-        ) : (
-          <div className="flex flex-col items-center space-y-2">
-            <Upload className="w-8 h-8 text-gray-400" />
-            <p className="text-sm text-gray-500">{placeholder}</p>
-            <p className="text-xs text-gray-400">PNG, JPG, GIF até 5MB</p>
-          </div>
-        )}
-      </div>
-
-      {/* Campo de URL */}
-      <div className="space-y-2">
-        <label className="block text-sm font-medium text-gray-700">
-          Ou cole uma URL de imagem:
-        </label>
-        <input
-          type="url"
-          value={urlInput}
-          onChange={handleUrlChange}
-          placeholder="https://exemplo.com/imagem.jpg"
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#7FBA3D] focus:border-transparent"
-        />
-      </div>
     </div>
   );
 }

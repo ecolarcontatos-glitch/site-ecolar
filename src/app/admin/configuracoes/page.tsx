@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Save, Upload, X, Plus } from 'lucide-react';
 import Image from 'next/image';
+import ImageUpload from '@/components/ImageUpload';
 
 interface SiteConfig {
   logoHeader: string;
@@ -37,10 +38,45 @@ export default function ConfiguracoesPage() {
 
   const handleSave = async () => {
     setIsSaving(true);
-    // Simular salvamento
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    setIsSaving(false);
-    alert('Configurações salvas com sucesso!');
+    try {
+      // Simular salvamento no arquivo de configuração
+      const response = await fetch('/api/config', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(config),
+      });
+
+      if (response.ok) {
+        alert('Configurações salvas com sucesso!');
+        // Recarregar a página para aplicar as mudanças
+        window.location.reload();
+      } else {
+        throw new Error('Erro ao salvar');
+      }
+    } catch (error) {
+      console.error('Erro ao salvar:', error);
+      alert('Erro ao salvar configurações. Tente novamente.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleLogoHeaderUpload = (url: string) => {
+    setConfig({ ...config, logoHeader: url });
+  };
+
+  const handleLogoFooterUpload = (url: string) => {
+    setConfig({ ...config, logoFooter: url });
+  };
+
+  const handleLogoHeaderRemove = () => {
+    setConfig({ ...config, logoHeader: '' });
+  };
+
+  const handleLogoFooterRemove = () => {
+    setConfig({ ...config, logoFooter: '' });
   };
 
   const addHeroImage = () => {
@@ -52,6 +88,14 @@ export default function ConfiguracoesPage() {
       });
       setNewHeroImage('');
     }
+  };
+
+  const addHeroImageUpload = (url: string) => {
+    const newOrder = Math.max(...config.heroImages.map(img => img.order), 0) + 1;
+    setConfig({
+      ...config,
+      heroImages: [...config.heroImages, { url, order: newOrder }]
+    });
   };
 
   const removeHeroImage = (index: number) => {
@@ -85,54 +129,24 @@ export default function ConfiguracoesPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Logos */}
         <div className="bg-white rounded-lg shadow-sm border p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Logomarcas</h2>
+          <h2 className="text-lg font-semibold text-gray-900 mb-6">Logomarcas</h2>
           
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Logo do Header
-              </label>
-              <div className="flex items-center space-x-4">
-                <div className="relative w-32 h-12 bg-gray-100 rounded border">
-                  <Image
-                    src={config.logoHeader}
-                    alt="Logo Header"
-                    fill
-                    className="object-contain p-2"
-                  />
-                </div>
-                <input
-                  type="text"
-                  value={config.logoHeader}
-                  onChange={(e) => setConfig({ ...config, logoHeader: e.target.value })}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#7FBA3D]"
-                  placeholder="URL da logo do header"
-                />
-              </div>
-            </div>
+          <div className="space-y-6">
+            <ImageUpload
+              label="Logo do Header"
+              currentImage={config.logoHeader}
+              onImageUploaded={handleLogoHeaderUpload}
+              onImageRemoved={handleLogoHeaderRemove}
+              aspectRatio="aspect-[3/1]"
+            />
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Logo do Footer
-              </label>
-              <div className="flex items-center space-x-4">
-                <div className="relative w-32 h-12 bg-gray-100 rounded border">
-                  <Image
-                    src={config.logoFooter}
-                    alt="Logo Footer"
-                    fill
-                    className="object-contain p-2"
-                  />
-                </div>
-                <input
-                  type="text"
-                  value={config.logoFooter}
-                  onChange={(e) => setConfig({ ...config, logoFooter: e.target.value })}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#7FBA3D]"
-                  placeholder="URL da logo do footer"
-                />
-              </div>
-            </div>
+            <ImageUpload
+              label="Logo do Footer"
+              currentImage={config.logoFooter}
+              onImageUploaded={handleLogoFooterUpload}
+              onImageRemoved={handleLogoFooterRemove}
+              aspectRatio="aspect-[3/1]"
+            />
           </div>
         </div>
 
@@ -231,10 +245,19 @@ export default function ConfiguracoesPage() {
       <div className="mt-8 bg-white rounded-lg shadow-sm border p-6">
         <h2 className="text-lg font-semibold text-gray-900 mb-4">Imagens do Hero (Carrossel)</h2>
         
-        {/* Adicionar nova imagem */}
+        {/* Upload de nova imagem */}
+        <div className="mb-6">
+          <ImageUpload
+            label="Adicionar Nova Imagem do Hero"
+            onImageUploaded={addHeroImageUpload}
+            aspectRatio="aspect-video"
+          />
+        </div>
+
+        {/* Adicionar por URL */}
         <div className="mb-6 p-4 bg-gray-50 rounded-lg">
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Adicionar Nova Imagem
+            Ou adicionar por URL
           </label>
           <div className="flex space-x-2">
             <input
