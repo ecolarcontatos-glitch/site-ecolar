@@ -107,7 +107,7 @@ export default function NovaCategoria() {
                     </label>
                     <input
                       type="text"
-                      value={formData.nome}
+                      value={formData.nome ?? ''}
                       onChange={(e) => {
                         const nome = e.target.value;
                         handleChange('nome', nome);
@@ -125,7 +125,7 @@ export default function NovaCategoria() {
                     </label>
                     <input
                       type="text"
-                      value={formData.slug}
+                      value={formData.slug ?? ''}
                       onChange={(e) => handleChange('slug', e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C05A2B] focus:border-transparent"
                       placeholder="tijolos-e-blocos"
@@ -140,7 +140,7 @@ export default function NovaCategoria() {
                       Descrição *
                     </label>
                     <textarea
-                      value={formData.descricao}
+                      value={formData.descricao ?? ''}
                       onChange={(e) => handleChange('descricao', e.target.value)}
                       rows={4}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C05A2B] focus:border-transparent"
@@ -156,13 +156,13 @@ export default function NovaCategoria() {
                     <div className="flex items-center space-x-3">
                       <input
                         type="color"
-                        value={formData.cor}
+                        value={formData.cor ?? '#C05A2B'}
                         onChange={(e) => handleChange('cor', e.target.value)}
                         className="w-12 h-12 border border-gray-300 rounded-lg cursor-pointer"
                       />
                       <input
                         type="text"
-                        value={formData.cor}
+                        value={formData.cor ?? '#C05A2B'}
                         onChange={(e) => handleChange('cor', e.target.value)}
                         className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C05A2B] focus:border-transparent"
                         placeholder="#C05A2B"
@@ -182,7 +182,7 @@ export default function NovaCategoria() {
                 </h2>
                 
                 <ImageUpload
-                  value={formData.imagem}
+                  value={formData.imagem ?? ''}
                   onChange={(url) => handleChange('imagem', url)}
                   placeholder="Adicione uma imagem da categoria"
                 />

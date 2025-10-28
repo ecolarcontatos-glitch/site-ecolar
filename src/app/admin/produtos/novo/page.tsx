@@ -109,7 +109,7 @@ export default function NovoProduto() {
                     </label>
                     <input
                       type="text"
-                      value={formData.nome}
+                      value={formData.nome ?? ''}
                       onChange={(e) => handleChange('nome', e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#7FBA3D] focus:border-transparent"
                       placeholder="Ex: Tijolo Cerâmico 6 Furos"
@@ -122,7 +122,7 @@ export default function NovoProduto() {
                       Descrição *
                     </label>
                     <textarea
-                      value={formData.descricao}
+                      value={formData.descricao ?? ''}
                       onChange={(e) => handleChange('descricao', e.target.value)}
                       rows={4}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#7FBA3D] focus:border-transparent"
@@ -136,7 +136,7 @@ export default function NovoProduto() {
                       Categoria *
                     </label>
                     <select
-                      value={formData.categoria_id}
+                      value={formData.categoria_id ?? ''}
                       onChange={(e) => handleChange('categoria_id', e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#7FBA3D] focus:border-transparent"
                       required
@@ -155,7 +155,7 @@ export default function NovoProduto() {
                       Unidade de Medida
                     </label>
                     <select
-                      value={formData.unidade}
+                      value={formData.unidade ?? 'unidade'}
                       onChange={(e) => handleChange('unidade', e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#7FBA3D] focus:border-transparent"
                     >
@@ -186,7 +186,7 @@ export default function NovoProduto() {
                       type="number"
                       step="0.01"
                       min="0"
-                      value={formData.preco_fabrica}
+                      value={formData.preco_fabrica ?? ''}
                       onChange={(e) => handleChange('preco_fabrica', e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#7FBA3D] focus:border-transparent"
                       placeholder="0,00"
@@ -202,7 +202,7 @@ export default function NovoProduto() {
                       type="number"
                       step="0.01"
                       min="0"
-                      value={formData.preco_pronta_entrega}
+                      value={formData.preco_pronta_entrega ?? ''}
                       onChange={(e) => handleChange('preco_pronta_entrega', e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#7FBA3D] focus:border-transparent"
                       placeholder="0,00"
@@ -222,7 +222,7 @@ export default function NovoProduto() {
                 </h2>
                 
                 <ImageUpload
-                  value={formData.imagem}
+                  value={formData.imagem ?? ''}
                   onChange={(url) => handleChange('imagem', url)}
                   placeholder="Adicione uma imagem do produto"
                 />
@@ -239,7 +239,7 @@ export default function NovoProduto() {
                     <input
                       type="checkbox"
                       id="destaque"
-                      checked={formData.destaque}
+                      checked={formData.destaque ?? false}
                       onChange={(e) => handleChange('destaque', e.target.checked)}
                       className="h-4 w-4 text-[#7FBA3D] focus:ring-[#7FBA3D] border-gray-300 rounded"
                     />
@@ -252,7 +252,7 @@ export default function NovoProduto() {
                     <input
                       type="checkbox"
                       id="disponivel"
-                      checked={formData.disponivel}
+                      checked={formData.disponivel ?? true}
                       onChange={(e) => handleChange('disponivel', e.target.checked)}
                       className="h-4 w-4 text-[#7FBA3D] focus:ring-[#7FBA3D] border-gray-300 rounded"
                     />

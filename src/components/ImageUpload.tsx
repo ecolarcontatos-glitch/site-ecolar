@@ -5,12 +5,15 @@ import { Upload, X, Image as ImageIcon } from 'lucide-react';
 import Image from 'next/image';
 
 interface ImageUploadProps {
-  onImageUploaded: (url: string) => void;
+  onImageUploaded?: (url: string) => void;
   currentImage?: string;
   onImageRemoved?: () => void;
   label?: string;
   aspectRatio?: string;
   className?: string;
+  value?: string;
+  onChange?: (url: string) => void;
+  placeholder?: string;
 }
 
 export default function ImageUpload({ 
@@ -19,12 +22,19 @@ export default function ImageUpload({
   onImageRemoved, 
   label = "Imagem",
   aspectRatio = "aspect-video",
-  className = ""
+  className = "",
+  value,
+  onChange,
+  placeholder
 }: ImageUploadProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const [error, setError] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Usar value/onChange se fornecidos, senão usar currentImage/onImageUploaded
+  const imageUrl = value || currentImage || '';
+  const handleImageChange = onChange || onImageUploaded;
 
   const handleFileSelect = async (file: File) => {
     if (!file.type.startsWith('image/')) {
@@ -55,7 +65,11 @@ export default function ImageUpload({
       }
 
       const data = await response.json();
-      onImageUploaded(data.url);
+      
+      // Validar se a função existe antes de chamar
+      if (handleImageChange && typeof handleImageChange === 'function') {
+        handleImageChange(data.url);
+      }
     } catch (error) {
       console.error('Erro no upload:', error);
       setError(error instanceof Error ? error.message : 'Erro ao fazer upload da imagem. Tente novamente.');
@@ -92,8 +106,10 @@ export default function ImageUpload({
   };
 
   const handleRemove = () => {
-    if (onImageRemoved) {
+    if (onImageRemoved && typeof onImageRemoved === 'function') {
       onImageRemoved();
+    } else if (onChange && typeof onChange === 'function') {
+      onChange('');
     }
     setError('');
   };
@@ -111,17 +127,18 @@ export default function ImageUpload({
         </div>
       )}
       
-      {currentImage ? (
+      {imageUrl ? (
         <div className="relative">
           <div className={`relative ${aspectRatio} bg-gray-100 rounded-2xl overflow-hidden`}>
             <Image
-              src={currentImage}
+              src={imageUrl}
               alt={label}
               fill
               className="object-cover"
             />
           </div>
           <button
+            type="button"
             onClick={handleRemove}
             className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
           >
@@ -150,7 +167,7 @@ export default function ImageUpload({
               <>
                 <ImageIcon className="w-12 h-12 text-gray-400 mb-4" />
                 <p className="text-sm text-gray-600 mb-2">
-                  Clique para selecionar ou arraste uma imagem
+                  {placeholder || 'Clique para selecionar ou arraste uma imagem'}
                 </p>
                 <p className="text-xs text-gray-500">
                   PNG, JPG, WEBP até 10MB

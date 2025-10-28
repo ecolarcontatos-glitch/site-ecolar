@@ -1,6 +1,7 @@
 'use client';
 
 import AdminLayout from '@/components/AdminLayout';
+import ImageUpload from '@/components/ImageUpload';
 import { useData } from '@/contexts/DataContext';
 import { ArrowLeft, Save, MessageSquare, Star } from 'lucide-react';
 import Link from 'next/link';
@@ -22,6 +23,12 @@ export default function NovoDepoimento() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!formData.nome || !formData.texto) {
+      alert('Por favor, preencha todos os campos obrigatórios.');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -29,26 +36,21 @@ export default function NovoDepoimento() {
         nome: formData.nome,
         texto: formData.texto,
         estrelas: formData.estrelas,
-        foto: formData.foto || ''
+        foto: formData.foto
       };
 
       adicionarDepoimento(depoimento);
       router.push('/admin/depoimentos');
     } catch (error) {
       console.error('Erro ao salvar depoimento:', error);
+      alert('Erro ao salvar depoimento. Tente novamente.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value, type } = e.target;
-    
-    if (type === 'number') {
-      setFormData(prev => ({ ...prev, [name]: parseInt(value) }));
-    } else {
-      setFormData(prev => ({ ...prev, [name]: value }));
-    }
+  const handleChange = (field: string, value: any) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   const renderStars = (rating: number, interactive = false) => {
@@ -56,7 +58,7 @@ export default function NovoDepoimento() {
       <button
         key={i}
         type="button"
-        onClick={interactive ? () => setFormData(prev => ({ ...prev, estrelas: i + 1 })) : undefined}
+        onClick={interactive ? () => handleChange('estrelas', i + 1) : undefined}
         className={`${interactive ? 'cursor-pointer hover:scale-110' : 'cursor-default'} transition-transform`}
         disabled={!interactive}
       >
@@ -90,139 +92,143 @@ export default function NovoDepoimento() {
 
         {/* Formulário */}
         <form onSubmit={handleSubmit} className="space-y-8">
-          <div className="bg-white rounded-2xl p-8 shadow-[0_2px_8px_rgba(0,0,0,0.08)]">
-            <div className="flex items-center space-x-3 mb-6">
-              <MessageSquare className="w-6 h-6 text-purple-500" />
-              <h2 className="font-inter font-semibold text-xl text-[#111827]">
-                Informações do Depoimento
-              </h2>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Coluna Principal */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* Informações Básicas */}
+              <div className="bg-white rounded-2xl p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08)]">
+                <h2 className="font-inter font-semibold text-[#111827] text-lg mb-6">
+                  Informações do Depoimento
+                </h2>
+                
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Nome do Cliente *
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.nome ?? ''}
+                      onChange={(e) => handleChange('nome', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      placeholder="Ex: Maria Silva"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-3">
+                      Avaliação *
+                    </label>
+                    <div className="flex items-center space-x-2">
+                      {renderStars(formData.estrelas ?? 5, true)}
+                      <span className="ml-4 text-sm text-gray-600">
+                        {formData.estrelas ?? 5} de 5 estrelas
+                      </span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Depoimento *
+                    </label>
+                    <textarea
+                      value={formData.texto ?? ''}
+                      onChange={(e) => handleChange('texto', e.target.value)}
+                      rows={6}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      placeholder="Escreva o depoimento do cliente..."
+                      required
+                    />
+                    <p className="text-sm text-gray-500 mt-1">
+                      Escreva um depoimento autêntico e detalhado sobre a experiência do cliente
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
 
+            {/* Sidebar */}
             <div className="space-y-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div>
-                  <label className="block font-inter font-medium text-[#111827] mb-2">
-                    Nome do Cliente *
-                  </label>
-                  <input
-                    type="text"
-                    name="nome"
-                    value={formData.nome}
-                    onChange={handleChange}
-                    required
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent font-inter"
-                    placeholder="Ex: Maria Silva"
-                  />
-                </div>
-
-                <div>
-                  <label className="block font-inter font-medium text-[#111827] mb-2">
-                    URL da Foto (opcional)
-                  </label>
-                  <input
-                    type="url"
-                    name="foto"
-                    value={formData.foto}
-                    onChange={handleChange}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent font-inter"
-                    placeholder="https://exemplo.com/foto.jpg"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block font-inter font-medium text-[#111827] mb-3">
-                  Avaliação *
-                </label>
-                <div className="flex items-center space-x-2">
-                  {renderStars(formData.estrelas, true)}
-                  <span className="ml-4 font-inter text-[#6b7280]">
-                    {formData.estrelas} de 5 estrelas
-                  </span>
-                </div>
-              </div>
-
-              <div>
-                <label className="block font-inter font-medium text-[#111827] mb-2">
-                  Depoimento *
-                </label>
-                <textarea
-                  name="texto"
-                  value={formData.texto}
-                  onChange={handleChange}
-                  required
-                  rows={6}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent font-inter resize-none"
-                  placeholder="Escreva o depoimento do cliente..."
+              {/* Foto do Cliente */}
+              <div className="bg-white rounded-2xl p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08)]">
+                <h2 className="font-inter font-semibold text-[#111827] text-lg mb-6">
+                  Foto do Cliente (opcional)
+                </h2>
+                
+                <ImageUpload
+                  value={formData.foto ?? ''}
+                  onChange={(url) => handleChange('foto', url)}
+                  placeholder="Adicione uma foto do cliente"
+                  aspectRatio="aspect-square"
                 />
-                <p className="text-sm text-[#6b7280] font-inter mt-1">
-                  Escreva um depoimento autêntico e detalhado sobre a experiência do cliente
-                </p>
+              </div>
+
+              {/* Ações */}
+              <div className="bg-white rounded-2xl p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08)]">
+                <div className="space-y-3">
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full flex items-center justify-center space-x-2 bg-purple-500 text-white px-6 py-3 rounded-2xl hover:bg-purple-600 transition-colors duration-200 font-inter font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <Save className="w-5 h-5" />
+                    <span>{isSubmitting ? 'Salvando...' : 'Salvar Depoimento'}</span>
+                  </button>
+
+                  <Link
+                    href="/admin/depoimentos"
+                    className="w-full flex items-center justify-center space-x-2 border border-gray-300 text-gray-700 px-6 py-3 rounded-2xl hover:bg-gray-50 transition-colors duration-200 font-inter font-medium"
+                  >
+                    <span>Cancelar</span>
+                  </Link>
+                </div>
               </div>
             </div>
           </div>
 
           {/* Preview */}
-          <div className="bg-white rounded-2xl p-8 shadow-[0_2px_8px_rgba(0,0,0,0.08)]">
-            <h2 className="font-inter font-semibold text-xl text-[#111827] mb-6">
-              Pré-visualização
-            </h2>
-            
-            <div className="max-w-md">
-              <div className="bg-white border border-gray-200 rounded-2xl p-6">
-                {/* Header */}
-                <div className="flex items-center space-x-3 mb-4">
-                  <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
-                    {formData.foto ? (
-                      <img
-                        src={formData.foto}
-                        alt={formData.nome}
-                        className="w-12 h-12 rounded-full object-cover"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).style.display = 'none';
-                        }}
-                      />
-                    ) : (
-                      <span className="font-inter font-semibold text-purple-600 text-lg">
-                        {formData.nome ? formData.nome.charAt(0).toUpperCase() : '?'}
-                      </span>
-                    )}
-                  </div>
-                  <div>
-                    <h3 className="font-inter font-semibold text-[#111827]">
-                      {formData.nome || 'Nome do Cliente'}
-                    </h3>
-                    <div className="flex items-center space-x-1">
-                      {renderStars(formData.estrelas)}
+          {(formData.nome || formData.texto) && (
+            <div className="bg-white rounded-2xl p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08)]">
+              <h2 className="font-inter font-semibold text-[#111827] text-lg mb-6">
+                Pré-visualização
+              </h2>
+              
+              <div className="max-w-md">
+                <div className="bg-white border border-gray-200 rounded-2xl p-6">
+                  {/* Header */}
+                  <div className="flex items-center space-x-3 mb-4">
+                    <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center overflow-hidden">
+                      {formData.foto ? (
+                        <img
+                          src={formData.foto}
+                          alt={formData.nome}
+                          className="w-12 h-12 rounded-full object-cover"
+                        />
+                      ) : (
+                        <span className="font-inter font-semibold text-purple-600 text-lg">
+                          {formData.nome ? formData.nome.charAt(0).toUpperCase() : '?'}
+                        </span>
+                      )}
+                    </div>
+                    <div>
+                      <h3 className="font-inter font-semibold text-[#111827]">
+                        {formData.nome || 'Nome do Cliente'}
+                      </h3>
+                      <div className="flex items-center space-x-1">
+                        {renderStars(formData.estrelas ?? 5)}
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                {/* Texto */}
-                <blockquote className="font-inter text-[#6b7280] italic leading-relaxed">
-                  "{formData.texto || 'O depoimento aparecerá aqui...'}"
-                </blockquote>
+                  {/* Texto */}
+                  <blockquote className="font-inter text-[#6b7280] italic leading-relaxed">
+                    "{formData.texto || 'O depoimento aparecerá aqui...'}"
+                  </blockquote>
+                </div>
               </div>
             </div>
-          </div>
-
-          {/* Botões */}
-          <div className="flex flex-col sm:flex-row gap-4 sm:justify-end">
-            <Link
-              href="/admin/depoimentos"
-              className="flex items-center justify-center space-x-2 px-6 py-3 border border-gray-200 text-[#6b7280] rounded-2xl hover:bg-gray-50 transition-colors duration-200 font-inter font-medium"
-            >
-              <span>Cancelar</span>
-            </Link>
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="flex items-center justify-center space-x-2 bg-purple-500 text-white px-6 py-3 rounded-2xl hover:bg-purple-600 transition-colors duration-200 font-inter font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <Save className="w-5 h-5" />
-              <span>{isSubmitting ? 'Salvando...' : 'Salvar Depoimento'}</span>
-            </button>
-          </div>
+          )}
         </form>
       </div>
     </AdminLayout>

@@ -134,7 +134,7 @@ export default function ConfiguracoesPage() {
           <div className="space-y-6">
             <ImageUpload
               label="Logo do Header"
-              currentImage={config.logoHeader}
+              currentImage={config.logoHeader ?? ''}
               onImageUploaded={handleLogoHeaderUpload}
               onImageRemoved={handleLogoHeaderRemove}
               aspectRatio="aspect-[3/1]"
@@ -142,7 +142,7 @@ export default function ConfiguracoesPage() {
 
             <ImageUpload
               label="Logo do Footer"
-              currentImage={config.logoFooter}
+              currentImage={config.logoFooter ?? ''}
               onImageUploaded={handleLogoFooterUpload}
               onImageRemoved={handleLogoFooterRemove}
               aspectRatio="aspect-[3/1]"
@@ -161,7 +161,7 @@ export default function ConfiguracoesPage() {
               </label>
               <input
                 type="text"
-                value={config.telefone}
+                value={config.telefone ?? ''}
                 onChange={(e) => setConfig({ ...config, telefone: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#7FBA3D]"
                 placeholder="(83) 2177-7553"
@@ -174,7 +174,7 @@ export default function ConfiguracoesPage() {
               </label>
               <input
                 type="email"
-                value={config.email}
+                value={config.email ?? ''}
                 onChange={(e) => setConfig({ ...config, email: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#7FBA3D]"
                 placeholder="ecolar.contatos@gmail.com"
@@ -186,7 +186,7 @@ export default function ConfiguracoesPage() {
                 Endereço Completo
               </label>
               <textarea
-                value={config.endereco}
+                value={config.endereco ?? ''}
                 onChange={(e) => setConfig({ ...config, endereco: e.target.value })}
                 rows={3}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#7FBA3D]"
@@ -200,7 +200,7 @@ export default function ConfiguracoesPage() {
               </label>
               <input
                 type="text"
-                value={config.whatsapp}
+                value={config.whatsapp ?? ''}
                 onChange={(e) => setConfig({ ...config, whatsapp: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#7FBA3D]"
                 placeholder="558393661690"
@@ -215,7 +215,7 @@ export default function ConfiguracoesPage() {
                 Texto do Rodapé
               </label>
               <textarea
-                value={config.textoRodape}
+                value={config.textoRodape ?? ''}
                 onChange={(e) => setConfig({ ...config, textoRodape: e.target.value })}
                 rows={3}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#7FBA3D]"
@@ -262,7 +262,7 @@ export default function ConfiguracoesPage() {
           <div className="flex space-x-2">
             <input
               type="text"
-              value={newHeroImage}
+              value={newHeroImage ?? ''}
               onChange={(e) => setNewHeroImage(e.target.value)}
               className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#7FBA3D]"
               placeholder="URL da imagem (ex: https://images.unsplash.com/...)"
@@ -322,7 +322,7 @@ export default function ConfiguracoesPage() {
                 
                 <input
                   type="text"
-                  value={image.url}
+                  value={image.url ?? ''}
                   onChange={(e) => {
                     const newImages = [...config.heroImages];
                     newImages[index].url = e.target.value;
