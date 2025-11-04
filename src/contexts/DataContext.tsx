@@ -13,26 +13,26 @@ interface DataContextType {
   isLoading: boolean;
   
   // CRUD Produtos
-  adicionarProduto: (produto: Omit<Produto, 'id'>) => void;
-  atualizarProduto: (id: string, produto: Partial<Produto>) => void;
-  removerProduto: (id: string) => void;
+  adicionarProduto: (produto: Omit<Produto, 'id'>) => Promise<void>;
+  atualizarProduto: (id: string, produto: Partial<Produto>) => Promise<void>;
+  removerProduto: (id: string) => Promise<void>;
   
   // CRUD Categorias
-  adicionarCategoria: (categoria: Omit<Categoria, 'id'>) => void;
-  atualizarCategoria: (id: string, categoria: Partial<Categoria>) => void;
-  removerCategoria: (id: string) => void;
+  adicionarCategoria: (categoria: Omit<Categoria, 'id'>) => Promise<void>;
+  atualizarCategoria: (id: string, categoria: Partial<Categoria>) => Promise<void>;
+  removerCategoria: (id: string) => Promise<void>;
   
   // CRUD Posts
-  adicionarPost: (post: Omit<Post, 'id'>) => void;
-  atualizarPost: (id: string, post: Partial<Post>) => void;
-  removerPost: (id: string) => void;
+  adicionarPost: (post: Omit<Post, 'id'>) => Promise<void>;
+  atualizarPost: (id: string, post: Partial<Post>) => Promise<void>;
+  removerPost: (id: string) => Promise<void>;
   
-  // CRUD Depoimentos
+  // CRUD Depoimentos (ainda usando localStorage)
   adicionarDepoimento: (depoimento: Omit<Depoimento, 'id'>) => void;
   atualizarDepoimento: (id: string, depoimento: Partial<Depoimento>) => void;
   removerDepoimento: (id: string) => void;
   
-  // CRUD Inspirações
+  // CRUD Inspirações (ainda usando localStorage)
   adicionarInspiracao: (inspiracao: Omit<Inspiracao, 'id'>) => void;
   atualizarInspiracao: (id: string, inspiracao: Partial<Inspiracao>) => void;
   removerInspiracao: (id: string) => void;
@@ -41,9 +41,6 @@ interface DataContextType {
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
 const STORAGE_KEYS = {
-  produtos: 'ecolar_produtos',
-  categorias: 'ecolar_categorias',
-  posts: 'ecolar_posts',
   depoimentos: 'ecolar_depoimentos',
   inspiracoes: 'ecolar_inspiracoes'
 };
@@ -56,30 +53,60 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [inspiracoes, setInspiracoes] = useState<Inspiracao[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Função para carregar dados do localStorage ou usar dados iniciais
-  const carregarDados = () => {
-    if (typeof window === 'undefined') return;
-
+  // Função para carregar dados do servidor e localStorage
+  const carregarDados = async () => {
     try {
-      // Carregar produtos
-      const produtosStored = localStorage.getItem(STORAGE_KEYS.produtos);
-      setProdutos(produtosStored ? JSON.parse(produtosStored) : produtosIniciais);
+      setIsLoading(true);
 
-      // Carregar categorias
-      const categoriasStored = localStorage.getItem(STORAGE_KEYS.categorias);
-      setCategorias(categoriasStored ? JSON.parse(categoriasStored) : categoriasIniciais);
+      // Carregar produtos do servidor
+      try {
+        const produtosRes = await fetch('/api/produtos');
+        const produtosData = await produtosRes.json();
+        setProdutos(produtosData.length > 0 ? produtosData : produtosIniciais);
+      } catch (error) {
+        console.error('Erro ao carregar produtos:', error);
+        setProdutos(produtosIniciais);
+      }
 
-      // Carregar posts
-      const postsStored = localStorage.getItem(STORAGE_KEYS.posts);
-      setPosts(postsStored ? JSON.parse(postsStored) : postsIniciais);
+      // Carregar categorias do servidor
+      try {
+        const categoriasRes = await fetch('/api/categorias');
+        const categoriasData = await categoriasRes.json();
+        setCategorias(categoriasData.length > 0 ? categoriasData : categoriasIniciais);
+      } catch (error) {
+        console.error('Erro ao carregar categorias:', error);
+        setCategorias(categoriasIniciais);
+      }
 
-      // Carregar depoimentos
-      const depoimentosStored = localStorage.getItem(STORAGE_KEYS.depoimentos);
-      setDepoimentos(depoimentosStored ? JSON.parse(depoimentosStored) : depoimentosIniciais);
+      // Carregar posts do servidor
+      try {
+        const postsRes = await fetch('/api/posts');
+        const postsData = await postsRes.json();
+        setPosts(postsData.length > 0 ? postsData : postsIniciais);
+      } catch (error) {
+        console.error('Erro ao carregar posts:', error);
+        setPosts(postsIniciais);
+      }
 
-      // Carregar inspirações
-      const inspiracoesStored = localStorage.getItem(STORAGE_KEYS.inspiracoes);
-      setInspiracoes(inspiracoesStored ? JSON.parse(inspiracoesStored) : inspiracoesIniciais);
+      // Carregar depoimentos do localStorage (ainda não migrado)
+      if (typeof window !== 'undefined') {
+        try {
+          const depoimentosStored = localStorage.getItem(STORAGE_KEYS.depoimentos);
+          setDepoimentos(depoimentosStored ? JSON.parse(depoimentosStored) : depoimentosIniciais);
+        } catch (error) {
+          console.error('Erro ao carregar depoimentos:', error);
+          setDepoimentos(depoimentosIniciais);
+        }
+
+        // Carregar inspirações do localStorage (ainda não migrado)
+        try {
+          const inspiracoesStored = localStorage.getItem(STORAGE_KEYS.inspiracoes);
+          setInspiracoes(inspiracoesStored ? JSON.parse(inspiracoesStored) : inspiracoesIniciais);
+        } catch (error) {
+          console.error('Erro ao carregar inspirações:', error);
+          setInspiracoes(inspiracoesIniciais);
+        }
+      }
 
       setIsLoading(false);
     } catch (error) {
@@ -98,7 +125,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     carregarDados();
   }, []);
 
-  // Função para salvar no localStorage com sincronização forçada
+  // Função para salvar no localStorage (ainda usado para depoimentos e inspirações)
   const salvarDados = (key: string, data: any) => {
     if (typeof window === 'undefined') return;
     
@@ -111,86 +138,201 @@ export function DataProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Listener para sincronização entre abas
+  // Listener para sincronização entre abas (ainda necessário para localStorage)
   useEffect(() => {
     const handleStorageChange = () => {
-      carregarDados();
+      if (typeof window !== 'undefined') {
+        try {
+          const depoimentosStored = localStorage.getItem(STORAGE_KEYS.depoimentos);
+          if (depoimentosStored) {
+            setDepoimentos(JSON.parse(depoimentosStored));
+          }
+
+          const inspiracoesStored = localStorage.getItem(STORAGE_KEYS.inspiracoes);
+          if (inspiracoesStored) {
+            setInspiracoes(JSON.parse(inspiracoesStored));
+          }
+        } catch (error) {
+          console.error('Erro ao sincronizar dados:', error);
+        }
+      }
     };
 
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+    if (typeof window !== 'undefined') {
+      window.addEventListener('storage', handleStorageChange);
+      return () => window.removeEventListener('storage', handleStorageChange);
+    }
   }, []);
 
-  // CRUD Produtos
-  const adicionarProduto = (produto: Omit<Produto, 'id'>) => {
-    const novoProduto = { 
-      ...produto, 
-      id: Date.now().toString()
-    };
-    const novosProdutos = [...produtos, novoProduto];
-    setProdutos(novosProdutos);
-    salvarDados(STORAGE_KEYS.produtos, novosProdutos);
+  // CRUD Produtos (usando API)
+  const adicionarProduto = async (produto: Omit<Produto, 'id'>) => {
+    try {
+      const response = await fetch('/api/produtos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(produto),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success) {
+          setProdutos(prev => [...prev, result.data]);
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao adicionar produto:', error);
+    }
   };
 
-  const atualizarProduto = (id: string, produtoAtualizado: Partial<Produto>) => {
-    const novosProdutos = produtos.map(p => 
-      p.id === id ? { ...p, ...produtoAtualizado } : p
-    );
-    setProdutos(novosProdutos);
-    salvarDados(STORAGE_KEYS.produtos, novosProdutos);
+  const atualizarProduto = async (id: string, produtoAtualizado: Partial<Produto>) => {
+    try {
+      const response = await fetch('/api/produtos', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, ...produtoAtualizado }),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success) {
+          setProdutos(prev => prev.map(p => p.id === id ? result.data : p));
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao atualizar produto:', error);
+    }
   };
 
-  const removerProduto = (id: string) => {
-    const novosProdutos = produtos.filter(p => p.id !== id);
-    setProdutos(novosProdutos);
-    salvarDados(STORAGE_KEYS.produtos, novosProdutos);
+  const removerProduto = async (id: string) => {
+    try {
+      const response = await fetch(`/api/produtos?id=${id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success) {
+          setProdutos(prev => prev.filter(p => p.id !== id));
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao remover produto:', error);
+    }
   };
 
-  // CRUD Categorias
-  const adicionarCategoria = (categoria: Omit<Categoria, 'id'>) => {
-    const novaCategoria = { ...categoria, id: Date.now().toString() };
-    const novasCategorias = [...categorias, novaCategoria];
-    setCategorias(novasCategorias);
-    salvarDados(STORAGE_KEYS.categorias, novasCategorias);
+  // CRUD Categorias (usando API)
+  const adicionarCategoria = async (categoria: Omit<Categoria, 'id'>) => {
+    try {
+      const response = await fetch('/api/categorias', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(categoria),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success) {
+          setCategorias(prev => [...prev, result.data]);
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao adicionar categoria:', error);
+    }
   };
 
-  const atualizarCategoria = (id: string, categoriaAtualizada: Partial<Categoria>) => {
-    const novasCategorias = categorias.map(c => 
-      c.id === id ? { ...c, ...categoriaAtualizada } : c
-    );
-    setCategorias(novasCategorias);
-    salvarDados(STORAGE_KEYS.categorias, novasCategorias);
+  const atualizarCategoria = async (id: string, categoriaAtualizada: Partial<Categoria>) => {
+    try {
+      const response = await fetch('/api/categorias', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, ...categoriaAtualizada }),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success) {
+          setCategorias(prev => prev.map(c => c.id === id ? result.data : c));
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao atualizar categoria:', error);
+    }
   };
 
-  const removerCategoria = (id: string) => {
-    const novasCategorias = categorias.filter(c => c.id !== id);
-    setCategorias(novasCategorias);
-    salvarDados(STORAGE_KEYS.categorias, novasCategorias);
+  const removerCategoria = async (id: string) => {
+    try {
+      const response = await fetch(`/api/categorias?id=${id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success) {
+          setCategorias(prev => prev.filter(c => c.id !== id));
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao remover categoria:', error);
+    }
   };
 
-  // CRUD Posts
-  const adicionarPost = (post: Omit<Post, 'id'>) => {
-    const novoPost = { ...post, id: Date.now().toString() };
-    const novosPosts = [...posts, novoPost];
-    setPosts(novosPosts);
-    salvarDados(STORAGE_KEYS.posts, novosPosts);
+  // CRUD Posts (usando API)
+  const adicionarPost = async (post: Omit<Post, 'id'>) => {
+    try {
+      const response = await fetch('/api/posts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(post),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success) {
+          setPosts(prev => [...prev, result.data]);
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao adicionar post:', error);
+    }
   };
 
-  const atualizarPost = (id: string, postAtualizado: Partial<Post>) => {
-    const novosPosts = posts.map(p => 
-      p.id === id ? { ...p, ...postAtualizado } : p
-    );
-    setPosts(novosPosts);
-    salvarDados(STORAGE_KEYS.posts, novosPosts);
+  const atualizarPost = async (id: string, postAtualizado: Partial<Post>) => {
+    try {
+      const response = await fetch('/api/posts', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, ...postAtualizado }),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success) {
+          setPosts(prev => prev.map(p => p.id === id ? result.data : p));
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao atualizar post:', error);
+    }
   };
 
-  const removerPost = (id: string) => {
-    const novosPosts = posts.filter(p => p.id !== id);
-    setPosts(novosPosts);
-    salvarDados(STORAGE_KEYS.posts, novosPosts);
+  const removerPost = async (id: string) => {
+    try {
+      const response = await fetch(`/api/posts?id=${id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success) {
+          setPosts(prev => prev.filter(p => p.id !== id));
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao remover post:', error);
+    }
   };
 
-  // CRUD Depoimentos
+  // CRUD Depoimentos (ainda usando localStorage)
   const adicionarDepoimento = (depoimento: Omit<Depoimento, 'id'>) => {
     const novoDepoimento = { ...depoimento, id: Date.now().toString() };
     const novosDepoimentos = [...depoimentos, novoDepoimento];
@@ -212,7 +354,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     salvarDados(STORAGE_KEYS.depoimentos, novosDepoimentos);
   };
 
-  // CRUD Inspirações
+  // CRUD Inspirações (ainda usando localStorage)
   const adicionarInspiracao = (inspiracao: Omit<Inspiracao, 'id'>) => {
     const novaInspiracao = { ...inspiracao, id: Date.now().toString() };
     const novasInspiracoes = [...inspiracoes, novaInspiracao];
