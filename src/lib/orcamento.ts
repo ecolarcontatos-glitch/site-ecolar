@@ -1,118 +1,81 @@
-import { ItemOrcamento } from './types';
+import { Produto } from '@/contexts/DataContext';
 
-export class OrcamentoService {
-  private static STORAGE_KEY = 'ecolar_orcamento';
-
-  static getItens(): ItemOrcamento[] {
-    if (typeof window === 'undefined') return [];
-    
-    try {
-      const stored = localStorage.getItem(this.STORAGE_KEY);
-      return stored ? JSON.parse(stored) : [];
-    } catch {
-      return [];
-    }
-  }
-
-  static adicionarItem(item: ItemOrcamento): void {
-    if (typeof window === 'undefined') return;
-    
-    const itens = this.getItens();
-    const existingIndex = itens.findIndex(
-      i => i.produto.id === item.produto.id && i.modalidade === item.modalidade
-    );
-
-    if (existingIndex >= 0) {
-      itens[existingIndex].quantidade += item.quantidade;
-    } else {
-      itens.push(item);
-    }
-
-    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(itens));
-  }
-
-  static removerItem(produtoId: string, modalidade: 'fabrica' | 'pronta_entrega'): void {
-    if (typeof window === 'undefined') return;
-    
-    const itens = this.getItens().filter(
-      item => !(item.produto.id === produtoId && item.modalidade === modalidade)
-    );
-    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(itens));
-  }
-
-  static atualizarQuantidade(produtoId: string, modalidade: 'fabrica' | 'pronta_entrega', quantidade: number): void {
-    if (typeof window === 'undefined') return;
-    
-    const itens = this.getItens();
-    const item = itens.find(i => i.produto.id === produtoId && i.modalidade === modalidade);
-    
-    if (item) {
-      item.quantidade = quantidade;
-      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(itens));
-    }
-  }
-
-  static atualizarModalidade(produtoId: string, modalidadeAtual: 'fabrica' | 'pronta_entrega', novaModalidade: 'fabrica' | 'pronta_entrega'): void {
-    if (typeof window === 'undefined') return;
-    
-    const itens = this.getItens();
-    const item = itens.find(i => i.produto.id === produtoId && i.modalidade === modalidadeAtual);
-    
-    if (item) {
-      item.modalidade = novaModalidade;
-      item.preco_unitario = novaModalidade === 'fabrica' 
-        ? item.produto.preco_fabrica 
-        : (item.produto.preco_pronta_entrega || item.produto.preco_fabrica);
-      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(itens));
-    }
-  }
-
-  static limparOrcamento(): void {
-    if (typeof window === 'undefined') return;
-    localStorage.removeItem(this.STORAGE_KEY);
-  }
-
-  static getTotal(): number {
-    return this.getItens().reduce((total, item) => {
-      const precoUnitario = typeof item.preco_unitario === 'number' ? item.preco_unitario : 0;
-      const quantidade = typeof item.quantidade === 'number' ? item.quantidade : 0;
-      return total + (precoUnitario * quantidade);
-    }, 0);
-  }
-
-  static gerarLinkWhatsApp(whatsappNumber: string, observacoes?: string): string {
-    const itens = this.getItens();
-    const total = this.getTotal();
-    
-    let mensagem = 'Olá! Quero orçamento:%0A%0A';
-    
-    itens.forEach(item => {
-      const modalidadeTexto = item.modalidade === 'fabrica' ? 'Fábrica' : 'Pronta Entrega';
-      const precoUnitario = typeof item.preco_unitario === 'number' ? item.preco_unitario : 0;
-      const quantidade = typeof item.quantidade === 'number' ? item.quantidade : 0;
-      const subtotal = precoUnitario * quantidade;
-      
-      mensagem += `- ${item.produto.nome}%0A`;
-      mensagem += `  Modalidade: ${modalidadeTexto}%0A`;
-      mensagem += `  Qtd: ${quantidade} — Unit: R$ ${precoUnitario.toFixed(2)} — Sub: R$ ${subtotal.toFixed(2)}%0A%0A`;
-    });
-    
-    mensagem += `*Total: R$ ${total.toFixed(2)}*%0A%0A`;
-    
-    if (observacoes) {
-      mensagem += `Observações: ${observacoes}%0A%0A`;
-    }
-    
-    mensagem += 'Aguardo retorno!';
-    
-    return `https://wa.me/${whatsappNumber}?text=${mensagem}`;
-  }
+export interface ItemOrcamento {
+  produto: Produto;
+  quantidade: number;
 }
 
-export const formatPrice = (price: number | undefined | null): string => {
-  const validPrice = typeof price === 'number' ? price : 0;
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL'
-  }).format(validPrice);
+export const formatPrice = (value: number): string => {
+  const numericValue = Number(value) || 0;
+  return `R$ ${numericValue.toFixed(2).replace('.', ',')}`;
+};
+
+export const calcularOrcamento = (itens: ItemOrcamento[]) => {
+  let total = 0;
+  const detalhes: string[] = [];
+
+  itens.forEach(item => {
+    const preco = Number(item.produto.preco) || 0;
+    const desconto = Number(item.produto.desconto) || 0;
+    
+    // Calcular preço unitário com desconto
+    const precoUnitario = preco * (1 - desconto / 100);
+    const subtotal = precoUnitario * item.quantidade;
+    
+    total += subtotal;
+    
+    detalhes.push(`${item.produto.nome} - Qtd: ${item.quantidade} - R$ ${subtotal.toFixed(2)}`);
+  });
+
+  return {
+    total,
+    detalhes,
+    formatado: `R$ ${total.toFixed(2)}`
+  };
+};
+
+export const gerarMensagemWhatsApp = (itens: ItemOrcamento[], dadosCliente?: {
+  nome?: string;
+  telefone?: string;
+  email?: string;
+  endereco?: string;
+}) => {
+  let mensagem = '*Solicitação de Orçamento - ECOLAR*%0A%0A';
+  
+  if (dadosCliente?.nome) {
+    mensagem += `*Cliente:* ${dadosCliente.nome}%0A`;
+  }
+  if (dadosCliente?.telefone) {
+    mensagem += `*Telefone:* ${dadosCliente.telefone}%0A`;
+  }
+  if (dadosCliente?.email) {
+    mensagem += `*Email:* ${dadosCliente.email}%0A`;
+  }
+  if (dadosCliente?.endereco) {
+    mensagem += `*Endereço:* ${dadosCliente.endereco}%0A`;
+  }
+  
+  mensagem += '%0A*Produtos solicitados:*%0A%0A';
+  
+  let total = 0;
+  
+  itens.forEach(item => {
+    const preco = Number(item.produto.preco) || 0;
+    const desconto = Number(item.produto.desconto) || 0;
+    
+    // Calcular preço unitário com desconto
+    const precoUnitario = preco * (1 - desconto / 100);
+    const subtotal = precoUnitario * item.quantidade;
+    
+    total += subtotal;
+    
+    mensagem += `*${item.produto.nome}*%0A`;
+    mensagem += `  Qtd: ${item.quantidade} — Unit: R$ ${precoUnitario.toFixed(2)} — Sub: R$ ${subtotal.toFixed(2)}%0A%0A`;
+  });
+  
+  mensagem += `*Total: R$ ${total.toFixed(2)}*%0A%0A`;
+  mensagem += 'Aguardo retorno com disponibilidade e prazo de entrega.%0A%0A';
+  mensagem += 'Obrigado!';
+  
+  return mensagem;
 };

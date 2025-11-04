@@ -257,10 +257,18 @@ export default function EditarProduto() {
                     <p className="text-sm font-medium text-gray-700 mb-1">Preview do preço:</p>
                     <div className="flex items-center space-x-2">
                       <span className="text-lg font-bold text-[#7FBA3D]">
-                        R$ {(parseFloat(formData.preco) * (1 - parseFloat(formData.desconto) / 100)).toFixed(2).replace('.', ',')}
+                        R$ {(() => {
+                          const preco = Number(formData.preco) || 0;
+                          const desconto = Number(formData.desconto) || 0;
+                          const precoComDesconto = preco * (1 - desconto / 100);
+                          return precoComDesconto.toFixed(2).replace('.', ',');
+                        })()}
                       </span>
                       <span className="text-sm text-gray-500 line-through">
-                        R$ {parseFloat(formData.preco).toFixed(2).replace('.', ',')}
+                        R$ {(() => {
+                          const preco = Number(formData.preco) || 0;
+                          return preco.toFixed(2).replace('.', ',');
+                        })()}
                       </span>
                     </div>
                   </div>

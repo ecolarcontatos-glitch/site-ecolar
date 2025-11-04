@@ -138,8 +138,14 @@ export default function ProdutosPage() {
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          <div>Fábrica: R$ {produto.preco_fabrica.toFixed(2)}</div>
-                          <div>Pronta: R$ {produto.preco_pronta_entrega.toFixed(2)}</div>
+                          <div>Fábrica: R$ {(() => {
+                            const preco = Number(produto.preco_fabrica) || 0;
+                            return preco.toFixed(2);
+                          })()}</div>
+                          <div>Pronta: R$ {(() => {
+                            const preco = Number(produto.preco_pronta_entrega) || 0;
+                            return preco.toFixed(2);
+                          })()}</div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex flex-col space-y-1">
