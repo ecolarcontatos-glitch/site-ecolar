@@ -108,16 +108,28 @@ export function DataProvider({ children }: { children: ReactNode }) {
     carregarDados();
   }, []);
 
-  // Função para salvar no localStorage
+  // ✅ CORREÇÃO: Função para salvar no localStorage com sincronização forçada
   const salvarDados = (key: string, data: any) => {
     if (typeof window === 'undefined') return;
     
     try {
       localStorage.setItem(key, JSON.stringify(data));
+      // ✅ FORÇA sincronização imediata
+      window.dispatchEvent(new Event('storage'));
     } catch (error) {
       console.error('Erro ao salvar dados:', error);
     }
   };
+
+  // ✅ CORREÇÃO: Listener para sincronização entre abas
+  useEffect(() => {
+    const handleStorageChange = () => {
+      carregarDados();
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
 
   // CRUD Produtos
   const adicionarProduto = (produto: Omit<Produto, 'id'>) => {
