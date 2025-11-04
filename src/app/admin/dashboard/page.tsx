@@ -135,7 +135,7 @@ export default function AdminDashboard() {
                       {produto.nome}
                     </h3>
                     <p className="font-inter text-[#6b7280] text-xs">
-                      R$ {produto.preco_fabrica.toFixed(2)}
+                      R$ {typeof produto.preco === 'number' ? produto.preco.toFixed(2) : '0,00'}
                     </p>
                   </div>
                 </div>
