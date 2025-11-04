@@ -135,7 +135,7 @@ export default function AdminDashboard() {
                       {produto.nome}
                     </h3>
                     <p className="font-inter text-[#6b7280] text-xs">
-                      R$ {typeof produto.preco === 'number' ? produto.preco.toFixed(2) : '0,00'}
+                      R$ {typeof produto.preco === 'number' && !isNaN(produto.preco) ? produto.preco.toFixed(2) : '0,00'}
                     </p>
                   </div>
                 </div>
