@@ -52,12 +52,10 @@ export const produtos: Produto[] = [
     categoria: '1',
     descricao: 'Telha colonial em cerâmica de alta qualidade, ideal para coberturas residenciais e comerciais. Resistente às intempéries e com excelente durabilidade.',
     imagem: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&h=600&fit=crop',
-    preco_fabrica: 2.10,
-    preco_pronta_entrega: 2.80,
-    disponivel_fabrica: true,
-    disponivel_pronta_entrega: true,
+    preco: 2.80,
+    desconto: 15,
     destaque: true,
-    disponivel: true // ✅ CORREÇÃO: Campo adicionado para controle geral
+    unidade: 'unidade'
   },
   {
     id: '2',
@@ -65,12 +63,9 @@ export const produtos: Produto[] = [
     categoria: '2',
     descricao: 'Tijolo estrutural de alta resistência, ideal para construções que exigem qualidade e durabilidade. Dimensões padronizadas para facilitar a construção.',
     imagem: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=800&h=600&fit=crop',
-    preco_fabrica: 1.80,
-    preco_pronta_entrega: 2.40,
-    disponivel_fabrica: true,
-    disponivel_pronta_entrega: false,
+    preco: 2.40,
     destaque: true,
-    disponivel: true // ✅ CORREÇÃO: Campo adicionado para controle geral
+    unidade: 'unidade'
   },
   {
     id: '3',
@@ -78,12 +73,10 @@ export const produtos: Produto[] = [
     categoria: '4',
     descricao: 'Vaso decorativo em barro natural, perfeito para jardins e áreas externas. Produzido artesanalmente com materiais de primeira qualidade.',
     imagem: 'https://images.unsplash.com/photo-1586773860418-d37222d8fce3?w=800&h=600&fit=crop',
-    preco_fabrica: 35.00,
-    preco_pronta_entrega: 49.00,
-    disponivel_fabrica: true,
-    disponivel_pronta_entrega: true,
+    preco: 49.00,
+    desconto: 10,
     destaque: true,
-    disponivel: true // ✅ CORREÇÃO: Campo adicionado para controle geral
+    unidade: 'unidade'
   },
   {
     id: '4',
@@ -91,12 +84,9 @@ export const produtos: Produto[] = [
     categoria: '3',
     descricao: 'Piso cerâmico de alta qualidade, ideal para áreas internas residenciais e comerciais. Fácil limpeza e manutenção.',
     imagem: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&h=600&fit=crop',
-    preco_fabrica: 28.90,
-    preco_pronta_entrega: 35.90,
-    disponivel_fabrica: true,
-    disponivel_pronta_entrega: true,
+    preco: 35.90,
     destaque: false,
-    disponivel: true // ✅ CORREÇÃO: Campo adicionado para controle geral
+    unidade: 'm²'
   },
   {
     id: '5',
@@ -104,12 +94,10 @@ export const produtos: Produto[] = [
     categoria: '1',
     descricao: 'Telha francesa com acabamento esmaltado, oferece maior durabilidade e resistência. Ideal para projetos que exigem qualidade superior.',
     imagem: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&h=600&fit=crop',
-    preco_fabrica: 3.50,
-    preco_pronta_entrega: 4.20,
-    disponivel_fabrica: true,
-    disponivel_pronta_entrega: true,
+    preco: 4.20,
+    desconto: 5,
     destaque: false,
-    disponivel: true // ✅ CORREÇÃO: Campo adicionado para controle geral
+    unidade: 'unidade'
   },
   {
     id: '6',
@@ -117,12 +105,9 @@ export const produtos: Produto[] = [
     categoria: '2',
     descricao: 'Tijolo aparente com textura rústica, perfeito para projetos que valorizam o aspecto natural e tradicional da construção.',
     imagem: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=800&h=600&fit=crop',
-    preco_fabrica: 2.80,
-    preco_pronta_entrega: 3.60,
-    disponivel_fabrica: true,
-    disponivel_pronta_entrega: true,
+    preco: 3.60,
     destaque: false,
-    disponivel: true // ✅ CORREÇÃO: Campo adicionado para controle geral
+    unidade: 'unidade'
   }
 ];
 

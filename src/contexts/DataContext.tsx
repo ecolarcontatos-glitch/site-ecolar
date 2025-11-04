@@ -48,15 +48,6 @@ const STORAGE_KEYS = {
   inspiracoes: 'ecolar_inspiracoes'
 };
 
-// ✅ CORREÇÃO: Função para normalizar produtos (garantir campo disponivel)
-const normalizarProdutos = (produtos: Produto[]): Produto[] => {
-  return produtos.map(produto => ({
-    ...produto,
-    // Se disponivel não está definido, usar true por padrão
-    disponivel: produto.disponivel !== undefined ? produto.disponivel : true
-  }));
-};
-
 export function DataProvider({ children }: { children: ReactNode }) {
   const [produtos, setProdutos] = useState<Produto[]>([]);
   const [categorias, setCategorias] = useState<Categoria[]>([]);
@@ -70,10 +61,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
     if (typeof window === 'undefined') return;
 
     try {
-      // Carregar produtos com normalização
+      // Carregar produtos
       const produtosStored = localStorage.getItem(STORAGE_KEYS.produtos);
-      const produtosCarregados = produtosStored ? JSON.parse(produtosStored) : produtosIniciais;
-      setProdutos(normalizarProdutos(produtosCarregados));
+      setProdutos(produtosStored ? JSON.parse(produtosStored) : produtosIniciais);
 
       // Carregar categorias
       const categoriasStored = localStorage.getItem(STORAGE_KEYS.categorias);
@@ -94,8 +84,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
       setIsLoading(false);
     } catch (error) {
       console.error('Erro ao carregar dados:', error);
-      // Em caso de erro, usar dados iniciais normalizados
-      setProdutos(normalizarProdutos(produtosIniciais));
+      // Em caso de erro, usar dados iniciais
+      setProdutos(produtosIniciais);
       setCategorias(categoriasIniciais);
       setPosts(postsIniciais);
       setDepoimentos(depoimentosIniciais);
@@ -108,20 +98,20 @@ export function DataProvider({ children }: { children: ReactNode }) {
     carregarDados();
   }, []);
 
-  // ✅ CORREÇÃO: Função para salvar no localStorage com sincronização forçada
+  // Função para salvar no localStorage com sincronização forçada
   const salvarDados = (key: string, data: any) => {
     if (typeof window === 'undefined') return;
     
     try {
       localStorage.setItem(key, JSON.stringify(data));
-      // ✅ FORÇA sincronização imediata
+      // Força sincronização imediata
       window.dispatchEvent(new Event('storage'));
     } catch (error) {
       console.error('Erro ao salvar dados:', error);
     }
   };
 
-  // ✅ CORREÇÃO: Listener para sincronização entre abas
+  // Listener para sincronização entre abas
   useEffect(() => {
     const handleStorageChange = () => {
       carregarDados();
@@ -135,9 +125,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const adicionarProduto = (produto: Omit<Produto, 'id'>) => {
     const novoProduto = { 
       ...produto, 
-      id: Date.now().toString(),
-      // ✅ CORREÇÃO: Garantir que novos produtos tenham disponivel = true por padrão
-      disponivel: produto.disponivel !== undefined ? produto.disponivel : true
+      id: Date.now().toString()
     };
     const novosProdutos = [...produtos, novoProduto];
     setProdutos(novosProdutos);

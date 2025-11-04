@@ -13,13 +13,11 @@ export interface Produto {
   categoria: string; // ID da categoria
   descricao: string;
   imagem: string;
-  preco_fabrica: number;
-  preco_pronta_entrega: number;
-  disponivel_fabrica: boolean;
-  disponivel_pronta_entrega: boolean;
+  preco: number; // Preço base único
+  desconto?: number; // Desconto em porcentagem (0-100), opcional
   destaque: boolean;
   unidade?: string;
-  disponivel?: boolean; // Campo adicional para controle geral de disponibilidade
+  // Campos removidos: preco_fabrica, preco_pronta_entrega, disponivel_fabrica, disponivel_pronta_entrega, disponivel
 }
 
 export interface Depoimento {

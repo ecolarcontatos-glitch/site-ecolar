@@ -18,9 +18,8 @@ export default function ProdutosPageContent() {
   useEffect(() => {
     let filtered = produtos;
 
-    // FILTRO CRÍTICO: Apenas produtos disponíveis aparecem no site
-    filtered = filtered.filter(produto => produto.disponivel !== false);
-
+    // Todos os produtos são exibidos automaticamente (campo disponível removido)
+    
     // Filtro por categoria
     if (selectedCategory) {
       filtered = filtered.filter(produto => {
@@ -39,14 +38,25 @@ export default function ProdutosPageContent() {
 
     // Ordenação
     switch (sortBy) {
-      case 'menor_preco_fabrica':
-        filtered.sort((a, b) => a.preco_fabrica - b.preco_fabrica);
-        break;
-      case 'maior_preco_pronta':
+      case 'menor_preco':
         filtered.sort((a, b) => {
-          const precoA = a.preco_pronta_entrega || a.preco_fabrica;
-          const precoB = b.preco_pronta_entrega || b.preco_fabrica;
+          const precoA = a.desconto ? a.preco * (1 - a.desconto / 100) : a.preco;
+          const precoB = b.desconto ? b.preco * (1 - b.desconto / 100) : b.preco;
+          return precoA - precoB;
+        });
+        break;
+      case 'maior_preco':
+        filtered.sort((a, b) => {
+          const precoA = a.desconto ? a.preco * (1 - a.desconto / 100) : a.preco;
+          const precoB = b.desconto ? b.preco * (1 - b.desconto / 100) : b.preco;
           return precoB - precoA;
+        });
+        break;
+      case 'desconto':
+        filtered.sort((a, b) => {
+          const descontoA = a.desconto || 0;
+          const descontoB = b.desconto || 0;
+          return descontoB - descontoA;
         });
         break;
       default: // relevancia
@@ -75,7 +85,7 @@ export default function ProdutosPageContent() {
             Catálogo de Produtos
           </h1>
           <p className="font-inter text-lg text-[#6b7280]">
-            Encontre os melhores materiais com dupla opção de preço
+            Encontre os melhores materiais de construção com preços especiais
           </p>
         </div>
 
@@ -120,8 +130,9 @@ export default function ProdutosPageContent() {
                 className="w-full pl-10 pr-4 py-3 border border-[#e5e7eb] rounded-xl font-inter focus:outline-none focus:ring-2 focus:ring-[#7FBA3D] focus:border-transparent appearance-none bg-white"
               >
                 <option value="relevancia">Relevância</option>
-                <option value="menor_preco_fabrica">Menor preço fábrica</option>
-                <option value="maior_preco_pronta">Maior preço pronta entrega</option>
+                <option value="menor_preco">Menor preço</option>
+                <option value="maior_preco">Maior preço</option>
+                <option value="desconto">Maior desconto</option>
               </select>
             </div>
 

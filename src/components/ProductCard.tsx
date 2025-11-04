@@ -12,22 +12,26 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ produto, onAddToCart }: ProductCardProps) {
-  const [selectedModalidade, setSelectedModalidade] = useState<'fabrica' | 'pronta_entrega'>('fabrica');
   const [quantidade, setQuantidade] = useState(1);
   const [isAdding, setIsAdding] = useState(false);
 
-  const precoAtual = selectedModalidade === 'fabrica' 
-    ? produto.preco_fabrica 
-    : (produto.preco_pronta_entrega || produto.preco_fabrica);
+  // Calcular preço com desconto
+  const precoOriginal = produto.preco;
+  const temDesconto = produto.desconto && produto.desconto > 0;
+  const precoComDesconto = temDesconto 
+    ? precoOriginal * (1 - produto.desconto! / 100)
+    : precoOriginal;
+  
+  const precoFinal = precoComDesconto;
 
   const handleAddToCart = async () => {
     setIsAdding(true);
     
     OrcamentoService.adicionarItem({
       produto,
-      modalidade: selectedModalidade,
+      modalidade: 'fabrica', // Modalidade única agora
       quantidade,
-      preco_unitario: precoAtual
+      preco_unitario: precoFinal
     });
 
     // Feedback visual
@@ -56,9 +60,9 @@ export default function ProductCard({ produto, onAddToCart }: ProductCardProps) 
             Destaque
           </div>
         )}
-        {produto.disponivel_pronta_entrega && (
+        {temDesconto && (
           <div className="absolute top-3 right-3 bg-[#7FBA3D] text-white px-3 py-1 rounded-full text-xs font-inter font-semibold">
-            Pronta Entrega
+            -{produto.desconto}%
           </div>
         )}
       </div>
@@ -73,72 +77,67 @@ export default function ProductCard({ produto, onAddToCart }: ProductCardProps) 
           {produto.descricao}
         </p>
 
-        {/* Seleção de Modalidade - Compacta */}
-        <div className="space-y-3">
-          <div className="flex space-x-2">
-            <button
-              onClick={() => setSelectedModalidade('fabrica')}
-              className={`flex-1 py-2.5 px-3 rounded-xl text-sm font-inter font-semibold transition-all duration-200 ${
-                selectedModalidade === 'fabrica'
-                  ? 'bg-[#7FBA3D] text-white shadow-md'
-                  : 'bg-[#f1f5f9] text-[#6b7280] hover:bg-[#e5e7eb]'
-              }`}
-            >
-              Fábrica
-            </button>
-            {produto.disponivel_pronta_entrega && produto.preco_pronta_entrega && (
-              <button
-                onClick={() => setSelectedModalidade('pronta_entrega')}
-                className={`flex-1 py-2.5 px-3 rounded-xl text-sm font-inter font-semibold transition-all duration-200 ${
-                  selectedModalidade === 'pronta_entrega'
-                    ? 'bg-[#C05A2B] text-white shadow-md'
-                    : 'bg-[#f1f5f9] text-[#6b7280] hover:bg-[#e5e7eb]'
-                }`}
-              >
-                Pronta Entrega
-              </button>
-            )}
-          </div>
-
-          {/* Quantidade */}
-          <div className="flex items-center justify-center space-x-3">
-            <label className="text-sm font-inter font-semibold text-[#111827]">
-              Qtd:
-            </label>
-            <input
-              type="number"
-              inputMode="numeric"
-              pattern="[0-9]*"
-              min="1"
-              step="1"
-              value={quantidade}
-              onChange={(e) => setQuantidade(Math.max(1, parseInt(e.target.value) || 1))}
-              className="w-16 px-2 py-1.5 border border-[#e5e7eb] rounded-lg text-sm font-inter text-center focus:outline-none focus:ring-2 focus:ring-[#7FBA3D] focus:border-transparent"
-            />
-          </div>
-
-          {/* Preço Total - Destaque */}
-          <div className="text-center py-2">
-            <div className="text-xs font-inter text-[#6b7280] mb-1">Total:</div>
-            <div className="font-inter font-bold text-[#111827] text-xl">
-              {formatPrice(precoAtual * quantidade)}
+        {/* Preços */}
+        <div className="text-center py-3 mb-4">
+          {temDesconto ? (
+            <div className="space-y-1">
+              <div className="text-sm text-gray-500 line-through">
+                {formatPrice(precoOriginal)}
+              </div>
+              <div className="font-inter font-bold text-[#7FBA3D] text-xl">
+                {formatPrice(precoComDesconto)}
+              </div>
             </div>
-          </div>
-
-          {/* Botão Adicionar - Mais proeminente */}
-          <button
-            onClick={handleAddToCart}
-            disabled={isAdding}
-            className={`w-full flex items-center justify-center space-x-2 py-3.5 px-4 rounded-2xl font-inter font-bold text-base transition-all duration-200 ${
-              isAdding
-                ? 'bg-[#7FBA3D] text-white cursor-not-allowed opacity-80'
-                : 'bg-[#7FBA3D] text-white hover:bg-[#0A3D2E] hover:shadow-lg hover:scale-[1.02]'
-            }`}
-          >
-            <ShoppingCart className="w-5 h-5" />
-            <span>{isAdding ? 'Adicionando...' : 'Adicionar ao orçamento'}</span>
-          </button>
+          ) : (
+            <div className="font-inter font-bold text-[#111827] text-xl">
+              {formatPrice(precoOriginal)}
+            </div>
+          )}
+          {produto.unidade && produto.unidade !== 'unidade' && (
+            <div className="text-xs text-gray-500 mt-1">
+              por {produto.unidade}
+            </div>
+          )}
         </div>
+
+        {/* Quantidade */}
+        <div className="flex items-center justify-center space-x-3 mb-4">
+          <label className="text-sm font-inter font-semibold text-[#111827]">
+            Qtd:
+          </label>
+          <input
+            type="number"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            min="1"
+            step="1"
+            value={quantidade}
+            onChange={(e) => setQuantidade(Math.max(1, parseInt(e.target.value) || 1))}
+            className="w-16 px-2 py-1.5 border border-[#e5e7eb] rounded-lg text-sm font-inter text-center focus:outline-none focus:ring-2 focus:ring-[#7FBA3D] focus:border-transparent"
+          />
+        </div>
+
+        {/* Preço Total */}
+        <div className="text-center py-2 mb-4">
+          <div className="text-xs font-inter text-[#6b7280] mb-1">Total:</div>
+          <div className="font-inter font-bold text-[#111827] text-xl">
+            {formatPrice(precoFinal * quantidade)}
+          </div>
+        </div>
+
+        {/* Botão Adicionar */}
+        <button
+          onClick={handleAddToCart}
+          disabled={isAdding}
+          className={`w-full flex items-center justify-center space-x-2 py-3.5 px-4 rounded-2xl font-inter font-bold text-base transition-all duration-200 ${
+            isAdding
+              ? 'bg-[#7FBA3D] text-white cursor-not-allowed opacity-80'
+              : 'bg-[#7FBA3D] text-white hover:bg-[#0A3D2E] hover:shadow-lg hover:scale-[1.02]'
+          }`}
+        >
+          <ShoppingCart className="w-5 h-5" />
+          <span>{isAdding ? 'Adicionando...' : 'Adicionar ao orçamento'}</span>
+        </button>
       </div>
     </div>
   );

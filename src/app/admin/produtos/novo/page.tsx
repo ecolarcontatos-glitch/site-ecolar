@@ -16,14 +16,11 @@ export default function NovoProduto() {
     nome: '',
     descricao: '',
     imagem: '',
-    categoria: '', // Corrigido para 'categoria' em vez de 'categoria_id'
-    preco_fabrica: '',
-    preco_pronta_entrega: '',
+    categoria: '',
+    preco: '',
+    desconto: '',
     unidade: 'unidade',
-    destaque: false,
-    disponivel: true, // Campo para controle geral de disponibilidade
-    disponivel_fabrica: true,
-    disponivel_pronta_entrega: true
+    destaque: false
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -36,8 +33,14 @@ export default function NovoProduto() {
       return;
     }
 
-    if (!formData.preco_fabrica || !formData.preco_pronta_entrega) {
-      alert('Por favor, preencha os preços.');
+    if (!formData.preco) {
+      alert('Por favor, preencha o preço.');
+      return;
+    }
+
+    // Validar desconto se preenchido
+    if (formData.desconto && (parseFloat(formData.desconto) < 0 || parseFloat(formData.desconto) > 100)) {
+      alert('O desconto deve estar entre 0 e 100%.');
       return;
     }
 
@@ -48,14 +51,11 @@ export default function NovoProduto() {
         nome: formData.nome,
         descricao: formData.descricao,
         imagem: formData.imagem,
-        categoria: formData.categoria, // Corrigido
-        preco_fabrica: parseFloat(formData.preco_fabrica),
-        preco_pronta_entrega: parseFloat(formData.preco_pronta_entrega),
+        categoria: formData.categoria,
+        preco: parseFloat(formData.preco),
+        desconto: formData.desconto ? parseFloat(formData.desconto) : undefined,
         unidade: formData.unidade,
-        destaque: formData.destaque,
-        disponivel: formData.disponivel, // Adicionado
-        disponivel_fabrica: formData.disponivel_fabrica,
-        disponivel_pronta_entrega: formData.disponivel_pronta_entrega
+        destaque: formData.destaque
       });
 
       router.push('/admin/produtos');
@@ -178,20 +178,20 @@ export default function NovoProduto() {
               {/* Preços */}
               <div className="bg-white rounded-2xl p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08)]">
                 <h2 className="font-inter font-semibold text-[#111827] text-lg mb-6">
-                  Preços
+                  Preço e Desconto
                 </h2>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Preço Fábrica (R$) *
+                      Preço (R$) *
                     </label>
                     <input
                       type="number"
                       step="0.01"
                       min="0"
-                      value={formData.preco_fabrica ?? ''}
-                      onChange={(e) => handleChange('preco_fabrica', e.target.value)}
+                      value={formData.preco ?? ''}
+                      onChange={(e) => handleChange('preco', e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#7FBA3D] focus:border-transparent"
                       placeholder="0,00"
                       required
@@ -200,20 +200,38 @@ export default function NovoProduto() {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Preço Pronta Entrega (R$) *
+                      Desconto (%) - Opcional
                     </label>
                     <input
                       type="number"
                       step="0.01"
                       min="0"
-                      value={formData.preco_pronta_entrega ?? ''}
-                      onChange={(e) => handleChange('preco_pronta_entrega', e.target.value)}
+                      max="100"
+                      value={formData.desconto ?? ''}
+                      onChange={(e) => handleChange('desconto', e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#7FBA3D] focus:border-transparent"
-                      placeholder="0,00"
-                      required
+                      placeholder="0"
                     />
+                    <p className="text-xs text-gray-500 mt-1">
+                      Digite um valor entre 0 e 100
+                    </p>
                   </div>
                 </div>
+
+                {/* Preview do preço com desconto */}
+                {formData.preco && formData.desconto && parseFloat(formData.desconto) > 0 && (
+                  <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+                    <p className="text-sm font-medium text-gray-700 mb-1">Preview do preço:</p>
+                    <div className="flex items-center space-x-2">
+                      <span className="text-lg font-bold text-[#7FBA3D]">
+                        R$ {(parseFloat(formData.preco) * (1 - parseFloat(formData.desconto) / 100)).toFixed(2).replace('.', ',')}
+                      </span>
+                      <span className="text-sm text-gray-500 line-through">
+                        R$ {parseFloat(formData.preco).toFixed(2).replace('.', ',')}
+                      </span>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -249,45 +267,6 @@ export default function NovoProduto() {
                     />
                     <label htmlFor="destaque" className="ml-2 block text-sm text-gray-700">
                       Produto em destaque
-                    </label>
-                  </div>
-
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      id="disponivel"
-                      checked={formData.disponivel ?? true}
-                      onChange={(e) => handleChange('disponivel', e.target.checked)}
-                      className="h-4 w-4 text-[#7FBA3D] focus:ring-[#7FBA3D] border-gray-300 rounded"
-                    />
-                    <label htmlFor="disponivel" className="ml-2 block text-sm text-gray-700">
-                      Produto disponível no site
-                    </label>
-                  </div>
-
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      id="disponivel_fabrica"
-                      checked={formData.disponivel_fabrica ?? true}
-                      onChange={(e) => handleChange('disponivel_fabrica', e.target.checked)}
-                      className="h-4 w-4 text-[#7FBA3D] focus:ring-[#7FBA3D] border-gray-300 rounded"
-                    />
-                    <label htmlFor="disponivel_fabrica" className="ml-2 block text-sm text-gray-700">
-                      Disponível direto da fábrica
-                    </label>
-                  </div>
-
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      id="disponivel_pronta_entrega"
-                      checked={formData.disponivel_pronta_entrega ?? true}
-                      onChange={(e) => handleChange('disponivel_pronta_entrega', e.target.checked)}
-                      className="h-4 w-4 text-[#7FBA3D] focus:ring-[#7FBA3D] border-gray-300 rounded"
-                    />
-                    <label htmlFor="disponivel_pronta_entrega" className="ml-2 block text-sm text-gray-700">
-                      Disponível para pronta entrega
                     </label>
                   </div>
                 </div>
