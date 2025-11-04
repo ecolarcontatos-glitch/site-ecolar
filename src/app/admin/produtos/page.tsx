@@ -97,7 +97,7 @@ export default function ProdutosPage() {
                       Categoria
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Preços
+                      Preço
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Status
@@ -110,6 +110,10 @@ export default function ProdutosPage() {
                 <tbody className="bg-white divide-y divide-gray-200">
                   {filteredProdutos.map((produto) => {
                     const categoria = getCategoriaById(produto.categoria);
+                    const preco = Number(produto?.preco) || 0;
+                    const desconto = Number(produto?.desconto) || 0;
+                    const precoFinal = desconto > 0 ? preco * (1 - desconto / 100) : preco;
+                    
                     return (
                       <tr key={produto.id} className="hover:bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap">
@@ -138,14 +142,21 @@ export default function ProdutosPage() {
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          <div>Fábrica: R$ {(() => {
-                            const preco = Number(produto.preco_fabrica) || 0;
-                            return preco.toFixed(2);
-                          })()}</div>
-                          <div>Pronta: R$ {(() => {
-                            const preco = Number(produto.preco_pronta_entrega) || 0;
-                            return preco.toFixed(2);
-                          })()}</div>
+                          <div className="space-y-1">
+                            <div className="font-medium">
+                              Preço base: R$ {preco.toFixed(2).replace('.', ',')}
+                            </div>
+                            {desconto > 0 && (
+                              <>
+                                <div className="text-xs text-gray-500">
+                                  Desconto: {desconto.toFixed(1)}%
+                                </div>
+                                <div className="text-sm font-bold text-[#7FBA3D]">
+                                  Valor final: R$ {precoFinal.toFixed(2).replace('.', ',')}
+                                </div>
+                              </>
+                            )}
+                          </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex flex-col space-y-1">

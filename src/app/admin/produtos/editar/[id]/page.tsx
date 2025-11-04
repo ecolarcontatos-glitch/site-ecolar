@@ -32,11 +32,11 @@ export default function EditarProduto() {
         nome: produto.nome,
         descricao: produto.descricao,
         categoria: produto.categoria,
-        preco: produto.preco.toString(),
-        desconto: produto.desconto ? produto.desconto.toString() : '',
+        preco: (Number(produto.preco) || 0).toString(),
+        desconto: produto.desconto ? (Number(produto.desconto) || 0).toString() : '',
         unidade: produto.unidade || 'unidade',
         imagem: produto.imagem,
-        destaque: produto.destaque
+        destaque: produto.destaque || false
       });
     }
   }, [produtos, params.id]);
