@@ -22,7 +22,9 @@ export default function ProductCard({ produto, onAddToCart }: ProductCardProps) 
     ? precoOriginal * (1 - produto.desconto! / 100)
     : precoOriginal;
   
-  const precoFinal = precoComDesconto;
+  // Preço final considerando quantidade
+  const precoFinalUnitario = precoComDesconto;
+  const precoFinalTotal = precoFinalUnitario * quantidade;
 
   const handleAddToCart = async () => {
     setIsAdding(true);
@@ -31,7 +33,7 @@ export default function ProductCard({ produto, onAddToCart }: ProductCardProps) 
       produto,
       modalidade: 'fabrica', // Modalidade única agora
       quantidade,
-      preco_unitario: precoFinal
+      preco_unitario: precoFinalUnitario
     });
 
     // Feedback visual
@@ -77,29 +79,6 @@ export default function ProductCard({ produto, onAddToCart }: ProductCardProps) 
           {produto.descricao}
         </p>
 
-        {/* Preços */}
-        <div className="text-center py-3 mb-4">
-          {temDesconto ? (
-            <div className="space-y-1">
-              <div className="text-sm text-gray-500 line-through">
-                {formatPrice(precoOriginal)}
-              </div>
-              <div className="font-inter font-bold text-[#7FBA3D] text-xl">
-                {formatPrice(precoComDesconto)}
-              </div>
-            </div>
-          ) : (
-            <div className="font-inter font-bold text-[#111827] text-xl">
-              {formatPrice(precoOriginal)}
-            </div>
-          )}
-          {produto.unidade && produto.unidade !== 'unidade' && (
-            <div className="text-xs text-gray-500 mt-1">
-              por {produto.unidade}
-            </div>
-          )}
-        </div>
-
         {/* Quantidade */}
         <div className="flex items-center justify-center space-x-3 mb-4">
           <label className="text-sm font-inter font-semibold text-[#111827]">
@@ -117,12 +96,27 @@ export default function ProductCard({ produto, onAddToCart }: ProductCardProps) 
           />
         </div>
 
-        {/* Preço Total */}
-        <div className="text-center py-2 mb-4">
-          <div className="text-xs font-inter text-[#6b7280] mb-1">Total:</div>
-          <div className="font-inter font-bold text-[#111827] text-xl">
-            {formatPrice(precoFinal * quantidade)}
-          </div>
+        {/* Preço (atualizado automaticamente com quantidade) */}
+        <div className="text-center py-3 mb-4">
+          {temDesconto ? (
+            <div className="space-y-1">
+              <div className="text-sm text-gray-500 line-through">
+                {formatPrice(precoOriginal * quantidade)}
+              </div>
+              <div className="font-inter font-bold text-[#7FBA3D] text-xl">
+                {formatPrice(precoFinalTotal)}
+              </div>
+            </div>
+          ) : (
+            <div className="font-inter font-bold text-[#111827] text-xl">
+              {formatPrice(precoFinalTotal)}
+            </div>
+          )}
+          {produto.unidade && produto.unidade !== 'unidade' && (
+            <div className="text-xs text-gray-500 mt-1">
+              por {produto.unidade}
+            </div>
+          )}
         </div>
 
         {/* Botão Adicionar */}
