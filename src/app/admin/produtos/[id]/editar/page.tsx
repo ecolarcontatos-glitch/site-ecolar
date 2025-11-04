@@ -19,13 +19,10 @@ export default function EditarProduto() {
     descricao: '',
     imagem: '',
     categoria: '',
-    preco_fabrica: '',
-    preco_pronta_entrega: '',
+    preco: '',
+    desconto: '',
     unidade: 'unidade',
-    destaque: false,
-    disponivel: true,
-    disponivel_fabrica: true,
-    disponivel_pronta_entrega: true
+    destaque: false
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -40,13 +37,10 @@ export default function EditarProduto() {
         descricao: produtoEncontrado.descricao || '',
         imagem: produtoEncontrado.imagem || '',
         categoria: produtoEncontrado.categoria || '',
-        preco_fabrica: produtoEncontrado.preco_fabrica?.toString() || '',
-        preco_pronta_entrega: produtoEncontrado.preco_pronta_entrega?.toString() || '',
+        preco: produtoEncontrado.preco?.toString() || '',
+        desconto: produtoEncontrado.desconto?.toString() || '',
         unidade: produtoEncontrado.unidade || 'unidade',
-        destaque: produtoEncontrado.destaque || false,
-        disponivel: produtoEncontrado.disponivel !== false,
-        disponivel_fabrica: produtoEncontrado.disponivel_fabrica !== false,
-        disponivel_pronta_entrega: produtoEncontrado.disponivel_pronta_entrega !== false
+        destaque: produtoEncontrado.destaque || false
       });
     }
   }, [id, produtos]);
@@ -59,8 +53,14 @@ export default function EditarProduto() {
       return;
     }
 
-    if (!formData.preco_fabrica || !formData.preco_pronta_entrega) {
-      alert('Por favor, preencha os preços.');
+    if (!formData.preco) {
+      alert('Por favor, preencha o preço.');
+      return;
+    }
+
+    // Validar desconto se preenchido
+    if (formData.desconto && (parseFloat(formData.desconto) < 0 || parseFloat(formData.desconto) > 100)) {
+      alert('O desconto deve estar entre 0 e 100%.');
       return;
     }
 
@@ -72,13 +72,10 @@ export default function EditarProduto() {
         descricao: formData.descricao,
         imagem: formData.imagem,
         categoria: formData.categoria,
-        preco_fabrica: parseFloat(formData.preco_fabrica),
-        preco_pronta_entrega: parseFloat(formData.preco_pronta_entrega),
+        preco: parseFloat(formData.preco),
+        desconto: formData.desconto ? parseFloat(formData.desconto) : 0,
         unidade: formData.unidade,
-        destaque: formData.destaque,
-        disponivel: formData.disponivel,
-        disponivel_fabrica: formData.disponivel_fabrica,
-        disponivel_pronta_entrega: formData.disponivel_pronta_entrega
+        destaque: formData.destaque
       });
 
       router.push('/admin/produtos');
@@ -93,6 +90,11 @@ export default function EditarProduto() {
   const handleChange = (field: string, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
+
+  // Calcular preço final com desconto
+  const precoFinal = formData.preco && formData.desconto 
+    ? parseFloat(formData.preco) * (1 - parseFloat(formData.desconto) / 100)
+    : parseFloat(formData.preco) || 0;
 
   if (!produto) {
     return (
@@ -214,20 +216,20 @@ export default function EditarProduto() {
               {/* Preços */}
               <div className="bg-white rounded-2xl p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08)]">
                 <h2 className="font-inter font-semibold text-[#111827] text-lg mb-6">
-                  Preços
+                  Preço
                 </h2>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Preço Fábrica (R$) *
+                      Preço (R$) *
                     </label>
                     <input
                       type="number"
                       step="0.01"
                       min="0"
-                      value={formData.preco_fabrica ?? ''}
-                      onChange={(e) => handleChange('preco_fabrica', e.target.value)}
+                      value={formData.preco ?? ''}
+                      onChange={(e) => handleChange('preco', e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#7FBA3D] focus:border-transparent"
                       placeholder="0,00"
                       required
@@ -236,20 +238,39 @@ export default function EditarProduto() {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Preço Pronta Entrega (R$) *
+                      Desconto (%)
                     </label>
                     <input
                       type="number"
                       step="0.01"
                       min="0"
-                      value={formData.preco_pronta_entrega ?? ''}
-                      onChange={(e) => handleChange('preco_pronta_entrega', e.target.value)}
+                      max="100"
+                      value={formData.desconto ?? ''}
+                      onChange={(e) => handleChange('desconto', e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#7FBA3D] focus:border-transparent"
-                      placeholder="0,00"
-                      required
+                      placeholder="0"
                     />
                   </div>
                 </div>
+
+                {/* Preview do preço final */}
+                {formData.preco && (
+                  <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+                    <div className="text-sm text-gray-600">
+                      <span>Preço base: R$ {parseFloat(formData.preco || '0').toFixed(2)}</span>
+                      {formData.desconto && parseFloat(formData.desconto) > 0 && (
+                        <>
+                          <span className="mx-2">•</span>
+                          <span>Desconto: {formData.desconto}%</span>
+                          <span className="mx-2">•</span>
+                          <span className="font-semibold text-[#7FBA3D]">
+                            Preço final: R$ {precoFinal.toFixed(2)}
+                          </span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -285,45 +306,6 @@ export default function EditarProduto() {
                     />
                     <label htmlFor="destaque" className="ml-2 block text-sm text-gray-700">
                       Produto em destaque
-                    </label>
-                  </div>
-
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      id="disponivel"
-                      checked={formData.disponivel ?? true}
-                      onChange={(e) => handleChange('disponivel', e.target.checked)}
-                      className="h-4 w-4 text-[#7FBA3D] focus:ring-[#7FBA3D] border-gray-300 rounded"
-                    />
-                    <label htmlFor="disponivel" className="ml-2 block text-sm text-gray-700">
-                      Produto disponível no site
-                    </label>
-                  </div>
-
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      id="disponivel_fabrica"
-                      checked={formData.disponivel_fabrica ?? true}
-                      onChange={(e) => handleChange('disponivel_fabrica', e.target.checked)}
-                      className="h-4 w-4 text-[#7FBA3D] focus:ring-[#7FBA3D] border-gray-300 rounded"
-                    />
-                    <label htmlFor="disponivel_fabrica" className="ml-2 block text-sm text-gray-700">
-                      Disponível direto da fábrica
-                    </label>
-                  </div>
-
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      id="disponivel_pronta_entrega"
-                      checked={formData.disponivel_pronta_entrega ?? true}
-                      onChange={(e) => handleChange('disponivel_pronta_entrega', e.target.checked)}
-                      className="h-4 w-4 text-[#7FBA3D] focus:ring-[#7FBA3D] border-gray-300 rounded"
-                    />
-                    <label htmlFor="disponivel_pronta_entrega" className="ml-2 block text-sm text-gray-700">
-                      Disponível para pronta entrega
                     </label>
                   </div>
                 </div>
