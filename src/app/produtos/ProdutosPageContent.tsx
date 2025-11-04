@@ -40,22 +40,30 @@ export default function ProdutosPageContent() {
     switch (sortBy) {
       case 'menor_preco':
         filtered.sort((a, b) => {
-          const precoA = a.desconto ? a.preco * (1 - a.desconto / 100) : a.preco;
-          const precoB = b.desconto ? b.preco * (1 - b.desconto / 100) : b.preco;
+          const precoA = typeof a.preco === 'number' && typeof a.desconto === 'number' && a.desconto > 0 
+            ? a.preco * (1 - a.desconto / 100) 
+            : (typeof a.preco === 'number' ? a.preco : 0);
+          const precoB = typeof b.preco === 'number' && typeof b.desconto === 'number' && b.desconto > 0 
+            ? b.preco * (1 - b.desconto / 100) 
+            : (typeof b.preco === 'number' ? b.preco : 0);
           return precoA - precoB;
         });
         break;
       case 'maior_preco':
         filtered.sort((a, b) => {
-          const precoA = a.desconto ? a.preco * (1 - a.desconto / 100) : a.preco;
-          const precoB = b.desconto ? b.preco * (1 - b.desconto / 100) : b.preco;
+          const precoA = typeof a.preco === 'number' && typeof a.desconto === 'number' && a.desconto > 0 
+            ? a.preco * (1 - a.desconto / 100) 
+            : (typeof a.preco === 'number' ? a.preco : 0);
+          const precoB = typeof b.preco === 'number' && typeof b.desconto === 'number' && b.desconto > 0 
+            ? b.preco * (1 - b.desconto / 100) 
+            : (typeof b.preco === 'number' ? b.preco : 0);
           return precoB - precoA;
         });
         break;
       case 'desconto':
         filtered.sort((a, b) => {
-          const descontoA = a.desconto || 0;
-          const descontoB = b.desconto || 0;
+          const descontoA = typeof a.desconto === 'number' ? a.desconto : 0;
+          const descontoB = typeof b.desconto === 'number' ? b.desconto : 0;
           return descontoB - descontoA;
         });
         break;

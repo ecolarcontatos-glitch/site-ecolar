@@ -74,7 +74,9 @@ export class OrcamentoService {
 
   static getTotal(): number {
     return this.getItens().reduce((total, item) => {
-      return total + (item.preco_unitario * item.quantidade);
+      const precoUnitario = typeof item.preco_unitario === 'number' ? item.preco_unitario : 0;
+      const quantidade = typeof item.quantidade === 'number' ? item.quantidade : 0;
+      return total + (precoUnitario * quantidade);
     }, 0);
   }
 
@@ -86,11 +88,13 @@ export class OrcamentoService {
     
     itens.forEach(item => {
       const modalidadeTexto = item.modalidade === 'fabrica' ? 'Fábrica' : 'Pronta Entrega';
-      const subtotal = item.preco_unitario * item.quantidade;
+      const precoUnitario = typeof item.preco_unitario === 'number' ? item.preco_unitario : 0;
+      const quantidade = typeof item.quantidade === 'number' ? item.quantidade : 0;
+      const subtotal = precoUnitario * quantidade;
       
       mensagem += `- ${item.produto.nome}%0A`;
       mensagem += `  Modalidade: ${modalidadeTexto}%0A`;
-      mensagem += `  Qtd: ${item.quantidade} — Unit: R$ ${item.preco_unitario.toFixed(2)} — Sub: R$ ${subtotal.toFixed(2)}%0A%0A`;
+      mensagem += `  Qtd: ${quantidade} — Unit: R$ ${precoUnitario.toFixed(2)} — Sub: R$ ${subtotal.toFixed(2)}%0A%0A`;
     });
     
     mensagem += `*Total: R$ ${total.toFixed(2)}*%0A%0A`;
@@ -105,9 +109,10 @@ export class OrcamentoService {
   }
 }
 
-export const formatPrice = (price: number): string => {
+export const formatPrice = (price: number | undefined | null): string => {
+  const validPrice = typeof price === 'number' ? price : 0;
   return new Intl.NumberFormat('pt-BR', {
     style: 'currency',
     currency: 'BRL'
-  }).format(price);
+  }).format(validPrice);
 };

@@ -15,11 +15,12 @@ export default function ProductCard({ produto, onAddToCart }: ProductCardProps) 
   const [quantidade, setQuantidade] = useState(1);
   const [isAdding, setIsAdding] = useState(false);
 
-  // Calcular preço com desconto
-  const precoOriginal = produto.preco;
-  const temDesconto = produto.desconto && produto.desconto > 0;
+  // Calcular preço com desconto - com verificações de segurança
+  const precoOriginal = typeof produto.preco === 'number' ? produto.preco : 0;
+  const desconto = typeof produto.desconto === 'number' ? produto.desconto : 0;
+  const temDesconto = desconto > 0;
   const precoComDesconto = temDesconto 
-    ? precoOriginal * (1 - produto.desconto! / 100)
+    ? precoOriginal * (1 - desconto / 100)
     : precoOriginal;
   
   // Preço final considerando quantidade
@@ -64,7 +65,7 @@ export default function ProductCard({ produto, onAddToCart }: ProductCardProps) 
         )}
         {temDesconto && (
           <div className="absolute top-3 right-3 bg-[#7FBA3D] text-white px-3 py-1 rounded-full text-xs font-inter font-semibold">
-            -{produto.desconto}%
+            -{desconto}%
           </div>
         )}
       </div>
