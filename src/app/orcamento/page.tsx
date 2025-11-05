@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Trash2, Plus, Minus, MessageCircle, ShoppingCart, ArrowLeft } from 'lucide-react';
-import { OrcamentoService, formatPrice } from '@/lib/orcamento';
-import { ItemOrcamento } from '@/lib/types';
+import { formatPrice, OrcamentoService } from '@/lib/orcamento';
+import { ItemOrcamento } from '@/lib/orcamento';
 import { config } from '@/lib/data';
 
 export default function OrcamentoPage() {
@@ -15,8 +15,13 @@ export default function OrcamentoPage() {
 
   useEffect(() => {
     const loadItens = () => {
-      const itensOrcamento = OrcamentoService.getItens();
-      setItens(itensOrcamento);
+      try {
+        const itensOrcamento = OrcamentoService.getItens();
+        setItens(itensOrcamento);
+      } catch (error) {
+        console.error('Erro ao carregar orçamento:', error);
+        setItens([]);
+      }
       setIsLoading(false);
     };
 
@@ -24,13 +29,17 @@ export default function OrcamentoPage() {
     
     // Atualizar quando localStorage mudar
     const handleStorageChange = () => loadItens();
+    const handleOrcamentoUpdate = () => loadItens();
+    
     window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('orcamentoUpdated', handleOrcamentoUpdate);
     
     // Verificar mudanças periodicamente
     const interval = setInterval(loadItens, 1000);
     
     return () => {
       window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('orcamentoUpdated', handleOrcamentoUpdate);
       clearInterval(interval);
     };
   }, []);
@@ -42,12 +51,8 @@ export default function OrcamentoPage() {
 
   const atualizarQuantidade = (produtoId: string, modalidade: 'fabrica' | 'pronta_entrega', novaQuantidade: number) => {
     if (novaQuantidade < 1) return;
+    
     OrcamentoService.atualizarQuantidade(produtoId, modalidade, novaQuantidade);
-    setItens(OrcamentoService.getItens());
-  };
-
-  const alterarModalidade = (produtoId: string, modalidadeAtual: 'fabrica' | 'pronta_entrega', novaModalidade: 'fabrica' | 'pronta_entrega') => {
-    OrcamentoService.atualizarModalidade(produtoId, modalidadeAtual, novaModalidade);
     setItens(OrcamentoService.getItens());
   };
 
@@ -56,12 +61,48 @@ export default function OrcamentoPage() {
     setItens([]);
   };
 
+  const calcularPrecoFinal = (item: ItemOrcamento) => {
+    // O preço já vem calculado com desconto no preco_unitario
+    return item.preco_unitario;
+  };
+
+  const calcularTotal = () => {
+    return OrcamentoService.getTotal();
+  };
+
   const finalizarOrcamento = () => {
-    const link = OrcamentoService.gerarLinkWhatsApp(config.whatsapp, observacoes);
+    const total = calcularTotal();
+    const totalItens = OrcamentoService.getTotalItens();
+    
+    let mensagem = `🛒 *ORÇAMENTO ECOLAR*\n\n`;
+    mensagem += `📋 *Itens (${totalItens}):*\n`;
+    
+    itens.forEach((item, index) => {
+      const precoFinal = calcularPrecoFinal(item);
+      const subtotal = precoFinal * item.quantidade;
+      const modalidadeTexto = item.modalidade === 'fabrica' ? 'Fábrica' : 'Pronta Entrega';
+      
+      mensagem += `\n${index + 1}. *${item.produto.nome}*\n`;
+      mensagem += `   Modalidade: ${modalidadeTexto}\n`;
+      mensagem += `   Quantidade: ${item.quantidade}\n`;
+      mensagem += `   Preço unitário: ${formatPrice(precoFinal)}\n`;
+      mensagem += `   Subtotal: ${formatPrice(subtotal)}\n`;
+    });
+    
+    mensagem += `\n💰 *TOTAL: ${formatPrice(total)}*\n`;
+    
+    if (observacoes.trim()) {
+      mensagem += `\n📝 *Observações:*\n${observacoes}\n`;
+    }
+    
+    mensagem += `\n---\n🌱 Orçamento gerado pelo site ECOLAR`;
+    
+    const link = `https://wa.me/${config.whatsapp}?text=${encodeURIComponent(mensagem)}`;
     window.open(link, '_blank');
   };
 
-  const total = OrcamentoService.getTotal();
+  const total = calcularTotal();
+  const totalItens = OrcamentoService.getTotalItens();
 
   if (isLoading) {
     return (
@@ -83,7 +124,7 @@ export default function OrcamentoPage() {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="font-inter font-bold text-3xl md:text-4xl text-[#111827] mb-2">
-              Seu Orçamento
+              Itens do Orçamento ({totalItens})
             </h1>
             <p className="font-inter text-lg text-[#6b7280]">
               Revise os itens e finalize pelo WhatsApp
@@ -126,7 +167,7 @@ export default function OrcamentoPage() {
                 <div className="p-6 border-b border-[#f1f5f9]">
                   <div className="flex items-center justify-between">
                     <h2 className="font-inter font-semibold text-[#111827] text-xl">
-                      Itens do Orçamento ({itens.length})
+                      Produtos Selecionados
                     </h2>
                     <button
                       onClick={limparOrcamento}
@@ -138,17 +179,17 @@ export default function OrcamentoPage() {
                 </div>
 
                 <div className="divide-y divide-[#f1f5f9]">
-                  {itens.map((item, index) => {
-                    // Proteção contra imagens undefined - usar imagem ou fallback
-                    const imagemSrc = (item.produto.imagens && item.produto.imagens.length > 0) 
-                      ? item.produto.imagens[0] 
-                      : (item.produto.imagem || '/placeholder.webp');
+                  {itens.map((item) => {
+                    const precoFinal = calcularPrecoFinal(item);
+                    const imagemSrc = item.produto.imagem || '/placeholder.webp';
+                    const modalidadeTexto = item.modalidade === 'fabrica' ? 'Fábrica' : 'Pronta Entrega';
+                    const subtotal = precoFinal * item.quantidade;
 
                     return (
                       <div key={`${item.produto.id}-${item.modalidade}`} className="p-6">
-                        <div className="flex flex-col md:flex-row gap-4">
+                        <div className="flex gap-4">
                           {/* Imagem do Produto */}
-                          <div className="relative w-full md:w-24 h-24 flex-shrink-0">
+                          <div className="relative w-20 h-20 flex-shrink-0">
                             <Image
                               src={imagemSrc}
                               alt={item.produto.nome}
@@ -159,34 +200,25 @@ export default function OrcamentoPage() {
 
                           {/* Detalhes do Produto */}
                           <div className="flex-1">
-                            <h3 className="font-inter font-semibold text-[#111827] text-lg mb-2">
+                            <h3 className="font-inter font-semibold text-[#111827] text-lg mb-1">
                               {item.produto.nome}
                             </h3>
                             
                             {/* Modalidade */}
-                            <div className="flex flex-wrap gap-2 mb-4">
-                              <button
-                                onClick={() => alterarModalidade(item.produto.id, item.modalidade, 'fabrica')}
-                                className={`px-3 py-1 rounded-lg text-sm font-inter font-medium transition-colors ${
-                                  item.modalidade === 'fabrica'
-                                    ? 'bg-[#7FBA3D] text-white'
-                                    : 'bg-[#f1f5f9] text-[#6b7280] hover:bg-[#e5e7eb]'
-                                }`}
-                              >
-                                Fábrica - {formatPrice(item.produto.preco_fabrica)}
-                              </button>
-                              {item.produto.pronta_entrega_disponivel && item.produto.preco_pronta_entrega && (
-                                <button
-                                  onClick={() => alterarModalidade(item.produto.id, item.modalidade, 'pronta_entrega')}
-                                  className={`px-3 py-1 rounded-lg text-sm font-inter font-medium transition-colors ${
-                                    item.modalidade === 'pronta_entrega'
-                                      ? 'bg-[#C05A2B] text-white'
-                                      : 'bg-[#f1f5f9] text-[#6b7280] hover:bg-[#e5e7eb]'
-                                  }`}
-                                >
-                                  Pronta Entrega - {formatPrice(item.produto.preco_pronta_entrega)}
-                                </button>
-                              )}
+                            <div className="mb-2">
+                              <span className="inline-block bg-[#f1f5f9] text-[#6b7280] px-2 py-1 rounded-lg text-xs font-inter font-medium">
+                                {modalidadeTexto}
+                              </span>
+                            </div>
+                            
+                            {/* Preço */}
+                            <div className="mb-4">
+                              <span className="font-inter font-bold text-[#111827] text-lg">
+                                {formatPrice(precoFinal)}
+                              </span>
+                              <span className="text-[#6b7280] text-sm font-inter ml-1">
+                                por unidade
+                              </span>
                             </div>
 
                             {/* Controles */}
@@ -210,14 +242,11 @@ export default function OrcamentoPage() {
                                 </button>
                               </div>
 
-                              {/* Preço e Remover */}
+                              {/* Subtotal e Remover */}
                               <div className="flex items-center space-x-4">
                                 <div className="text-right">
                                   <div className="font-inter font-semibold text-[#111827] text-lg">
-                                    {formatPrice(item.preco_unitario * item.quantidade)}
-                                  </div>
-                                  <div className="text-sm text-[#6b7280] font-inter">
-                                    {formatPrice(item.preco_unitario)} cada
+                                    {formatPrice(subtotal)}
                                   </div>
                                 </div>
                                 <button
@@ -237,7 +266,7 @@ export default function OrcamentoPage() {
               </div>
             </div>
 
-            {/* Resumo */}
+            {/* Resumo do Orçamento */}
             <div className="lg:col-span-1">
               <div className="bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] p-6 sticky top-24">
                 <h2 className="font-inter font-semibold text-[#111827] text-xl mb-6">
@@ -250,7 +279,7 @@ export default function OrcamentoPage() {
                     <span className="font-inter font-semibold text-[#111827] text-lg">
                       Total:
                     </span>
-                    <span className="font-inter font-bold text-[#111827] text-2xl">
+                    <span className="font-inter font-bold text-[#7FBA3D] text-2xl">
                       {formatPrice(total)}
                     </span>
                   </div>
@@ -259,7 +288,7 @@ export default function OrcamentoPage() {
                 {/* Observações */}
                 <div className="mb-6">
                   <label className="block font-inter font-medium text-[#111827] mb-2">
-                    Cidade/Observações (opcional)
+                    Observações (opcional)
                   </label>
                   <textarea
                     value={observacoes}
@@ -276,7 +305,7 @@ export default function OrcamentoPage() {
                   className="w-full flex items-center justify-center space-x-2 bg-[#7FBA3D] text-white py-4 rounded-2xl hover:bg-[#0A3D2E] transition-colors duration-200 font-inter font-semibold text-lg shadow-lg hover:shadow-xl"
                 >
                   <MessageCircle className="w-5 h-5" />
-                  <span>Fechar orçamento pelo WhatsApp</span>
+                  <span>Enviar Orçamento via WhatsApp</span>
                 </button>
 
                 <p className="text-xs text-[#6b7280] font-inter text-center mt-3">

@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { Produto } from '@/lib/types';
-import { formatPrice } from '@/lib/orcamento';
-import { ShoppingCart } from 'lucide-react';
+import { formatPrice, OrcamentoService } from '@/lib/orcamento';
+import { ShoppingCart, Check } from 'lucide-react';
 
 interface ProductCardProps {
   produto: Produto;
@@ -14,6 +14,7 @@ interface ProductCardProps {
 export default function ProductCard({ produto, onAddToCart }: ProductCardProps) {
   const [quantidade, setQuantidade] = useState(1);
   const [isAdding, setIsAdding] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   // Calcular preço com desconto - com verificações de segurança
   const precoOriginal = typeof produto.preco === 'number' ? produto.preco : 0;
@@ -30,19 +31,30 @@ export default function ProductCard({ produto, onAddToCart }: ProductCardProps) 
   const handleAddToCart = async () => {
     setIsAdding(true);
     
-    // Simular adição ao carrinho/orçamento
-    // Como OrcamentoService não existe, vamos apenas simular o comportamento
-    console.log('Item adicionado ao orçamento:', {
-      produto,
-      quantidade,
-      preco_unitario: precoFinalUnitario
-    });
+    try {
+      // Adicionar ao orçamento usando o OrcamentoService
+      // Como não temos mais modalidades separadas, usamos 'pronta_entrega' como padrão
+      OrcamentoService.adicionarItem(produto, 'pronta_entrega', quantidade);
 
-    // Feedback visual
-    setTimeout(() => {
-      setIsAdding(false);
+      // Feedback visual de sucesso
+      setShowSuccess(true);
+      
+      // Disparar evento customizado para atualizar o contador no header
+      window.dispatchEvent(new CustomEvent('orcamentoUpdated'));
+      
+      // Callback opcional
       onAddToCart?.();
-    }, 500);
+
+      // Resetar estados após um tempo
+      setTimeout(() => {
+        setShowSuccess(false);
+        setIsAdding(false);
+      }, 2000);
+
+    } catch (error) {
+      console.error('Erro ao adicionar produto ao orçamento:', error);
+      setIsAdding(false);
+    }
   };
 
   // Proteção contra imagem undefined - compatibilidade entre painel e site
@@ -126,14 +138,34 @@ export default function ProductCard({ produto, onAddToCart }: ProductCardProps) 
           onClick={handleAddToCart}
           disabled={isAdding}
           className={`w-full flex items-center justify-center space-x-2 py-3.5 px-4 rounded-2xl font-inter font-bold text-base transition-all duration-200 ${
-            isAdding
+            showSuccess
+              ? 'bg-green-500 text-white'
+              : isAdding
               ? 'bg-[#7FBA3D] text-white cursor-not-allowed opacity-80'
               : 'bg-[#7FBA3D] text-white hover:bg-[#0A3D2E] hover:shadow-lg hover:scale-[1.02]'
           }`}
         >
-          <ShoppingCart className="w-5 h-5" />
-          <span>{isAdding ? 'Adicionando...' : 'Adicionar ao orçamento'}</span>
+          {showSuccess ? (
+            <>
+              <Check className="w-5 h-5" />
+              <span>Adicionado!</span>
+            </>
+          ) : (
+            <>
+              <ShoppingCart className="w-5 h-5" />
+              <span>{isAdding ? 'Adicionando...' : 'Adicionar ao orçamento'}</span>
+            </>
+          )}
         </button>
+
+        {/* Mensagem de confirmação */}
+        {showSuccess && (
+          <div className="mt-2 text-center">
+            <p className="text-sm text-green-600 font-inter font-medium">
+              Produto adicionado ao orçamento!
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

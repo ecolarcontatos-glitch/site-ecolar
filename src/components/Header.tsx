@@ -3,11 +3,12 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
-import { Menu, X, Calculator } from 'lucide-react';
+import { Menu, X, ShoppingCart } from 'lucide-react';
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [logoUrl, setLogoUrl] = useState('https://k6hrqrxuu8obbfwn.public.blob.vercel-storage.com/temp/fa155124-8442-4fa3-aede-ff541b4163a7.png');
+  const [cartCount, setCartCount] = useState(0);
 
   // Carregar logo do localStorage
   useEffect(() => {
@@ -24,6 +25,53 @@ export default function Header() {
         }
       }
     }
+  }, []);
+
+  // Carregar e monitorar contador do carrinho
+  useEffect(() => {
+    const updateCartCount = () => {
+      if (typeof window !== 'undefined') {
+        const storedItems = localStorage.getItem('ecolar_orcamento');
+        if (storedItems) {
+          try {
+            const items = JSON.parse(storedItems);
+            // Contar total de itens (soma das quantidades)
+            const totalItems = Array.isArray(items) 
+              ? items.reduce((total, item) => total + (item.quantidade || 1), 0)
+              : 0;
+            setCartCount(totalItems);
+          } catch (error) {
+            console.error('Erro ao carregar itens do orçamento:', error);
+            setCartCount(0);
+          }
+        } else {
+          setCartCount(0);
+        }
+      }
+    };
+
+    // Carregar contador inicial
+    updateCartCount();
+
+    // Monitorar mudanças no localStorage
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'ecolar_orcamento') {
+        updateCartCount();
+      }
+    };
+
+    // Monitorar evento customizado disparado pelo ProductCard
+    const handleOrcamentoUpdated = () => {
+      updateCartCount();
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('orcamentoUpdated', handleOrcamentoUpdated);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('orcamentoUpdated', handleOrcamentoUpdated);
+    };
   }, []);
 
   return (
@@ -80,10 +128,15 @@ export default function Header() {
           <div className="hidden md:flex items-center">
             <Link
               href="/orcamento"
-              className="flex items-center space-x-2 bg-[#7FBA3D] text-white px-4 py-2 rounded-xl hover:bg-[#0A3D2E] transition-colors duration-200 font-inter font-medium"
+              className="relative flex items-center space-x-2 bg-[#7FBA3D] text-white px-4 py-2 rounded-xl hover:bg-[#0A3D2E] transition-colors duration-200 font-inter font-medium"
             >
-              <Calculator className="w-4 h-4" />
+              <ShoppingCart className="w-4 h-4" />
               <span>Orçamento</span>
+              {cartCount > 0 && (
+                <div className="absolute -top-1 -right-1 w-4 h-4 bg-white text-[#7FBA3D] rounded-full flex items-center justify-center text-[11px] font-bold shadow-md">
+                  {cartCount}
+                </div>
+              )}
             </Link>
           </div>
 
@@ -138,11 +191,16 @@ export default function Header() {
               <div className="pt-4 border-t border-gray-200">
                 <Link
                   href="/orcamento"
-                  className="flex items-center justify-center space-x-2 bg-[#7FBA3D] text-white px-4 py-2 rounded-xl hover:bg-[#0A3D2E] transition-colors duration-200 font-inter font-medium"
+                  className="relative flex items-center justify-center space-x-2 bg-[#7FBA3D] text-white px-4 py-2 rounded-xl hover:bg-[#0A3D2E] transition-colors duration-200 font-inter font-medium"
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  <Calculator className="w-4 h-4" />
+                  <ShoppingCart className="w-4 h-4" />
                   <span>Orçamento</span>
+                  {cartCount > 0 && (
+                    <div className="absolute -top-1 -right-1 w-4 h-4 bg-white text-[#7FBA3D] rounded-full flex items-center justify-center text-[11px] font-bold shadow-md">
+                      {cartCount}
+                    </div>
+                  )}
                 </Link>
               </div>
             </nav>
