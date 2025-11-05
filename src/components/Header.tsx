@@ -133,7 +133,7 @@ export default function Header() {
               <ShoppingCart className="w-4 h-4" />
               <span>Orçamento</span>
               {cartCount > 0 && (
-                <div className="absolute -top-1 -right-1 w-4 h-4 bg-white text-[#7FBA3D] rounded-full flex items-center justify-center text-[11px] font-bold shadow-md">
+                <div className="absolute -top-2 -right-2 min-w-[20px] h-5 px-[5px] bg-white text-[#7FBA3D] rounded-full flex items-center justify-center text-[11px] font-bold shadow-lg">
                   {cartCount}
                 </div>
               )}
@@ -197,7 +197,7 @@ export default function Header() {
                   <ShoppingCart className="w-4 h-4" />
                   <span>Orçamento</span>
                   {cartCount > 0 && (
-                    <div className="absolute -top-1 -right-1 w-4 h-4 bg-white text-[#7FBA3D] rounded-full flex items-center justify-center text-[11px] font-bold shadow-md">
+                    <div className="absolute -top-2 -right-2 min-w-[20px] h-5 px-[5px] bg-white text-[#7FBA3D] rounded-full flex items-center justify-center text-[11px] font-bold shadow-lg">
                       {cartCount}
                     </div>
                   )}
