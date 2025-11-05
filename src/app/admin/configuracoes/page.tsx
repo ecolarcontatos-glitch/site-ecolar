@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Save, Upload, X, Plus } from 'lucide-react';
+import { Save, Upload, X, Plus, ArrowLeft } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 import ImageUpload from '@/components/ImageUpload';
 
 interface SiteConfig {
@@ -127,6 +128,17 @@ export default function ConfiguracoesPage() {
 
   return (
     <div className="p-6">
+      {/* Botão Voltar ao Painel */}
+      <div className="flex justify-end mb-6">
+        <Link
+          href="/admin"
+          className="flex items-center space-x-2 px-4 py-2 border-2 border-[#7FBA3D] text-[#7FBA3D] rounded-lg hover:bg-[#7FBA3D] hover:text-white transition-colors duration-200"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span>Voltar ao Painel</span>
+        </Link>
+      </div>
+
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-900 mb-2">Configurações do Site</h1>
         <p className="text-gray-600">Gerencie as informações e imagens do site ECOLAR</p>
@@ -138,21 +150,111 @@ export default function ConfiguracoesPage() {
           <h2 className="text-lg font-semibold text-gray-900 mb-6">Logomarcas</h2>
           
           <div className="space-y-6">
-            <ImageUpload
-              label="Logo do Header"
-              currentImage={config.logoHeader ?? ''}
-              onImageUploaded={handleLogoHeaderUpload}
-              onImageRemoved={handleLogoHeaderRemove}
-              aspectRatio="aspect-[3/1]"
-            />
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Logo do Header
+              </label>
+              <div className="flex items-center space-x-3">
+                {config.logoHeader && (
+                  <div className="relative w-32 h-10 bg-gray-100 rounded-lg overflow-hidden">
+                    <Image
+                      src={config.logoHeader}
+                      alt="Logo Header"
+                      fill
+                      className="object-contain"
+                    />
+                  </div>
+                )}
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => document.getElementById('logoHeader')?.click()}
+                    className="px-3 py-1.5 text-sm bg-[#7FBA3D] text-white rounded hover:bg-[#0A3D2E] transition-colors duration-200 flex items-center space-x-1"
+                  >
+                    <Upload className="w-3 h-3" />
+                    <span>Upload</span>
+                  </button>
+                  {config.logoHeader && (
+                    <button
+                      onClick={handleLogoHeaderRemove}
+                      className="px-3 py-1.5 text-sm bg-red-500 text-white rounded hover:bg-red-600 transition-colors duration-200 flex items-center space-x-1"
+                    >
+                      <X className="w-3 h-3" />
+                      <span>Remover</span>
+                    </button>
+                  )}
+                </div>
+                <input
+                  id="logoHeader"
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onload = (e) => {
+                        const result = e.target?.result as string;
+                        handleLogoHeaderUpload(result);
+                      };
+                      reader.readAsDataURL(file);
+                    }
+                  }}
+                />
+              </div>
+            </div>
 
-            <ImageUpload
-              label="Logo do Footer"
-              currentImage={config.logoFooter ?? ''}
-              onImageUploaded={handleLogoFooterUpload}
-              onImageRemoved={handleLogoFooterRemove}
-              aspectRatio="aspect-[3/1]"
-            />
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Logo do Footer
+              </label>
+              <div className="flex items-center space-x-3">
+                {config.logoFooter && (
+                  <div className="relative w-32 h-10 bg-gray-100 rounded-lg overflow-hidden">
+                    <Image
+                      src={config.logoFooter}
+                      alt="Logo Footer"
+                      fill
+                      className="object-contain"
+                    />
+                  </div>
+                )}
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => document.getElementById('logoFooter')?.click()}
+                    className="px-3 py-1.5 text-sm bg-[#7FBA3D] text-white rounded hover:bg-[#0A3D2E] transition-colors duration-200 flex items-center space-x-1"
+                  >
+                    <Upload className="w-3 h-3" />
+                    <span>Upload</span>
+                  </button>
+                  {config.logoFooter && (
+                    <button
+                      onClick={handleLogoFooterRemove}
+                      className="px-3 py-1.5 text-sm bg-red-500 text-white rounded hover:bg-red-600 transition-colors duration-200 flex items-center space-x-1"
+                    >
+                      <X className="w-3 h-3" />
+                      <span>Remover</span>
+                    </button>
+                  )}
+                </div>
+                <input
+                  id="logoFooter"
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onload = (e) => {
+                        const result = e.target?.result as string;
+                        handleLogoFooterUpload(result);
+                      };
+                      reader.readAsDataURL(file);
+                    }
+                  }}
+                />
+              </div>
+            </div>
           </div>
         </div>
 
@@ -253,11 +355,35 @@ export default function ConfiguracoesPage() {
         
         {/* Upload de nova imagem */}
         <div className="mb-6">
-          <ImageUpload
-            label="Adicionar Nova Imagem do Hero"
-            onImageUploaded={addHeroImageUpload}
-            aspectRatio="aspect-video"
-          />
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Adicionar Nova Imagem do Hero
+          </label>
+          <div className="flex items-center space-x-3">
+            <button
+              onClick={() => document.getElementById('heroUpload')?.click()}
+              className="px-3 py-1.5 text-sm bg-[#7FBA3D] text-white rounded hover:bg-[#0A3D2E] transition-colors duration-200 flex items-center space-x-1"
+            >
+              <Upload className="w-3 h-3" />
+              <span>Upload</span>
+            </button>
+            <input
+              id="heroUpload"
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  const reader = new FileReader();
+                  reader.onload = (e) => {
+                    const result = e.target?.result as string;
+                    addHeroImageUpload(result);
+                  };
+                  reader.readAsDataURL(file);
+                }
+              }}
+            />
+          </div>
         </div>
 
         {/* Adicionar por URL */}

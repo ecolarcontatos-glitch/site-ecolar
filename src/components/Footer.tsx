@@ -1,8 +1,55 @@
+'use client';
+
 import Link from 'next/link';
 import Image from 'next/image';
+import { useState, useEffect } from 'react';
 import { MapPin, Phone, Mail, MessageCircle } from 'lucide-react';
 
+interface SiteConfig {
+  logoFooter: string;
+  telefone: string;
+  email: string;
+  endereco: string;
+  whatsapp: string;
+  textoRodape: string;
+}
+
 export default function Footer() {
+  const [config, setConfig] = useState<SiteConfig>({
+    logoFooter: 'https://k6hrqrxuu8obbfwn.public.blob.vercel-storage.com/temp/fa155124-8442-4fa3-aede-ff541b4163a7.png',
+    telefone: '(83) 2177-7553',
+    email: 'ecolar.contatos@gmail.com',
+    endereco: 'R. Pres. Washington Luís, 592 - Bessa, João Pessoa - PB, 58035-340',
+    whatsapp: '558393661690',
+    textoRodape: 'Materiais de construção com qualidade e sustentabilidade.'
+  });
+
+  // Carregar configurações do localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedConfig = localStorage.getItem('ecolar_config');
+      if (storedConfig) {
+        try {
+          const parsedConfig = JSON.parse(storedConfig);
+          setConfig({
+            logoFooter: parsedConfig.logoFooter || config.logoFooter,
+            telefone: parsedConfig.telefone || config.telefone,
+            email: parsedConfig.email || config.email,
+            endereco: parsedConfig.endereco || config.endereco,
+            whatsapp: parsedConfig.whatsapp || config.whatsapp,
+            textoRodape: parsedConfig.textoRodape || config.textoRodape
+          });
+        } catch (error) {
+          console.error('Erro ao carregar configurações do footer:', error);
+        }
+      }
+    }
+  }, []);
+
+  // Formatar WhatsApp para link
+  const whatsappLink = `https://wa.me/${config.whatsapp}`;
+  const whatsappDisplay = config.whatsapp.replace(/(\d{2})(\d{2})(\d{4,5})(\d{4})/, '($1) $2$3-$4');
+
   return (
     <footer className="bg-[#0A3D2E] text-white">
       <div className="max-w-[1200px] mx-auto px-5 py-12">
@@ -11,7 +58,7 @@ export default function Footer() {
           <div className="md:col-span-1">
             <Link href="/" className="inline-block mb-4">
               <Image
-                src="https://k6hrqrxuu8obbfwn.public.blob.vercel-storage.com/temp/fa155124-8442-4fa3-aede-ff541b4163a7.png"
+                src={config.logoFooter}
                 alt="ECOLAR"
                 width={150}
                 height={50}
@@ -19,8 +66,7 @@ export default function Footer() {
               />
             </Link>
             <p className="font-inter text-gray-300 text-sm leading-relaxed">
-              Materiais de construção e decoração com qualidade e tradição. 
-              Sua obra merece o melhor.
+              {config.textoRodape}
             </p>
           </div>
 
@@ -115,38 +161,41 @@ export default function Footer() {
               <div className="flex items-start space-x-3">
                 <MapPin className="w-5 h-5 text-[#7FBA3D] mt-0.5 flex-shrink-0" />
                 <span className="font-inter text-gray-300 text-sm">
-                  R. Pres. Washington Luís, 592<br />
-                  Bessa, João Pessoa - PB<br />
-                  CEP: 58035-340
+                  {config.endereco.split(',').map((part, index) => (
+                    <span key={index}>
+                      {part.trim()}
+                      {index < config.endereco.split(',').length - 1 && <br />}
+                    </span>
+                  ))}
                 </span>
               </div>
               <div className="flex items-center space-x-3">
                 <Phone className="w-5 h-5 text-[#7FBA3D] flex-shrink-0" />
                 <a
-                  href="tel:+558321777553"
+                  href={`tel:+55${config.telefone.replace(/\D/g, '')}`}
                   className="font-inter text-gray-300 hover:text-[#7FBA3D] transition-colors duration-200 text-sm"
                 >
-                  (83) 2177-7553
+                  {config.telefone}
                 </a>
               </div>
               <div className="flex items-center space-x-3">
                 <Mail className="w-5 h-5 text-[#7FBA3D] flex-shrink-0" />
                 <a
-                  href="mailto:ecolar.contatos@gmail.com"
+                  href={`mailto:${config.email}`}
                   className="font-inter text-gray-300 hover:text-[#7FBA3D] transition-colors duration-200 text-sm"
                 >
-                  ecolar.contatos@gmail.com
+                  {config.email}
                 </a>
               </div>
               <div className="flex items-center space-x-3">
                 <MessageCircle className="w-5 h-5 text-[#7FBA3D] flex-shrink-0" />
                 <a
-                  href="https://wa.me/558393661690"
+                  href={whatsappLink}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="font-inter text-gray-300 hover:text-[#7FBA3D] transition-colors duration-200 text-sm"
                 >
-                  (83) 9366-1690
+                  {whatsappDisplay}
                 </a>
               </div>
             </div>
@@ -160,7 +209,7 @@ export default function Footer() {
               © 2024 ECOLAR. Todos os direitos reservados.
             </p>
             <p className="font-inter text-gray-400 text-sm mt-2 md:mt-0">
-              Materiais de construção com qualidade e sustentabilidade.
+              {config.textoRodape}
             </p>
           </div>
         </div>

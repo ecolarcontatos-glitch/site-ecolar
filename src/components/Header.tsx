@@ -2,11 +2,29 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Menu, X, Calculator } from 'lucide-react';
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [logoUrl, setLogoUrl] = useState('https://k6hrqrxuu8obbfwn.public.blob.vercel-storage.com/temp/fa155124-8442-4fa3-aede-ff541b4163a7.png');
+
+  // Carregar logo do localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedConfig = localStorage.getItem('ecolar_config');
+      if (storedConfig) {
+        try {
+          const parsedConfig = JSON.parse(storedConfig);
+          if (parsedConfig.logoHeader) {
+            setLogoUrl(parsedConfig.logoHeader);
+          }
+        } catch (error) {
+          console.error('Erro ao carregar configurações do header:', error);
+        }
+      }
+    }
+  }, []);
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-white shadow-sm">
@@ -15,7 +33,7 @@ export default function Header() {
           {/* Logo */}
           <Link href="/" className="flex items-center">
             <Image
-              src="https://k6hrqrxuu8obbfwn.public.blob.vercel-storage.com/temp/fa155124-8442-4fa3-aede-ff541b4163a7.png"
+              src={logoUrl}
               alt="ECOLAR"
               width={60}
               height={20}
