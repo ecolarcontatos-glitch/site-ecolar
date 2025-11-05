@@ -10,6 +10,12 @@ import { useState, useEffect } from 'react';
 export default function HomePage() {
   const { produtos, categorias, depoimentos, inspiracoes } = useData();
   const [posts, setPosts] = useState([]);
+  const [heroImages, setHeroImages] = useState([
+    "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=1920&h=1080&fit=crop",
+    "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=1920&h=1080&fit=crop",
+    "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1920&h=1080&fit=crop",
+    "https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=1920&h=1080&fit=crop"
+  ]);
   
   // FILTRO CRÍTICO: Apenas produtos disponíveis aparecem no site
   const produtosDisponiveis = produtos.filter(p => p.disponivel !== false);
@@ -29,16 +35,29 @@ export default function HomePage() {
     }
   }, []);
 
+  // Carregar configurações do hero do localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedConfig = localStorage.getItem('ecolar_config');
+      if (storedConfig) {
+        try {
+          const parsedConfig = JSON.parse(storedConfig);
+          if (parsedConfig.heroImages && parsedConfig.heroImages.length > 0) {
+            // Ordenar por ordem e extrair apenas as URLs
+            const sortedImages = parsedConfig.heroImages
+              .sort((a, b) => a.order - b.order)
+              .map(img => img.url);
+            setHeroImages(sortedImages);
+          }
+        } catch (error) {
+          console.error('Erro ao carregar configurações do hero:', error);
+        }
+      }
+    }
+  }, []);
+
   // Post mais recente para destaque
   const postDestaque = posts.length > 0 ? posts[0] : null;
-
-  // Carrossel de imagens do Hero
-  const heroImages = [
-    "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=1920&h=1080&fit=crop",
-    "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=1920&h=1080&fit=crop",
-    "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1920&h=1080&fit=crop",
-    "https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=1920&h=1080&fit=crop"
-  ];
 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
@@ -74,8 +93,8 @@ export default function HomePage() {
               />
             </div>
           ))}
-          {/* Camada preta MUITO transparente para contraste */}
-          <div className="absolute inset-0 bg-black/15" />
+          {/* Camada verde escuro translúcida para contraste */}
+          <div className="absolute inset-0 bg-[rgba(10,61,46,0.6)]" />
         </div>
         
         <div className="relative z-10 max-w-[1200px] mx-auto px-5 text-center text-white">

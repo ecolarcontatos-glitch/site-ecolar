@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Save, Upload, X, Plus } from 'lucide-react';
 import Image from 'next/image';
 import ImageUpload from '@/components/ImageUpload';
@@ -36,25 +36,31 @@ export default function ConfiguracoesPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [newHeroImage, setNewHeroImage] = useState('');
 
+  // Carregar configurações do localStorage na inicialização
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedConfig = localStorage.getItem('ecolar_config');
+      if (storedConfig) {
+        try {
+          const parsedConfig = JSON.parse(storedConfig);
+          setConfig(parsedConfig);
+        } catch (error) {
+          console.error('Erro ao carregar configurações:', error);
+        }
+      }
+    }
+  }, []);
+
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      // Simular salvamento no arquivo de configuração
-      const response = await fetch('/api/config', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(config),
-      });
-
-      if (response.ok) {
-        alert('Configurações salvas com sucesso!');
-        // Recarregar a página para aplicar as mudanças
-        window.location.reload();
-      } else {
-        throw new Error('Erro ao salvar');
-      }
+      // Salvar no localStorage
+      localStorage.setItem('ecolar_config', JSON.stringify(config));
+      
+      alert('Configurações salvas com sucesso!');
+      
+      // Opcional: recarregar a página para aplicar as mudanças
+      // window.location.reload();
     } catch (error) {
       console.error('Erro ao salvar:', error);
       alert('Erro ao salvar configurações. Tente novamente.');
