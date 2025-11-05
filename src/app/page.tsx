@@ -8,12 +8,29 @@ import ProductCard from '@/components/ProductCard';
 import { useState, useEffect } from 'react';
 
 export default function HomePage() {
-  const { produtos, categorias, depoimentos, inspiracoes, posts } = useData();
+  const { produtos, categorias, depoimentos, inspiracoes } = useData();
+  const [posts, setPosts] = useState([]);
   
   // FILTRO CRÍTICO: Apenas produtos disponíveis aparecem no site
   const produtosDisponiveis = produtos.filter(p => p.disponivel !== false);
   const produtosDestaque = produtosDisponiveis.filter(p => p.destaque).slice(0, 6);
   const categoriasPrincipais = categorias.slice(0, 4); // Apenas 4 categorias
+
+  // Carregar posts do localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedPosts = localStorage.getItem('ecolar_posts');
+      if (storedPosts) {
+        const parsedPosts = JSON.parse(storedPosts);
+        // Ordenar por data decrescente (mais recente primeiro)
+        const sortedPosts = parsedPosts.sort((a, b) => new Date(b.data) - new Date(a.data));
+        setPosts(sortedPosts);
+      }
+    }
+  }, []);
+
+  // Post mais recente para destaque
+  const postDestaque = posts.length > 0 ? posts[0] : null;
 
   // Carrossel de imagens do Hero
   const heroImages = [
@@ -345,46 +362,56 @@ export default function HomePage() {
             </p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-            {posts.slice(0, 3).map((post) => (
-              <Link
-                key={post.id}
-                href={`/blog/${post.id}`}
-                className="group bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)] transition-all duration-300 overflow-hidden"
-              >
-                <div className="relative aspect-[4/3]">
-                  <Image
-                    src={post.imagem}
-                    alt={post.titulo}
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                </div>
-                <div className="p-6">
-                  <h3 className="font-inter font-semibold text-[#111827] text-lg mb-2 line-clamp-2">
-                    {post.titulo}
-                  </h3>
-                  <p className="font-inter text-[#6b7280] text-sm mb-4 line-clamp-3">
-                    {post.resumo}
-                  </p>
-                  <div className="flex items-center justify-between text-xs text-[#6b7280] font-inter">
-                    <span>{post.autor}</span>
-                    <span>{new Date(post.data).toLocaleDateString('pt-BR')}</span>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-          
-          <div className="text-center">
-            <Link
-              href="/blog"
-              className="inline-flex items-center space-x-2 bg-[#7FBA3D] text-white px-6 py-3 rounded-2xl hover:bg-[#0A3D2E] transition-colors duration-200 font-inter font-medium"
-            >
-              <span>Ver todos os posts</span>
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
+          {posts.length > 0 ? (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+                {posts.slice(0, 3).map((post) => (
+                  <Link
+                    key={post.id}
+                    href={`/blog/${post.id}`}
+                    className="group bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)] transition-all duration-300 overflow-hidden"
+                  >
+                    <div className="relative aspect-[4/3]">
+                      <Image
+                        src={post.imagem}
+                        alt={post.titulo}
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                    </div>
+                    <div className="p-6">
+                      <h3 className="font-inter font-semibold text-[#111827] text-lg mb-2 line-clamp-2">
+                        {post.titulo}
+                      </h3>
+                      <p className="font-inter text-[#6b7280] text-sm mb-4 line-clamp-3">
+                        {post.resumo}
+                      </p>
+                      <div className="flex items-center justify-between text-xs text-[#6b7280] font-inter">
+                        <span>{post.autor}</span>
+                        <span>{new Date(post.data).toLocaleDateString('pt-BR')}</span>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+              
+              <div className="text-center">
+                <Link
+                  href="/blog"
+                  className="inline-flex items-center space-x-2 bg-[#7FBA3D] text-white px-6 py-3 rounded-2xl hover:bg-[#0A3D2E] transition-colors duration-200 font-inter font-medium"
+                >
+                  <span>Ver todos os posts</span>
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
+            </>
+          ) : (
+            <div className="text-center py-12">
+              <p className="font-inter text-lg text-[#6b7280]">
+                Nenhum post publicado ainda.
+              </p>
+            </div>
+          )}
         </div>
       </section>
 
