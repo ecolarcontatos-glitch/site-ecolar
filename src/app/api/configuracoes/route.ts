@@ -6,7 +6,8 @@ export async function GET() {
     console.log('📋 Buscando configurações...');
     
     const configs = await executeQuery(`
-      SELECT id, telefone, email, endereco, whatsapp, texto_footer, hero_images, logo_footer, created_at, updated_at
+      SELECT id, telefone, email, endereco, whatsapp, texto_footer, texto_rodape, 
+             hero_images, logo_header, logo_footer, created_at, updated_at
       FROM configuracoes 
       ORDER BY id DESC
       LIMIT 1
@@ -17,10 +18,12 @@ export async function GET() {
       return NextResponse.json({
         telefone: '(83) 2177-7553',
         email: 'ecolar.contatos@gmail.com',
-        endereco: 'R. Pres. Washington Luís, 592 - Bessa, João Pessoa - PB, 58035-340',
+        endereco: 'R. Pres. Washington Luís, 592 - João Pessoa',
         whatsapp: '558393661690',
         texto_footer: 'Materiais de construção com qualidade e sustentabilidade.',
+        texto_rodape: 'Materiais de construção com qualidade e sustentabilidade.',
         hero_images: '[]',
+        logo_header: 'https://k6hrqrxuu8obbfwn.public.blob.vercel-storage.com/temp/fa155124-8442-4fa3-aede-ff541b4163a7.png',
         logo_footer: 'https://k6hrqrxuu8obbfwn.public.blob.vercel-storage.com/temp/fa155124-8442-4fa3-aede-ff541b4163a7.png'
       });
     }
@@ -51,8 +54,8 @@ export async function PUT(request: NextRequest) {
   try {
     const body = await request.json();
     const { 
-      telefone, email, endereco, whatsapp, texto_footer, 
-      hero_images, logo_footer 
+      telefone, email, endereco, whatsapp, texto_footer, texto_rodape,
+      hero_images, logo_header, logo_footer 
     } = body;
 
     console.log('✏️ Atualizando configurações...');
@@ -70,15 +73,18 @@ export async function PUT(request: NextRequest) {
     if (existingConfigs.length === 0) {
       // Criar nova configuração
       const result = await executeInsert(`
-        INSERT INTO configuracoes (telefone, email, endereco, whatsapp, texto_footer, hero_images, logo_footer, created_at, updated_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+        INSERT INTO configuracoes (telefone, email, endereco, whatsapp, texto_footer, texto_rodape, 
+                                   hero_images, logo_header, logo_footer, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
       `, [
         telefone || '(83) 2177-7553',
         email || 'ecolar.contatos@gmail.com',
-        endereco || 'R. Pres. Washington Luís, 592 - Bessa, João Pessoa - PB, 58035-340',
+        endereco || 'R. Pres. Washington Luís, 592 - João Pessoa',
         whatsapp || '558393661690',
         texto_footer || 'Materiais de construção com qualidade e sustentabilidade.',
+        texto_rodape || 'Materiais de construção com qualidade e sustentabilidade.',
         heroImagesJson || '[]',
+        logo_header || 'https://k6hrqrxuu8obbfwn.public.blob.vercel-storage.com/temp/fa155124-8442-4fa3-aede-ff541b4163a7.png',
         logo_footer || 'https://k6hrqrxuu8obbfwn.public.blob.vercel-storage.com/temp/fa155124-8442-4fa3-aede-ff541b4163a7.png'
       ]);
 
@@ -89,16 +95,18 @@ export async function PUT(request: NextRequest) {
       
       const result = await executeUpdate(`
         UPDATE configuracoes 
-        SET telefone = ?, email = ?, endereco = ?, whatsapp = ?, texto_footer = ?, 
-            hero_images = ?, logo_footer = ?, updated_at = NOW()
+        SET telefone = ?, email = ?, endereco = ?, whatsapp = ?, texto_footer = ?, texto_rodape = ?,
+            hero_images = ?, logo_header = ?, logo_footer = ?, updated_at = NOW()
         WHERE id = ?
       `, [
         telefone || '(83) 2177-7553',
         email || 'ecolar.contatos@gmail.com',
-        endereco || 'R. Pres. Washington Luís, 592 - Bessa, João Pessoa - PB, 58035-340',
+        endereco || 'R. Pres. Washington Luís, 592 - João Pessoa',
         whatsapp || '558393661690',
         texto_footer || 'Materiais de construção com qualidade e sustentabilidade.',
+        texto_rodape || 'Materiais de construção com qualidade e sustentabilidade.',
         heroImagesJson || '[]',
+        logo_header || 'https://k6hrqrxuu8obbfwn.public.blob.vercel-storage.com/temp/fa155124-8442-4fa3-aede-ff541b4163a7.png',
         logo_footer || 'https://k6hrqrxuu8obbfwn.public.blob.vercel-storage.com/temp/fa155124-8442-4fa3-aede-ff541b4163a7.png',
         configId
       ]);
@@ -109,10 +117,12 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({
       telefone: telefone || '(83) 2177-7553',
       email: email || 'ecolar.contatos@gmail.com',
-      endereco: endereco || 'R. Pres. Washington Luís, 592 - Bessa, João Pessoa - PB, 58035-340',
+      endereco: endereco || 'R. Pres. Washington Luís, 592 - João Pessoa',
       whatsapp: whatsapp || '558393661690',
       texto_footer: texto_footer || 'Materiais de construção com qualidade e sustentabilidade.',
+      texto_rodape: texto_rodape || 'Materiais de construção com qualidade e sustentabilidade.',
       hero_images: typeof hero_images === 'string' ? JSON.parse(hero_images || '[]') : (hero_images || []),
+      logo_header: logo_header || 'https://k6hrqrxuu8obbfwn.public.blob.vercel-storage.com/temp/fa155124-8442-4fa3-aede-ff541b4163a7.png',
       logo_footer: logo_footer || 'https://k6hrqrxuu8obbfwn.public.blob.vercel-storage.com/temp/fa155124-8442-4fa3-aede-ff541b4163a7.png',
       message: 'Configurações atualizadas com sucesso'
     });

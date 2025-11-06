@@ -6,7 +6,7 @@ export async function GET() {
     console.log('📋 Listando categorias...');
     
     const categorias = await executeQuery(`
-      SELECT id, nome, imagem, descricao, slug, created_at, updated_at
+      SELECT id, nome, imagem, descricao, slug, cor, created_at, updated_at
       FROM categorias 
       ORDER BY nome ASC
     `);
@@ -25,9 +25,9 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { nome, imagem, descricao, slug } = body;
+    const { nome, imagem, descricao, slug, cor } = body;
 
-    console.log('➕ Criando categoria:', { nome, slug });
+    console.log('➕ Criando categoria:', { nome, slug, cor });
 
     if (!nome || !slug) {
       return NextResponse.json(
@@ -37,9 +37,9 @@ export async function POST(request: NextRequest) {
     }
 
     const result = await executeInsert(`
-      INSERT INTO categorias (nome, imagem, descricao, slug, created_at, updated_at)
-      VALUES (?, ?, ?, ?, NOW(), NOW())
-    `, [nome, imagem || '', descricao || '', slug]);
+      INSERT INTO categorias (nome, imagem, descricao, slug, cor, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, NOW(), NOW())
+    `, [nome, imagem || '', descricao || '', slug, cor || '#3B82F6']);
 
     console.log(`✅ Categoria criada com ID: ${result.insertId}`);
 
@@ -50,6 +50,7 @@ export async function POST(request: NextRequest) {
         imagem: imagem || '',
         descricao: descricao || '',
         slug,
+        cor: cor || '#3B82F6',
         message: 'Categoria criada com sucesso'
       },
       { status: 201 }

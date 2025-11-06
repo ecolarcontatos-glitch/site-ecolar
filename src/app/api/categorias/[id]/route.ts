@@ -17,7 +17,7 @@ export async function GET(
     }
 
     const categorias = await executeQuery(`
-      SELECT id, nome, imagem, descricao, slug, created_at, updated_at
+      SELECT id, nome, imagem, descricao, slug, cor, created_at, updated_at
       FROM categorias 
       WHERE id = ?
     `, [id]);
@@ -48,9 +48,9 @@ export async function PUT(
   try {
     const id = parseInt(params.id);
     const body = await request.json();
-    const { nome, imagem, descricao, slug } = body;
+    const { nome, imagem, descricao, slug, cor } = body;
 
-    console.log(`✏️ Atualizando categoria ID: ${id}`, { nome, slug });
+    console.log(`✏️ Atualizando categoria ID: ${id}`, { nome, slug, cor });
 
     if (isNaN(id)) {
       return NextResponse.json(
@@ -68,9 +68,9 @@ export async function PUT(
 
     const result = await executeUpdate(`
       UPDATE categorias 
-      SET nome = ?, imagem = ?, descricao = ?, slug = ?, updated_at = NOW()
+      SET nome = ?, imagem = ?, descricao = ?, slug = ?, cor = ?, updated_at = NOW()
       WHERE id = ?
-    `, [nome, imagem || '', descricao || '', slug, id]);
+    `, [nome, imagem || '', descricao || '', slug, cor || '#3B82F6', id]);
 
     if (result.affectedRows === 0) {
       console.log(`❌ Categoria ID ${id} não encontrada para atualização`);
@@ -87,6 +87,7 @@ export async function PUT(
       imagem: imagem || '',
       descricao: descricao || '',
       slug,
+      cor: cor || '#3B82F6',
       message: 'Categoria atualizada com sucesso'
     });
   } catch (error) {

@@ -19,7 +19,7 @@ export async function GET(
     const produtos = await executeQuery(`
       SELECT 
         p.id, p.nome, p.categoria_id, p.descricao, p.preco, p.desconto, 
-        p.imagem, p.destaque, p.status, p.disponivel, p.created_at, p.updated_at,
+        p.imagem, p.destaque, p.status, p.disponivel, p.unidade, p.created_at, p.updated_at,
         c.nome as categoria_nome, c.slug as categoria_slug
       FROM produtos p
       LEFT JOIN categorias c ON p.categoria_id = c.id
@@ -54,10 +54,10 @@ export async function PUT(
     const body = await request.json();
     const { 
       nome, categoria_id, descricao, preco, desconto, 
-      imagem, destaque, status, disponivel 
+      imagem, destaque, status, disponivel, unidade 
     } = body;
 
-    console.log(`✏️ Atualizando produto ID: ${id}`, { nome, categoria_id });
+    console.log(`✏️ Atualizando produto ID: ${id}`, { nome, categoria_id, unidade });
 
     if (isNaN(id)) {
       return NextResponse.json(
@@ -76,7 +76,7 @@ export async function PUT(
     const result = await executeUpdate(`
       UPDATE produtos 
       SET nome = ?, categoria_id = ?, descricao = ?, preco = ?, desconto = ?, 
-          imagem = ?, destaque = ?, status = ?, disponivel = ?, updated_at = NOW()
+          imagem = ?, destaque = ?, status = ?, disponivel = ?, unidade = ?, updated_at = NOW()
       WHERE id = ?
     `, [
       nome,
@@ -88,6 +88,7 @@ export async function PUT(
       destaque ? 1 : 0,
       status || 'ativo',
       disponivel !== false ? 1 : 0,
+      unidade || 'unidade',
       id
     ]);
 
@@ -111,6 +112,7 @@ export async function PUT(
       destaque: destaque ? 1 : 0,
       status: status || 'ativo',
       disponivel: disponivel !== false ? 1 : 0,
+      unidade: unidade || 'unidade',
       message: 'Produto atualizado com sucesso'
     });
   } catch (error) {

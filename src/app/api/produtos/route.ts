@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
     let query = `
       SELECT 
         p.id, p.nome, p.categoria_id, p.descricao, p.preco, p.desconto, 
-        p.imagem, p.destaque, p.status, p.disponivel, p.created_at, p.updated_at,
+        p.imagem, p.destaque, p.status, p.disponivel, p.unidade, p.created_at, p.updated_at,
         c.nome as categoria_nome, c.slug as categoria_slug
       FROM produtos p
       LEFT JOIN categorias c ON p.categoria_id = c.id
@@ -55,10 +55,10 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { 
       nome, categoria_id, descricao, preco, desconto, 
-      imagem, destaque, status, disponivel 
+      imagem, destaque, status, disponivel, unidade 
     } = body;
 
-    console.log('➕ Criando produto:', { nome, categoria_id });
+    console.log('➕ Criando produto:', { nome, categoria_id, unidade });
 
     if (!nome || !categoria_id) {
       return NextResponse.json(
@@ -70,8 +70,8 @@ export async function POST(request: NextRequest) {
     const result = await executeInsert(`
       INSERT INTO produtos (
         nome, categoria_id, descricao, preco, desconto, 
-        imagem, destaque, status, disponivel, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+        imagem, destaque, status, disponivel, unidade, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
     `, [
       nome,
       categoria_id,
@@ -81,7 +81,8 @@ export async function POST(request: NextRequest) {
       imagem || '',
       destaque ? 1 : 0,
       status || 'ativo',
-      disponivel !== false ? 1 : 0
+      disponivel !== false ? 1 : 0,
+      unidade || 'unidade'
     ]);
 
     console.log(`✅ Produto criado com ID: ${result.insertId}`);
@@ -98,6 +99,7 @@ export async function POST(request: NextRequest) {
         destaque: destaque ? 1 : 0,
         status: status || 'ativo',
         disponivel: disponivel !== false ? 1 : 0,
+        unidade: unidade || 'unidade',
         message: 'Produto criado com sucesso'
       },
       { status: 201 }
