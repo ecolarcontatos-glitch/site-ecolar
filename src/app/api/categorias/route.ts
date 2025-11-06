@@ -1,98 +1,64 @@
-import fs from 'fs';
-import path from 'path';
 import { NextRequest, NextResponse } from 'next/server';
-
-const filePath = path.join(process.cwd(), 'data', 'categorias.json');
-
-// Função para garantir que o arquivo existe
-function ensureFileExists() {
-  if (!fs.existsSync(filePath)) {
-    fs.writeFileSync(filePath, JSON.stringify([], null, 2));
-  }
-}
+import { executeQuery, executeInsert } from '@/lib/db';
 
 export async function GET() {
   try {
-    ensureFileExists();
-    const data = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
-    return NextResponse.json(data);
+    console.log('📋 Listando categorias...');
+    
+    const categorias = await executeQuery(`
+      SELECT id, nome, imagem, descricao, slug, created_at, updated_at
+      FROM categorias 
+      ORDER BY nome ASC
+    `);
+
+    console.log(`✅ ${categorias.length} categorias encontradas`);
+    return NextResponse.json(categorias);
   } catch (error) {
-    console.error('Erro ao ler categorias:', error);
-    return NextResponse.json([], { status: 500 });
+    console.error('❌ Erro ao listar categorias:', error);
+    return NextResponse.json(
+      { error: 'Erro interno do servidor' },
+      { status: 500 }
+    );
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
-    ensureFileExists();
     const body = await request.json();
-    const data = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
-    
-    // Adicionar ID se não existir
-    const novaCategoria = {
-      ...body,
-      id: body.id || Date.now().toString()
-    };
-    
-    data.push(novaCategoria);
-    fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
-    
-    return NextResponse.json({ success: true, data: novaCategoria });
-  } catch (error) {
-    console.error('Erro ao criar categoria:', error);
-    return NextResponse.json({ success: false, error: 'Erro interno do servidor' }, { status: 500 });
-  }
-}
+    const { nome, imagem, descricao, slug } = body;
 
-export async function PUT(request: NextRequest) {
-  try {
-    ensureFileExists();
-    const body = await request.json();
-    const { id, ...updateData } = body;
-    
-    if (!id) {
-      return NextResponse.json({ success: false, error: 'ID é obrigatório' }, { status: 400 });
-    }
-    
-    const data = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
-    const index = data.findIndex((item: any) => item.id === id);
-    
-    if (index === -1) {
-      return NextResponse.json({ success: false, error: 'Categoria não encontrada' }, { status: 404 });
-    }
-    
-    data[index] = { ...data[index], ...updateData };
-    fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
-    
-    return NextResponse.json({ success: true, data: data[index] });
-  } catch (error) {
-    console.error('Erro ao atualizar categoria:', error);
-    return NextResponse.json({ success: false, error: 'Erro interno do servidor' }, { status: 500 });
-  }
-}
+    console.log('➕ Criando categoria:', { nome, slug });
 
-export async function DELETE(request: NextRequest) {
-  try {
-    ensureFileExists();
-    const { searchParams } = new URL(request.url);
-    const id = searchParams.get('id');
-    
-    if (!id) {
-      return NextResponse.json({ success: false, error: 'ID é obrigatório' }, { status: 400 });
+    if (!nome || !slug) {
+      return NextResponse.json(
+        { error: 'Nome e slug são obrigatórios' },
+        { status: 400 }
+      );
     }
-    
-    const data = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
-    const filteredData = data.filter((item: any) => item.id !== id);
-    
-    if (data.length === filteredData.length) {
-      return NextResponse.json({ success: false, error: 'Categoria não encontrada' }, { status: 404 });
-    }
-    
-    fs.writeFileSync(filePath, JSON.stringify(filteredData, null, 2));
-    
-    return NextResponse.json({ success: true });
+
+    const result = await executeInsert(`
+      INSERT INTO categorias (nome, imagem, descricao, slug, created_at, updated_at)
+      VALUES (?, ?, ?, ?, NOW(), NOW())
+    `, [nome, imagem || '', descricao || '', slug]);
+
+    console.log(`✅ Categoria criada com ID: ${result.insertId}`);
+
+    return NextResponse.json(
+      { 
+        id: result.insertId,
+        nome,
+        imagem: imagem || '',
+        descricao: descricao || '',
+        slug,
+        message: 'Categoria criada com sucesso'
+      },
+      { status: 201 }
+    );
   } catch (error) {
-    console.error('Erro ao deletar categoria:', error);
-    return NextResponse.json({ success: false, error: 'Erro interno do servidor' }, { status: 500 });
+    console.error('❌ Erro ao criar categoria:', error);
+    return NextResponse.json(
+      { error: 'Erro interno do servidor' },
+      { status: 500 }
+    );
   }
 }

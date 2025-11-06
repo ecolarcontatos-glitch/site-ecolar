@@ -93,8 +93,8 @@ export default function HomePage() {
               />
             </div>
           ))}
-          {/* Camada verde escuro translúcida para contraste */}
-          <div className="absolute inset-0 bg-[rgba(10,61,46,0.6)]" />
+          {/* Camada preta translúcida para contraste - MAIS ESCURA */}
+          <div className="absolute inset-0 bg-[rgba(0,0,0,0.7)]" />
         </div>
         
         <div className="relative z-10 max-w-[1200px] mx-auto px-5 text-center text-white">

@@ -1,98 +1,112 @@
-import fs from 'fs';
-import path from 'path';
 import { NextRequest, NextResponse } from 'next/server';
+import { executeQuery, executeInsert } from '@/lib/db';
 
-const filePath = path.join(process.cwd(), 'data', 'produtos.json');
-
-// Função para garantir que o arquivo existe
-function ensureFileExists() {
-  if (!fs.existsSync(filePath)) {
-    fs.writeFileSync(filePath, JSON.stringify([], null, 2));
-  }
-}
-
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    ensureFileExists();
-    const data = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
-    return NextResponse.json(data);
+    const { searchParams } = new URL(request.url);
+    const categoria = searchParams.get('categoria');
+    const destaque = searchParams.get('destaque');
+    const disponivel = searchParams.get('disponivel');
+
+    console.log('📋 Listando produtos...', { categoria, destaque, disponivel });
+
+    let query = `
+      SELECT 
+        p.id, p.nome, p.categoria_id, p.descricao, p.preco, p.desconto, 
+        p.imagem, p.destaque, p.status, p.disponivel, p.created_at, p.updated_at,
+        c.nome as categoria_nome, c.slug as categoria_slug
+      FROM produtos p
+      LEFT JOIN categorias c ON p.categoria_id = c.id
+      WHERE 1=1
+    `;
+    const params: any[] = [];
+
+    if (categoria) {
+      query += ` AND c.slug = ?`;
+      params.push(categoria);
+    }
+
+    if (destaque === 'true') {
+      query += ` AND p.destaque = 1`;
+    }
+
+    if (disponivel !== null && disponivel !== undefined) {
+      query += ` AND p.disponivel = ?`;
+      params.push(disponivel === 'true' ? 1 : 0);
+    }
+
+    query += ` ORDER BY p.destaque DESC, p.created_at DESC`;
+
+    const produtos = await executeQuery(query, params);
+
+    console.log(`✅ ${produtos.length} produtos encontrados`);
+    return NextResponse.json(produtos);
   } catch (error) {
-    console.error('Erro ao ler produtos:', error);
-    return NextResponse.json([], { status: 500 });
+    console.error('❌ Erro ao listar produtos:', error);
+    return NextResponse.json(
+      { error: 'Erro interno do servidor' },
+      { status: 500 }
+    );
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
-    ensureFileExists();
     const body = await request.json();
-    const data = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
-    
-    // Adicionar ID se não existir
-    const novoProduto = {
-      ...body,
-      id: body.id || Date.now().toString()
-    };
-    
-    data.push(novoProduto);
-    fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
-    
-    return NextResponse.json({ success: true, data: novoProduto });
-  } catch (error) {
-    console.error('Erro ao criar produto:', error);
-    return NextResponse.json({ success: false, error: 'Erro interno do servidor' }, { status: 500 });
-  }
-}
+    const { 
+      nome, categoria_id, descricao, preco, desconto, 
+      imagem, destaque, status, disponivel 
+    } = body;
 
-export async function PUT(request: NextRequest) {
-  try {
-    ensureFileExists();
-    const body = await request.json();
-    const { id, ...updateData } = body;
-    
-    if (!id) {
-      return NextResponse.json({ success: false, error: 'ID é obrigatório' }, { status: 400 });
-    }
-    
-    const data = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
-    const index = data.findIndex((item: any) => item.id === id);
-    
-    if (index === -1) {
-      return NextResponse.json({ success: false, error: 'Produto não encontrado' }, { status: 404 });
-    }
-    
-    data[index] = { ...data[index], ...updateData };
-    fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
-    
-    return NextResponse.json({ success: true, data: data[index] });
-  } catch (error) {
-    console.error('Erro ao atualizar produto:', error);
-    return NextResponse.json({ success: false, error: 'Erro interno do servidor' }, { status: 500 });
-  }
-}
+    console.log('➕ Criando produto:', { nome, categoria_id });
 
-export async function DELETE(request: NextRequest) {
-  try {
-    ensureFileExists();
-    const { searchParams } = new URL(request.url);
-    const id = searchParams.get('id');
-    
-    if (!id) {
-      return NextResponse.json({ success: false, error: 'ID é obrigatório' }, { status: 400 });
+    if (!nome || !categoria_id) {
+      return NextResponse.json(
+        { error: 'Nome e categoria são obrigatórios' },
+        { status: 400 }
+      );
     }
-    
-    const data = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
-    const filteredData = data.filter((item: any) => item.id !== id);
-    
-    if (data.length === filteredData.length) {
-      return NextResponse.json({ success: false, error: 'Produto não encontrado' }, { status: 404 });
-    }
-    
-    fs.writeFileSync(filePath, JSON.stringify(filteredData, null, 2));
-    
-    return NextResponse.json({ success: true });
+
+    const result = await executeInsert(`
+      INSERT INTO produtos (
+        nome, categoria_id, descricao, preco, desconto, 
+        imagem, destaque, status, disponivel, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+    `, [
+      nome,
+      categoria_id,
+      descricao || '',
+      preco || 0,
+      desconto || 0,
+      imagem || '',
+      destaque ? 1 : 0,
+      status || 'ativo',
+      disponivel !== false ? 1 : 0
+    ]);
+
+    console.log(`✅ Produto criado com ID: ${result.insertId}`);
+
+    return NextResponse.json(
+      { 
+        id: result.insertId,
+        nome,
+        categoria_id,
+        descricao: descricao || '',
+        preco: preco || 0,
+        desconto: desconto || 0,
+        imagem: imagem || '',
+        destaque: destaque ? 1 : 0,
+        status: status || 'ativo',
+        disponivel: disponivel !== false ? 1 : 0,
+        message: 'Produto criado com sucesso'
+      },
+      { status: 201 }
+    );
   } catch (error) {
-    console.error('Erro ao deletar produto:', error);
-    return NextResponse.json({ success: false, error: 'Erro interno do servidor' }, { status: 500 });
+    console.error('❌ Erro ao criar produto:', error);
+    return NextResponse.json(
+      { error: 'Erro interno do servidor' },
+      { status: 500 }
+    );
   }
 }

@@ -54,8 +54,8 @@ export default function Footer() {
     <footer className="bg-[#0A3D2E] text-white">
       <div className="max-w-[1200px] mx-auto px-5 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* Logo e Descrição */}
-          <div className="md:col-span-1">
+          {/* Logo e Descrição - CENTRALIZADO NO MOBILE */}
+          <div className="md:col-span-1 text-center md:text-left">
             <Link href="/" className="inline-block mb-4">
               <Image
                 src={config.logoFooter}
@@ -70,8 +70,8 @@ export default function Footer() {
             </p>
           </div>
 
-          {/* Links Rápidos */}
-          <div>
+          {/* Links Rápidos - CENTRALIZADO NO MOBILE */}
+          <div className="text-center md:text-left">
             <h3 className="font-inter font-semibold text-white text-lg mb-4">
               Links Rápidos
             </h3>
@@ -111,8 +111,8 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Serviços */}
-          <div>
+          {/* Serviços - CENTRALIZADO NO MOBILE */}
+          <div className="text-center md:text-left">
             <h3 className="font-inter font-semibold text-white text-lg mb-4">
               Serviços
             </h3>
@@ -152,24 +152,20 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Contato */}
-          <div>
+          {/* Contato - CENTRALIZADO NO MOBILE */}
+          <div className="text-center md:text-left">
             <h3 className="font-inter font-semibold text-white text-lg mb-4">
               Contato
             </h3>
             <div className="space-y-3">
-              <div className="flex items-start space-x-3">
+              <div className="flex items-start space-x-3 justify-center md:justify-start">
                 <MapPin className="w-5 h-5 text-[#7FBA3D] mt-0.5 flex-shrink-0" />
                 <span className="font-inter text-gray-300 text-sm">
-                  {config.endereco.split(',').map((part, index) => (
-                    <span key={index}>
-                      {part.trim()}
-                      {index < config.endereco.split(',').length - 1 && <br />}
-                    </span>
-                  ))}
+                  R. Pres. Washington Luís<br />
+                  592 - João Pessoa
                 </span>
               </div>
-              <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-3 justify-center md:justify-start">
                 <Phone className="w-5 h-5 text-[#7FBA3D] flex-shrink-0" />
                 <a
                   href={`tel:+55${config.telefone.replace(/\D/g, '')}`}
@@ -178,7 +174,7 @@ export default function Footer() {
                   {config.telefone}
                 </a>
               </div>
-              <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-3 justify-center md:justify-start">
                 <Mail className="w-5 h-5 text-[#7FBA3D] flex-shrink-0" />
                 <a
                   href={`mailto:${config.email}`}
@@ -187,7 +183,7 @@ export default function Footer() {
                   {config.email}
                 </a>
               </div>
-              <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-3 justify-center md:justify-start">
                 <MessageCircle className="w-5 h-5 text-[#7FBA3D] flex-shrink-0" />
                 <a
                   href={whatsappLink}
@@ -204,7 +200,7 @@ export default function Footer() {
 
         {/* Linha divisória */}
         <div className="border-t border-gray-700 mt-8 pt-8">
-          <div className="flex flex-col md:flex-row justify-between items-center">
+          <div className="flex flex-col md:flex-row justify-between items-center text-center md:text-left">
             <p className="font-inter text-gray-400 text-sm">
               © 2024 ECOLAR. Todos os direitos reservados.
             </p>
