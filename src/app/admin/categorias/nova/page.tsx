@@ -2,14 +2,15 @@
 
 import AdminLayout from '@/components/AdminLayout';
 import ImageUpload from '@/components/ImageUpload';
-import { useData } from '@/contexts/DataContext';
 import { ArrowLeft, Save } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
+// Forçar renderização dinâmica
+export const dynamic = "force-dynamic";
+
 export default function NovaCategoria() {
-  const { adicionarCategoria } = useData();
   const router = useRouter();
   
   const [formData, setFormData] = useState({
@@ -44,15 +45,28 @@ export default function NovaCategoria() {
     setIsSubmitting(true);
 
     try {
-      adicionarCategoria({
+      const categoriaData = {
         nome: formData.nome,
         descricao: formData.descricao,
         slug: formData.slug || generateSlug(formData.nome),
         imagem: formData.imagem,
         cor: formData.cor
+      };
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/categorias`, {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          'X-Admin-Key': process.env.NEXT_PUBLIC_ADMIN_API_KEY || ''
+        },
+        body: JSON.stringify(categoriaData),
       });
 
-      router.push('/admin/categorias');
+      if (response.ok) {
+        router.push('/admin/categorias');
+      } else {
+        throw new Error('Erro ao criar categoria');
+      }
     } catch (error) {
       console.error('Erro ao criar categoria:', error);
       alert('Erro ao criar categoria. Tente novamente.');

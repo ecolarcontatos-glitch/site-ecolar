@@ -3,65 +3,57 @@ import { testConnection, executeQuery } from '@/lib/db';
 
 export async function GET() {
   try {
-    console.log('🔧 Testando conexão com banco MySQL...');
+    console.log('🔍 Iniciando teste de conexão...');
     
-    // Teste básico de conexão
+    // Verificar variáveis de ambiente
+    const envVars = {
+      DB_HOST: process.env.DB_HOST,
+      DB_PORT: process.env.DB_PORT,
+      DB_USER: process.env.DB_USER,
+      DB_NAME: process.env.DB_NAME,
+      DB_PASSWORD: process.env.DB_PASSWORD ? '[DEFINIDA]' : '[NÃO DEFINIDA]'
+    };
+    
+    console.log('🔧 Variáveis de ambiente:', envVars);
+    
+    // Testar conexão
     const connectionOk = await testConnection();
     
     if (!connectionOk) {
       return NextResponse.json({
         success: false,
-        message: 'Falha na conexão com o banco de dados',
-        env: {
-          host: process.env.DB_HOST,
-          port: process.env.DB_PORT,
-          user: process.env.DB_USER,
-          database: process.env.DB_NAME,
-          password: process.env.DB_PASSWORD ? 'DEFINIDA' : 'NÃO DEFINIDA'
-        }
+        message: 'Falha na conexão com o banco',
+        envVars
       }, { status: 500 });
     }
-
-    // Teste das tabelas
-    const tabelas = await executeQuery(`
-      SELECT TABLE_NAME, TABLE_ROWS 
-      FROM information_schema.TABLES 
-      WHERE TABLE_SCHEMA = ? AND TABLE_TYPE = 'BASE TABLE'
-    `, [process.env.DB_NAME]);
-
-    console.log('📊 Tabelas encontradas:', tabelas);
-
-    // Contar registros nas tabelas principais
-    const countProdutos = await executeQuery('SELECT COUNT(*) as total FROM produtos');
-    const countCategorias = await executeQuery('SELECT COUNT(*) as total FROM categorias');
-
+    
+    // Testar query básica
+    const result = await executeQuery('SELECT DATABASE() as current_db, CONNECTION_ID() as connection_id');
+    
+    // Testar se as tabelas existem
+    const tables = await executeQuery('SHOW TABLES');
+    
     return NextResponse.json({
       success: true,
-      message: 'Conexão com MySQL estabelecida com sucesso',
-      database: process.env.DB_NAME,
-      host: process.env.DB_HOST,
-      tabelas: tabelas.map(t => ({
-        nome: t.TABLE_NAME,
-        registros: t.TABLE_ROWS
-      })),
-      contadores: {
-        produtos: countProdutos[0]?.total || 0,
-        categorias: countCategorias[0]?.total || 0
-      }
+      message: 'Conexão estabelecida com sucesso',
+      database: result[0],
+      tables: tables.map((t: any) => Object.values(t)[0]),
+      envVars
     });
-
+    
   } catch (error) {
     console.error('❌ Erro no teste de conexão:', error);
+    
     return NextResponse.json({
       success: false,
       message: 'Erro no teste de conexão',
       error: error instanceof Error ? error.message : 'Erro desconhecido',
-      env: {
-        host: process.env.DB_HOST,
-        port: process.env.DB_PORT,
-        user: process.env.DB_USER,
-        database: process.env.DB_NAME,
-        password: process.env.DB_PASSWORD ? 'DEFINIDA' : 'NÃO DEFINIDA'
+      envVars: {
+        DB_HOST: process.env.DB_HOST,
+        DB_PORT: process.env.DB_PORT,
+        DB_USER: process.env.DB_USER,
+        DB_NAME: process.env.DB_NAME,
+        DB_PASSWORD: process.env.DB_PASSWORD ? '[DEFINIDA]' : '[NÃO DEFINIDA]'
       }
     }, { status: 500 });
   }

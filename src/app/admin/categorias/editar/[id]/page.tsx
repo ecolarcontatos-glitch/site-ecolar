@@ -4,36 +4,70 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import AdminLayout from '@/components/AdminLayout';
 import ImageUpload from '@/components/ImageUpload';
-import { useData } from '@/contexts/DataContext';
 import { ArrowLeft, Save } from 'lucide-react';
 import Link from 'next/link';
+
+// Forçar renderização dinâmica
+export const dynamic = "force-dynamic";
+
+interface Categoria {
+  id: string;
+  nome: string;
+  descricao: string;
+  slug: string;
+  imagem: string;
+  cor?: string;
+}
 
 export default function EditarCategoria() {
   const router = useRouter();
   const params = useParams();
-  const { categorias, atualizarCategoria } = useData();
-  const [loading, setLoading] = useState(false);
+  const [categoria, setCategoria] = useState<Categoria | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
     nome: '',
     descricao: '',
     slug: '',
     imagem: '',
-    cor: '#7FBA3D'
+    cor: '#C05A2B'
   });
 
+  // Buscar categoria da API
   useEffect(() => {
-    const categoria = categorias.find(c => c.id === params.id);
-    if (categoria) {
-      setFormData({
-        nome: categoria.nome,
-        descricao: categoria.descricao,
-        slug: categoria.slug,
-        imagem: categoria.imagem,
-        cor: categoria.cor || '#7FBA3D'
-      });
+    const fetchCategoria = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/categorias/${params.id}`, {
+          cache: "no-store",
+          headers: {
+            'X-Admin-Key': process.env.NEXT_PUBLIC_ADMIN_API_KEY || ''
+          }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          setCategoria(data);
+          setFormData({
+            nome: data.nome,
+            descricao: data.descricao,
+            slug: data.slug,
+            imagem: data.imagem,
+            cor: data.cor || '#C05A2B'
+          });
+        }
+      } catch (error) {
+        console.error('Erro ao buscar categoria:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (params.id) {
+      fetchCategoria();
     }
-  }, [categorias, params.id]);
+  }, [params.id]);
 
   const generateSlug = (nome: string) => {
     return nome
@@ -54,23 +88,36 @@ export default function EditarCategoria() {
       return;
     }
 
-    setLoading(true);
+    setIsSubmitting(true);
 
     try {
-      atualizarCategoria(params.id as string, {
+      const categoriaData = {
         nome: formData.nome,
         descricao: formData.descricao,
         slug: formData.slug || generateSlug(formData.nome),
         imagem: formData.imagem,
         cor: formData.cor
+      };
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/categorias/${params.id}`, {
+        method: "PUT",
+        headers: { 
+          "Content-Type": "application/json",
+          'X-Admin-Key': process.env.NEXT_PUBLIC_ADMIN_API_KEY || ''
+        },
+        body: JSON.stringify(categoriaData),
       });
 
-      router.push('/admin/categorias');
+      if (response.ok) {
+        router.push('/admin/categorias');
+      } else {
+        throw new Error('Erro ao atualizar categoria');
+      }
     } catch (error) {
       console.error('Erro ao atualizar categoria:', error);
       alert('Erro ao atualizar categoria. Tente novamente.');
     } finally {
-      setLoading(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -81,7 +128,19 @@ export default function EditarCategoria() {
     }));
   };
 
-  const categoria = categorias.find(c => c.id === params.id);
+  if (loading) {
+    return (
+      <AdminLayout>
+        <div className="flex items-center justify-center py-12">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#C05A2B] mx-auto mb-4"></div>
+            <p className="text-gray-600">Carregando categoria...</p>
+          </div>
+        </div>
+      </AdminLayout>
+    );
+  }
+
   if (!categoria) {
     return (
       <AdminLayout>
@@ -89,7 +148,7 @@ export default function EditarCategoria() {
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Categoria não encontrada</h1>
           <Link
             href="/admin/categorias"
-            className="text-[#7FBA3D] hover:text-[#0A3D2E] font-medium"
+            className="text-[#C05A2B] hover:text-[#A0481F] font-medium"
           >
             Voltar para categorias
           </Link>
@@ -195,7 +254,7 @@ export default function EditarCategoria() {
                         value={formData.cor}
                         onChange={(e) => handleChange('cor', e.target.value)}
                         className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C05A2B] focus:border-transparent"
-                        placeholder="#7FBA3D"
+                        placeholder="#C05A2B"
                       />
                     </div>
                   </div>
@@ -223,11 +282,11 @@ export default function EditarCategoria() {
                 <div className="space-y-3">
                   <button
                     type="submit"
-                    disabled={loading}
+                    disabled={isSubmitting}
                     className="w-full flex items-center justify-center space-x-2 bg-[#C05A2B] text-white px-6 py-3 rounded-2xl hover:bg-[#A0481F] transition-colors duration-200 font-inter font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <Save className="w-5 h-5" />
-                    <span>{loading ? 'Salvando...' : 'Salvar Alterações'}</span>
+                    <span>{isSubmitting ? 'Salvando...' : 'Salvar Alterações'}</span>
                   </button>
 
                   <Link

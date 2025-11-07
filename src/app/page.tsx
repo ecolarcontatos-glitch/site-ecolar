@@ -3,61 +3,98 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight, MessageCircle, Star, Users, Truck, Clock } from 'lucide-react';
-import { useData } from '@/contexts/DataContext';
 import ProductCard from '@/components/ProductCard';
 import { useState, useEffect } from 'react';
 
 export default function HomePage() {
-  const { produtos, categorias, depoimentos, inspiracoes } = useData();
+  const [produtos, setProdutos] = useState([]);
+  const [categorias, setCategorias] = useState([]);
+  const [depoimentos, setDepoimentos] = useState([]);
+  const [inspiracoes, setInspiracoes] = useState([]);
   const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [heroImages, setHeroImages] = useState([
     "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=1920&h=1080&fit=crop",
     "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=1920&h=1080&fit=crop",
     "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1920&h=1080&fit=crop",
     "https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=1920&h=1080&fit=crop"
   ]);
+
+  // Buscar dados da API
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        
+        // Buscar produtos
+        const produtosResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/produtos`, { 
+          cache: "no-store" 
+        });
+        if (produtosResponse.ok) {
+          const produtosData = await produtosResponse.json();
+          setProdutos(produtosData);
+        }
+
+        // Buscar categorias
+        const categoriasResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/categorias`, { 
+          cache: "no-store" 
+        });
+        if (categoriasResponse.ok) {
+          const categoriasData = await categoriasResponse.json();
+          setCategorias(categoriasData);
+        }
+
+        // Buscar depoimentos (localStorage por enquanto)
+        if (typeof window !== 'undefined') {
+          const storedDepoimentos = localStorage.getItem('ecolar_depoimentos');
+          if (storedDepoimentos) {
+            setDepoimentos(JSON.parse(storedDepoimentos));
+          }
+
+          // Buscar inspirações (localStorage por enquanto)
+          const storedInspiracoes = localStorage.getItem('ecolar_inspiracoes');
+          if (storedInspiracoes) {
+            setInspiracoes(JSON.parse(storedInspiracoes));
+          }
+
+          // Buscar posts (localStorage por enquanto)
+          const storedPosts = localStorage.getItem('ecolar_posts');
+          if (storedPosts) {
+            const parsedPosts = JSON.parse(storedPosts);
+            const sortedPosts = parsedPosts.sort((a, b) => new Date(b.data) - new Date(a.data));
+            setPosts(sortedPosts);
+          }
+
+          // Buscar configurações do hero
+          const storedConfig = localStorage.getItem('ecolar_config');
+          if (storedConfig) {
+            try {
+              const parsedConfig = JSON.parse(storedConfig);
+              if (parsedConfig.heroImages && parsedConfig.heroImages.length > 0) {
+                const sortedImages = parsedConfig.heroImages
+                  .sort((a, b) => a.order - b.order)
+                  .map(img => img.url);
+                setHeroImages(sortedImages);
+              }
+            } catch (error) {
+              console.error('Erro ao carregar configurações do hero:', error);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Erro ao buscar dados:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
   
   // FILTRO CRÍTICO: Apenas produtos disponíveis aparecem no site
   const produtosDisponiveis = produtos.filter(p => p.disponivel !== false);
   const produtosDestaque = produtosDisponiveis.filter(p => p.destaque).slice(0, 6);
   const categoriasPrincipais = categorias.slice(0, 4); // Apenas 4 categorias
-
-  // Carregar posts do localStorage
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const storedPosts = localStorage.getItem('ecolar_posts');
-      if (storedPosts) {
-        const parsedPosts = JSON.parse(storedPosts);
-        // Ordenar por data decrescente (mais recente primeiro)
-        const sortedPosts = parsedPosts.sort((a, b) => new Date(b.data) - new Date(a.data));
-        setPosts(sortedPosts);
-      }
-    }
-  }, []);
-
-  // Carregar configurações do hero do localStorage
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const storedConfig = localStorage.getItem('ecolar_config');
-      if (storedConfig) {
-        try {
-          const parsedConfig = JSON.parse(storedConfig);
-          if (parsedConfig.heroImages && parsedConfig.heroImages.length > 0) {
-            // Ordenar por ordem e extrair apenas as URLs
-            const sortedImages = parsedConfig.heroImages
-              .sort((a, b) => a.order - b.order)
-              .map(img => img.url);
-            setHeroImages(sortedImages);
-          }
-        } catch (error) {
-          console.error('Erro ao carregar configurações do hero:', error);
-        }
-      }
-    }
-  }, []);
-
-  // Post mais recente para destaque
-  const postDestaque = posts.length > 0 ? posts[0] : null;
 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
@@ -70,6 +107,17 @@ export default function HomePage() {
 
     return () => clearInterval(interval);
   }, [heroImages.length]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#7FBA3D] mx-auto mb-4"></div>
+          <p className="text-gray-600">Carregando...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen">

@@ -1,33 +1,124 @@
 'use client';
 
 import AdminLayout from '@/components/AdminLayout';
-import { useData } from '@/contexts/DataContext';
 import { FolderOpen, Plus, Edit, Trash2, Search } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+
+// Forçar renderização dinâmica
+export const dynamic = "force-dynamic";
+
+interface Categoria {
+  id: string;
+  nome: string;
+  descricao: string;
+  slug: string;
+  imagem: string;
+  cor?: string;
+}
+
+interface Produto {
+  id: string;
+  categoria: string;
+}
 
 export default function AdminCategorias() {
-  const { categorias, produtos, removerCategoria } = useData();
+  const [categorias, setCategorias] = useState<Categoria[]>([]);
+  const [produtos, setProdutos] = useState<Produto[]>([]);
+  const [loading, setLoading] = useState(true);
   const [busca, setBusca] = useState('');
+
+  // Buscar dados da API
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        
+        // Buscar categorias
+        const categoriasResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/categorias`, { 
+          cache: "no-store",
+          headers: {
+            'X-Admin-Key': process.env.NEXT_PUBLIC_ADMIN_API_KEY || ''
+          }
+        });
+        
+        if (categoriasResponse.ok) {
+          const categoriasData = await categoriasResponse.json();
+          setCategorias(categoriasData);
+        }
+
+        // Buscar produtos para contar por categoria
+        const produtosResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/produtos`, { 
+          cache: "no-store",
+          headers: {
+            'X-Admin-Key': process.env.NEXT_PUBLIC_ADMIN_API_KEY || ''
+          }
+        });
+        
+        if (produtosResponse.ok) {
+          const produtosData = await produtosResponse.json();
+          setProdutos(produtosData);
+        }
+      } catch (error) {
+        console.error('Erro ao buscar dados:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const categoriasFiltradas = categorias.filter(categoria =>
     categoria.nome.toLowerCase().includes(busca.toLowerCase()) ||
     categoria.descricao.toLowerCase().includes(busca.toLowerCase())
   );
 
-  const handleRemover = (id: string, nome: string) => {
-    const produtosNaCategoria = produtos.filter(p => p.categoria_id === id).length;
+  const handleRemover = async (id: string, nome: string) => {
+    const produtosNaCategoria = produtos.filter(p => p.categoria === id).length;
     
     if (produtosNaCategoria > 0) {
       alert(`Não é possível remover a categoria "${nome}" pois ela possui ${produtosNaCategoria} produto(s) vinculado(s).`);
       return;
     }
 
-    if (confirm(`Tem certeza que deseja remover a categoria "${nome}"?`)) {
-      removerCategoria(id);
+    if (!confirm(`Tem certeza que deseja remover a categoria "${nome}"?`)) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/categorias/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'X-Admin-Key': process.env.NEXT_PUBLIC_ADMIN_API_KEY || ''
+        }
+      });
+
+      if (response.ok) {
+        // Remover do estado local
+        setCategorias(prev => prev.filter(c => c.id !== id));
+      } else {
+        alert('Erro ao remover categoria. Tente novamente.');
+      }
+    } catch (error) {
+      console.error('Erro ao remover categoria:', error);
+      alert('Erro ao remover categoria. Tente novamente.');
     }
   };
+
+  if (loading) {
+    return (
+      <AdminLayout>
+        <div className="flex items-center justify-center py-12">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#C05A2B] mx-auto mb-4"></div>
+            <p className="text-gray-600">Carregando categorias...</p>
+          </div>
+        </div>
+      </AdminLayout>
+    );
+  }
 
   return (
     <AdminLayout>
@@ -81,7 +172,7 @@ export default function AdminCategorias() {
               <div>
                 <p className="font-inter text-[#6b7280] text-sm">Produtos Categorizados</p>
                 <p className="font-inter font-bold text-2xl text-[#111827]">
-                  {produtos.filter(p => p.categoria_id).length}
+                  {produtos.filter(p => p.categoria).length}
                 </p>
               </div>
               <FolderOpen className="w-8 h-8 text-[#7FBA3D]" />
@@ -92,7 +183,7 @@ export default function AdminCategorias() {
               <div>
                 <p className="font-inter text-[#6b7280] text-sm">Sem Categoria</p>
                 <p className="font-inter font-bold text-2xl text-[#111827]">
-                  {produtos.filter(p => !p.categoria_id).length}
+                  {produtos.filter(p => !p.categoria).length}
                 </p>
               </div>
               <FolderOpen className="w-8 h-8 text-red-500" />
@@ -122,7 +213,7 @@ export default function AdminCategorias() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
               {categoriasFiltradas.map((categoria) => {
-                const produtosNaCategoria = produtos.filter(p => p.categoria_id === categoria.id).length;
+                const produtosNaCategoria = produtos.filter(p => p.categoria === categoria.id).length;
                 return (
                   <div
                     key={categoria.id}
@@ -130,7 +221,7 @@ export default function AdminCategorias() {
                   >
                     <div className="relative aspect-[4/3]">
                       <Image
-                        src={categoria.imagem}
+                        src={categoria.imagem || '/placeholder.webp'}
                         alt={categoria.nome}
                         fill
                         className="object-cover"
