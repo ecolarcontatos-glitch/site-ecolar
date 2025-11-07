@@ -2,15 +2,22 @@
 
 import AdminLayout from '@/components/AdminLayout';
 import ImageUpload from '@/components/ImageUpload';
-import { useData } from '@/contexts/DataContext';
 import { ArrowLeft, Save } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+
+// Forçar renderização dinâmica
+export const dynamic = "force-dynamic";
+
+interface Categoria {
+  id: string;
+  nome: string;
+}
 
 export default function NovoProduto() {
-  const { categorias, adicionarProduto } = useData();
   const router = useRouter();
+  const [categorias, setCategorias] = useState<Categoria[]>([]);
   
   const [formData, setFormData] = useState({
     nome: '',
@@ -24,6 +31,29 @@ export default function NovoProduto() {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Buscar categorias da API
+  useEffect(() => {
+    const fetchCategorias = async () => {
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/categorias`, {
+          cache: "no-store",
+          headers: {
+            'X-Admin-Key': process.env.NEXT_PUBLIC_ADMIN_API_KEY || ''
+          }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          setCategorias(data);
+        }
+      } catch (error) {
+        console.error('Erro ao buscar categorias:', error);
+      }
+    };
+
+    fetchCategorias();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,7 +77,7 @@ export default function NovoProduto() {
     setIsSubmitting(true);
 
     try {
-      adicionarProduto({
+      const produtoData = {
         nome: formData.nome,
         descricao: formData.descricao,
         imagem: formData.imagem,
@@ -55,10 +85,24 @@ export default function NovoProduto() {
         preco: parseFloat(formData.preco),
         desconto: formData.desconto ? parseFloat(formData.desconto) : undefined,
         unidade: formData.unidade,
-        destaque: formData.destaque
+        destaque: formData.destaque,
+        disponivel: true
+      };
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/produtos`, {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          'X-Admin-Key': process.env.NEXT_PUBLIC_ADMIN_API_KEY || ''
+        },
+        body: JSON.stringify(produtoData),
       });
 
-      router.push('/admin/produtos');
+      if (response.ok) {
+        router.push('/admin/produtos');
+      } else {
+        throw new Error('Erro ao criar produto');
+      }
     } catch (error) {
       console.error('Erro ao criar produto:', error);
       alert('Erro ao criar produto. Tente novamente.');

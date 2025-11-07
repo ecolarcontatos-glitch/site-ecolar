@@ -1,22 +1,125 @@
 'use client';
 
 import AdminLayout from '@/components/AdminLayout';
-import { useData } from '@/contexts/DataContext';
 import { Plus, Edit, Trash2, Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+
+// Forçar renderização dinâmica
+export const dynamic = "force-dynamic";
+
+interface Produto {
+  id: string;
+  nome: string;
+  descricao: string;
+  imagem: string;
+  categoria: string;
+  preco: number;
+  desconto?: number;
+  unidade: string;
+  destaque: boolean;
+  disponivel: boolean;
+}
+
+interface Categoria {
+  id: string;
+  nome: string;
+}
 
 export default function ProdutosPage() {
-  const { produtos, categorias, atualizarProduto, removerProduto } = useData();
+  const [produtos, setProdutos] = useState<Produto[]>([]);
+  const [categorias, setCategorias] = useState<Categoria[]>([]);
+  const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('todos');
+
+  // Buscar dados da API
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        
+        // Buscar produtos
+        const produtosResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/produtos`, { 
+          cache: "no-store",
+          headers: {
+            'X-Admin-Key': process.env.NEXT_PUBLIC_ADMIN_API_KEY || ''
+          }
+        });
+        
+        if (produtosResponse.ok) {
+          const produtosData = await produtosResponse.json();
+          setProdutos(produtosData);
+        }
+
+        // Buscar categorias
+        const categoriasResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/categorias`, { 
+          cache: "no-store",
+          headers: {
+            'X-Admin-Key': process.env.NEXT_PUBLIC_ADMIN_API_KEY || ''
+          }
+        });
+        
+        if (categoriasResponse.ok) {
+          const categoriasData = await categoriasResponse.json();
+          setCategorias(categoriasData);
+        }
+      } catch (error) {
+        console.error('Erro ao buscar dados:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const getCategoriaById = (id: string) => {
     return categorias.find(c => c.id === id);
   };
 
-  const toggleDisponibilidade = (produtoId: string, disponivel: boolean) => {
-    atualizarProduto(produtoId, { disponivel: !disponivel });
+  const toggleDisponibilidade = async (produtoId: string, disponivel: boolean) => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/produtos/${produtoId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Admin-Key': process.env.NEXT_PUBLIC_ADMIN_API_KEY || ''
+        },
+        body: JSON.stringify({ disponivel: !disponivel })
+      });
+
+      if (response.ok) {
+        // Atualizar estado local
+        setProdutos(prev => prev.map(p => 
+          p.id === produtoId ? { ...p, disponivel: !disponivel } : p
+        ));
+      }
+    } catch (error) {
+      console.error('Erro ao atualizar disponibilidade:', error);
+    }
+  };
+
+  const removerProduto = async (produtoId: string) => {
+    if (!confirm('Tem certeza que deseja excluir este produto?')) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/produtos/${produtoId}`, {
+        method: 'DELETE',
+        headers: {
+          'X-Admin-Key': process.env.NEXT_PUBLIC_ADMIN_API_KEY || ''
+        }
+      });
+
+      if (response.ok) {
+        // Remover do estado local
+        setProdutos(prev => prev.filter(p => p.id !== produtoId));
+      }
+    } catch (error) {
+      console.error('Erro ao remover produto:', error);
+    }
   };
 
   const filteredProdutos = produtos.filter(produto => {
@@ -24,6 +127,19 @@ export default function ProdutosPage() {
     if (filter === 'indisponiveis') return produto.disponivel === false;
     return true;
   });
+
+  if (loading) {
+    return (
+      <AdminLayout>
+        <div className="flex items-center justify-center py-12">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#7FBA3D] mx-auto mb-4"></div>
+            <p className="text-gray-600">Carregando produtos...</p>
+          </div>
+        </div>
+      </AdminLayout>
+    );
+  }
 
   return (
     <AdminLayout>
@@ -196,11 +312,7 @@ export default function ProdutosPage() {
                               <Edit className="w-4 h-4" />
                             </Link>
                             <button
-                              onClick={() => {
-                                if (confirm('Tem certeza que deseja excluir este produto?')) {
-                                  removerProduto(produto.id);
-                                }
-                              }}
+                              onClick={() => removerProduto(produto.id)}
                               className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50"
                             >
                               <Trash2 className="w-4 h-4" />

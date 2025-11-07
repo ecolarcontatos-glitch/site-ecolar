@@ -4,15 +4,37 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import AdminLayout from '@/components/AdminLayout';
 import ImageUpload from '@/components/ImageUpload';
-import { useData } from '@/contexts/DataContext';
 import { ArrowLeft, Save } from 'lucide-react';
 import Link from 'next/link';
+
+// Forçar renderização dinâmica
+export const dynamic = "force-dynamic";
+
+interface Produto {
+  id: string;
+  nome: string;
+  descricao: string;
+  categoria: string;
+  preco: number;
+  desconto?: number;
+  unidade: string;
+  imagem: string;
+  destaque: boolean;
+  disponivel: boolean;
+}
+
+interface Categoria {
+  id: string;
+  nome: string;
+}
 
 export default function EditarProduto() {
   const router = useRouter();
   const params = useParams();
-  const { produtos, categorias, atualizarProduto } = useData();
-  const [loading, setLoading] = useState(false);
+  const [produto, setProduto] = useState<Produto | null>(null);
+  const [categorias, setCategorias] = useState<Categoria[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
     nome: '',
@@ -22,24 +44,63 @@ export default function EditarProduto() {
     desconto: '',
     unidade: 'unidade',
     imagem: '',
-    destaque: false
+    destaque: false,
+    disponivel: true
   });
 
+  // Buscar produto e categorias da API
   useEffect(() => {
-    const produto = produtos.find(p => p.id === params.id);
-    if (produto) {
-      setFormData({
-        nome: produto.nome,
-        descricao: produto.descricao,
-        categoria: produto.categoria,
-        preco: (Number(produto.preco) || 0).toString(),
-        desconto: produto.desconto ? (Number(produto.desconto) || 0).toString() : '',
-        unidade: produto.unidade || 'unidade',
-        imagem: produto.imagem,
-        destaque: produto.destaque || false
-      });
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        
+        // Buscar produto específico
+        const produtoResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/produtos/${params.id}`, {
+          cache: "no-store",
+          headers: {
+            'X-Admin-Key': process.env.NEXT_PUBLIC_ADMIN_API_KEY || ''
+          }
+        });
+        
+        if (produtoResponse.ok) {
+          const produtoData = await produtoResponse.json();
+          setProduto(produtoData);
+          setFormData({
+            nome: produtoData.nome,
+            descricao: produtoData.descricao,
+            categoria: produtoData.categoria,
+            preco: (Number(produtoData.preco) || 0).toString(),
+            desconto: produtoData.desconto ? (Number(produtoData.desconto) || 0).toString() : '',
+            unidade: produtoData.unidade || 'unidade',
+            imagem: produtoData.imagem,
+            destaque: produtoData.destaque || false,
+            disponivel: produtoData.disponivel !== false
+          });
+        }
+
+        // Buscar categorias
+        const categoriasResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/categorias`, {
+          cache: "no-store",
+          headers: {
+            'X-Admin-Key': process.env.NEXT_PUBLIC_ADMIN_API_KEY || ''
+          }
+        });
+        
+        if (categoriasResponse.ok) {
+          const categoriasData = await categoriasResponse.json();
+          setCategorias(categoriasData);
+        }
+      } catch (error) {
+        console.error('Erro ao buscar dados:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (params.id) {
+      fetchData();
     }
-  }, [produtos, params.id]);
+  }, [params.id]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,10 +121,10 @@ export default function EditarProduto() {
       return;
     }
 
-    setLoading(true);
+    setIsSubmitting(true);
 
     try {
-      atualizarProduto(params.id as string, {
+      const produtoData = {
         nome: formData.nome,
         descricao: formData.descricao,
         categoria: formData.categoria,
@@ -71,15 +132,29 @@ export default function EditarProduto() {
         desconto: formData.desconto ? parseFloat(formData.desconto) : undefined,
         unidade: formData.unidade,
         imagem: formData.imagem,
-        destaque: formData.destaque
+        destaque: formData.destaque,
+        disponivel: formData.disponivel
+      };
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/produtos/${params.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Admin-Key': process.env.NEXT_PUBLIC_ADMIN_API_KEY || ''
+        },
+        body: JSON.stringify(produtoData)
       });
 
-      router.push('/admin/produtos');
+      if (response.ok) {
+        router.push('/admin/produtos');
+      } else {
+        throw new Error('Erro ao atualizar produto');
+      }
     } catch (error) {
       console.error('Erro ao atualizar produto:', error);
       alert('Erro ao atualizar produto. Tente novamente.');
     } finally {
-      setLoading(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -90,7 +165,19 @@ export default function EditarProduto() {
     }));
   };
 
-  const produto = produtos.find(p => p.id === params.id);
+  if (loading) {
+    return (
+      <AdminLayout>
+        <div className="flex items-center justify-center py-12">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#7FBA3D] mx-auto mb-4"></div>
+            <p className="text-gray-600">Carregando produto...</p>
+          </div>
+        </div>
+      </AdminLayout>
+    );
+  }
+
   if (!produto) {
     return (
       <AdminLayout>
@@ -310,6 +397,19 @@ export default function EditarProduto() {
                       Produto em destaque
                     </label>
                   </div>
+
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      id="disponivel"
+                      checked={formData.disponivel}
+                      onChange={(e) => handleChange('disponivel', e.target.checked)}
+                      className="h-4 w-4 text-[#7FBA3D] focus:ring-[#7FBA3D] border-gray-300 rounded"
+                    />
+                    <label htmlFor="disponivel" className="ml-2 block text-sm text-gray-700">
+                      Produto disponível
+                    </label>
+                  </div>
                 </div>
               </div>
 
@@ -318,11 +418,11 @@ export default function EditarProduto() {
                 <div className="space-y-3">
                   <button
                     type="submit"
-                    disabled={loading}
+                    disabled={isSubmitting}
                     className="w-full flex items-center justify-center space-x-2 bg-[#7FBA3D] text-white px-6 py-3 rounded-2xl hover:bg-[#0A3D2E] transition-colors duration-200 font-inter font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <Save className="w-5 h-5" />
-                    <span>{loading ? 'Salvando...' : 'Salvar Alterações'}</span>
+                    <span>{isSubmitting ? 'Salvando...' : 'Salvar Alterações'}</span>
                   </button>
 
                   <Link
