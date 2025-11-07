@@ -1,13 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { executeQuery, executeUpdate, executeDelete } from '@/lib/db';
+import { executeQuery, executeUpdate, executeDelete, testConnection } from '@/lib/db';
 
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
+    // Teste de conexão antes de executar queries
+    const connectionOk = await testConnection();
+    if (!connectionOk) {
+      console.error('❌ Falha na conexão com o banco de dados');
+      return NextResponse.json(
+        { error: 'Erro de conexão com banco de dados' },
+        { status: 500 }
+      );
+    }
+
     const id = parseInt(params.id);
-    console.log(`📋 Buscando produto ID: ${id}`);
+    console.log(`📋 Buscando produto ID: ${id} no MySQL`);
 
     if (isNaN(id)) {
       return NextResponse.json(
@@ -27,19 +37,19 @@ export async function GET(
     `, [id]);
 
     if (produtos.length === 0) {
-      console.log(`❌ Produto ID ${id} não encontrado`);
+      console.log(`❌ Produto ID ${id} não encontrado no MySQL`);
       return NextResponse.json(
         { error: 'Produto não encontrado' },
         { status: 404 }
       );
     }
 
-    console.log(`✅ Produto encontrado: ${produtos[0].nome}`);
+    console.log(`✅ Produto encontrado no MySQL: ${produtos[0].nome}`);
     return NextResponse.json(produtos[0]);
   } catch (error) {
     console.error('❌ Erro ao buscar produto:', error);
     return NextResponse.json(
-      { error: 'Erro interno do servidor' },
+      { error: 'Erro interno do servidor', details: error instanceof Error ? error.message : 'Erro desconhecido' },
       { status: 500 }
     );
   }
@@ -50,6 +60,16 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
+    // Teste de conexão antes de executar queries
+    const connectionOk = await testConnection();
+    if (!connectionOk) {
+      console.error('❌ Falha na conexão com o banco de dados');
+      return NextResponse.json(
+        { error: 'Erro de conexão com banco de dados' },
+        { status: 500 }
+      );
+    }
+
     const id = parseInt(params.id);
     const body = await request.json();
     const { 
@@ -57,7 +77,7 @@ export async function PUT(
       imagem, destaque, disponivel, unidade 
     } = body;
 
-    console.log(`✏️ Atualizando produto ID: ${id}`, { nome, categoria_id, unidade });
+    console.log(`✏️ Atualizando produto ID: ${id} no MySQL`, { nome, categoria_id, unidade });
 
     if (isNaN(id)) {
       return NextResponse.json(
@@ -92,14 +112,25 @@ export async function PUT(
     ]);
 
     if (result.affectedRows === 0) {
-      console.log(`❌ Produto ID ${id} não encontrado para atualização`);
+      console.log(`❌ Produto ID ${id} não encontrado para atualização no MySQL`);
       return NextResponse.json(
         { error: 'Produto não encontrado' },
         { status: 404 }
       );
     }
 
-    console.log(`✅ Produto ID ${id} atualizado com sucesso`);
+    console.log(`✅ Produto ID ${id} atualizado com sucesso no MySQL`);
+    
+    // Verificar se o produto foi realmente atualizado
+    const produtoAtualizado = await executeQuery(
+      'SELECT * FROM produtos WHERE id = ?', 
+      [id]
+    );
+    
+    if (produtoAtualizado.length > 0) {
+      console.log('✅ Confirmado: produto atualizado no banco:', produtoAtualizado[0]);
+    }
+
     return NextResponse.json({
       id,
       nome,
@@ -111,12 +142,12 @@ export async function PUT(
       destaque: destaque ? 1 : 0,
       disponivel: disponivel !== false ? 1 : 0,
       unidade: unidade || 'unidade',
-      message: 'Produto atualizado com sucesso'
+      message: 'Produto atualizado com sucesso no MySQL'
     });
   } catch (error) {
     console.error('❌ Erro ao atualizar produto:', error);
     return NextResponse.json(
-      { error: 'Erro interno do servidor' },
+      { error: 'Erro interno do servidor', details: error instanceof Error ? error.message : 'Erro desconhecido' },
       { status: 500 }
     );
   }
@@ -127,8 +158,18 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
+    // Teste de conexão antes de executar queries
+    const connectionOk = await testConnection();
+    if (!connectionOk) {
+      console.error('❌ Falha na conexão com o banco de dados');
+      return NextResponse.json(
+        { error: 'Erro de conexão com banco de dados' },
+        { status: 500 }
+      );
+    }
+
     const id = parseInt(params.id);
-    console.log(`🗑️ Deletando produto ID: ${id}`);
+    console.log(`🗑️ Deletando produto ID: ${id} do MySQL`);
 
     if (isNaN(id)) {
       return NextResponse.json(
@@ -142,21 +183,21 @@ export async function DELETE(
     `, [id]);
 
     if (result.affectedRows === 0) {
-      console.log(`❌ Produto ID ${id} não encontrado para deleção`);
+      console.log(`❌ Produto ID ${id} não encontrado para deleção no MySQL`);
       return NextResponse.json(
         { error: 'Produto não encontrado' },
         { status: 404 }
       );
     }
 
-    console.log(`✅ Produto ID ${id} deletado com sucesso`);
+    console.log(`✅ Produto ID ${id} deletado com sucesso do MySQL`);
     return NextResponse.json({
-      message: 'Produto deletado com sucesso'
+      message: 'Produto deletado com sucesso do MySQL'
     });
   } catch (error) {
     console.error('❌ Erro ao deletar produto:', error);
     return NextResponse.json(
-      { error: 'Erro interno do servidor' },
+      { error: 'Erro interno do servidor', details: error instanceof Error ? error.message : 'Erro desconhecido' },
       { status: 500 }
     );
   }

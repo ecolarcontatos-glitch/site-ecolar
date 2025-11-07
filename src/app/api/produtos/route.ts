@@ -1,8 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { executeQuery, executeInsert } from '@/lib/db';
+import { executeQuery, executeInsert, testConnection } from '@/lib/db';
 
 export async function GET(request: NextRequest) {
   try {
+    // Teste de conexão antes de executar queries
+    const connectionOk = await testConnection();
+    if (!connectionOk) {
+      console.error('❌ Falha na conexão com o banco de dados');
+      return NextResponse.json(
+        { error: 'Erro de conexão com banco de dados' },
+        { status: 500 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const categoria = searchParams.get('categoria');
     const destaque = searchParams.get('destaque');
@@ -39,12 +49,18 @@ export async function GET(request: NextRequest) {
 
     const produtos = await executeQuery(query, params);
 
-    console.log(`✅ ${produtos.length} produtos encontrados`);
+    console.log(`✅ ${produtos.length} produtos encontrados no banco MySQL`);
+    
+    // Log dos primeiros produtos para debug
+    if (produtos.length > 0) {
+      console.log('📦 Primeiros produtos:', produtos.slice(0, 3).map(p => ({ id: p.id, nome: p.nome })));
+    }
+
     return NextResponse.json(produtos);
   } catch (error) {
     console.error('❌ Erro ao listar produtos:', error);
     return NextResponse.json(
-      { error: 'Erro interno do servidor' },
+      { error: 'Erro interno do servidor', details: error instanceof Error ? error.message : 'Erro desconhecido' },
       { status: 500 }
     );
   }
@@ -52,13 +68,23 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    // Teste de conexão antes de executar queries
+    const connectionOk = await testConnection();
+    if (!connectionOk) {
+      console.error('❌ Falha na conexão com o banco de dados');
+      return NextResponse.json(
+        { error: 'Erro de conexão com banco de dados' },
+        { status: 500 }
+      );
+    }
+
     const body = await request.json();
     const { 
       nome, categoria_id, descricao, preco, desconto, 
       imagem, destaque, disponivel, unidade 
     } = body;
 
-    console.log('➕ Criando produto:', { nome, categoria_id, unidade });
+    console.log('➕ Criando produto no MySQL:', { nome, categoria_id, unidade });
 
     if (!nome || !categoria_id) {
       return NextResponse.json(
@@ -84,7 +110,19 @@ export async function POST(request: NextRequest) {
       unidade || 'unidade'
     ]);
 
-    console.log(`✅ Produto criado com ID: ${result.insertId}`);
+    console.log(`✅ Produto criado no MySQL com ID: ${result.insertId}`);
+
+    // Verificar se o produto foi realmente inserido
+    const produtoInserido = await executeQuery(
+      'SELECT * FROM produtos WHERE id = ?', 
+      [result.insertId]
+    );
+    
+    if (produtoInserido.length > 0) {
+      console.log('✅ Confirmado: produto existe no banco:', produtoInserido[0]);
+    } else {
+      console.error('❌ ERRO: produto não foi encontrado após inserção!');
+    }
 
     return NextResponse.json(
       { 
@@ -98,14 +136,14 @@ export async function POST(request: NextRequest) {
         destaque: destaque ? 1 : 0,
         disponivel: disponivel !== false ? 1 : 0,
         unidade: unidade || 'unidade',
-        message: 'Produto criado com sucesso'
+        message: 'Produto criado com sucesso no MySQL'
       },
       { status: 201 }
     );
   } catch (error) {
     console.error('❌ Erro ao criar produto:', error);
     return NextResponse.json(
-      { error: 'Erro interno do servidor' },
+      { error: 'Erro interno do servidor', details: error instanceof Error ? error.message : 'Erro desconhecido' },
       { status: 500 }
     );
   }
