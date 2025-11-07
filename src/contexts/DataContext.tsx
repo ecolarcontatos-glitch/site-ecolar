@@ -2,7 +2,6 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Produto, Categoria, Post, Depoimento, Inspiracao } from '@/lib/types';
-import { produtos as produtosIniciais, categorias as categoriasIniciais, posts as postsIniciais, depoimentos as depoimentosIniciais, inspiracoes as inspiracoesIniciais } from '@/lib/data';
 
 interface DataContextType {
   produtos: Produto[];
@@ -13,14 +12,14 @@ interface DataContextType {
   isLoading: boolean;
   
   // CRUD Produtos
-  adicionarProduto: (produto: Omit<Produto, 'id'>) => void;
-  atualizarProduto: (id: string, produto: Partial<Produto>) => void;
-  removerProduto: (id: string) => void;
+  adicionarProduto: (produto: Omit<Produto, 'id'>) => Promise<void>;
+  atualizarProduto: (id: string, produto: Partial<Produto>) => Promise<void>;
+  removerProduto: (id: string) => Promise<void>;
   
   // CRUD Categorias
-  adicionarCategoria: (categoria: Omit<Categoria, 'id'>) => void;
-  atualizarCategoria: (id: string, categoria: Partial<Categoria>) => void;
-  removerCategoria: (id: string) => void;
+  adicionarCategoria: (categoria: Omit<Categoria, 'id'>) => Promise<void>;
+  atualizarCategoria: (id: string, categoria: Partial<Categoria>) => Promise<void>;
+  removerCategoria: (id: string) => Promise<void>;
   
   // CRUD Posts
   adicionarPost: (post: Omit<Post, 'id'>) => void;
@@ -36,17 +35,12 @@ interface DataContextType {
   adicionarInspiracao: (inspiracao: Omit<Inspiracao, 'id'>) => void;
   atualizarInspiracao: (id: string, inspiracao: Partial<Inspiracao>) => void;
   removerInspiracao: (id: string) => void;
+  
+  // Função para recarregar dados
+  recarregarDados: () => Promise<void>;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
-
-const STORAGE_KEYS = {
-  produtos: 'ecolar_produtos',
-  categorias: 'ecolar_categorias',
-  posts: 'ecolar_posts',
-  depoimentos: 'ecolar_depoimentos',
-  inspiracoes: 'ecolar_inspiracoes'
-};
 
 export function DataProvider({ children }: { children: ReactNode }) {
   const [produtos, setProdutos] = useState<Produto[]>([]);
@@ -56,154 +50,205 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [inspiracoes, setInspiracoes] = useState<Inspiracao[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Função para carregar dados do localStorage
-  const carregarDados = () => {
-    if (typeof window === 'undefined') return;
-    
+  // Função para carregar dados da API
+  const carregarDados = async () => {
     try {
       setIsLoading(true);
 
-      // Carregar produtos
-      const produtosStored = localStorage.getItem(STORAGE_KEYS.produtos);
-      setProdutos(produtosStored ? JSON.parse(produtosStored) : produtosIniciais);
+      // Carregar produtos da API
+      try {
+        const produtosResponse = await fetch('/api/produtos');
+        if (produtosResponse.ok) {
+          const produtosData = await produtosResponse.json();
+          setProdutos(produtosData || []);
+        } else {
+          console.error('Erro ao carregar produtos:', produtosResponse.status);
+          setProdutos([]);
+        }
+      } catch (error) {
+        console.error('Erro ao carregar produtos:', error);
+        setProdutos([]);
+      }
 
-      // Carregar categorias
-      const categoriasStored = localStorage.getItem(STORAGE_KEYS.categorias);
-      setCategorias(categoriasStored ? JSON.parse(categoriasStored) : categoriasIniciais);
+      // Carregar categorias da API
+      try {
+        const categoriasResponse = await fetch('/api/categorias');
+        if (categoriasResponse.ok) {
+          const categoriasData = await categoriasResponse.json();
+          setCategorias(categoriasData || []);
+        } else {
+          console.error('Erro ao carregar categorias:', categoriasResponse.status);
+          setCategorias([]);
+        }
+      } catch (error) {
+        console.error('Erro ao carregar categorias:', error);
+        setCategorias([]);
+      }
 
-      // Carregar posts
-      const postsStored = localStorage.getItem(STORAGE_KEYS.posts);
-      setPosts(postsStored ? JSON.parse(postsStored) : postsIniciais);
-
-      // Carregar depoimentos
-      const depoimentosStored = localStorage.getItem(STORAGE_KEYS.depoimentos);
-      setDepoimentos(depoimentosStored ? JSON.parse(depoimentosStored) : depoimentosIniciais);
-
-      // Carregar inspirações
-      const inspiracoesStored = localStorage.getItem(STORAGE_KEYS.inspiracoes);
-      setInspiracoes(inspiracoesStored ? JSON.parse(inspiracoesStored) : inspiracoesIniciais);
+      // Para posts, depoimentos e inspirações, manter dados locais por enquanto
+      // (podem ser implementados com API posteriormente)
+      setPosts([]);
+      setDepoimentos([]);
+      setInspiracoes([]);
 
       setIsLoading(false);
     } catch (error) {
-      console.error('Erro ao carregar dados:', error);
-      // Em caso de erro, usar dados iniciais
-      setProdutos(produtosIniciais);
-      setCategorias(categoriasIniciais);
-      setPosts(postsIniciais);
-      setDepoimentos(depoimentosIniciais);
-      setInspiracoes(inspiracoesIniciais);
+      console.error('Erro geral ao carregar dados:', error);
+      setProdutos([]);
+      setCategorias([]);
+      setPosts([]);
+      setDepoimentos([]);
+      setInspiracoes([]);
       setIsLoading(false);
     }
+  };
+
+  // Função para recarregar dados (útil após operações CRUD)
+  const recarregarDados = async () => {
+    await carregarDados();
   };
 
   useEffect(() => {
     carregarDados();
   }, []);
 
-  // Função para salvar no localStorage
-  const salvarDados = (key: string, data: any) => {
-    if (typeof window === 'undefined') return;
-    
+  // CRUD Produtos - integrado com API
+  const adicionarProduto = async (produto: Omit<Produto, 'id'>) => {
     try {
-      localStorage.setItem(key, JSON.stringify(data));
-      // Força sincronização imediata
-      window.dispatchEvent(new Event('storage'));
-    } catch (error) {
-      console.error('Erro ao salvar dados:', error);
-    }
-  };
+      const response = await fetch('/api/produtos', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(produto),
+      });
 
-  // Listener para sincronização entre abas
-  useEffect(() => {
-    const handleStorageChange = () => {
-      if (typeof window !== 'undefined') {
-        try {
-          const produtosStored = localStorage.getItem(STORAGE_KEYS.produtos);
-          if (produtosStored) {
-            setProdutos(JSON.parse(produtosStored));
-          }
-
-          const categoriasStored = localStorage.getItem(STORAGE_KEYS.categorias);
-          if (categoriasStored) {
-            setCategorias(JSON.parse(categoriasStored));
-          }
-
-          const postsStored = localStorage.getItem(STORAGE_KEYS.posts);
-          if (postsStored) {
-            setPosts(JSON.parse(postsStored));
-          }
-
-          const depoimentosStored = localStorage.getItem(STORAGE_KEYS.depoimentos);
-          if (depoimentosStored) {
-            setDepoimentos(JSON.parse(depoimentosStored));
-          }
-
-          const inspiracoesStored = localStorage.getItem(STORAGE_KEYS.inspiracoes);
-          if (inspiracoesStored) {
-            setInspiracoes(JSON.parse(inspiracoesStored));
-          }
-        } catch (error) {
-          console.error('Erro ao sincronizar dados:', error);
-        }
+      if (response.ok) {
+        // Recarregar dados após adicionar
+        await recarregarDados();
+      } else {
+        console.error('Erro ao adicionar produto:', response.status);
+        throw new Error('Erro ao adicionar produto');
       }
-    };
-
-    if (typeof window !== 'undefined') {
-      window.addEventListener('storage', handleStorageChange);
-      return () => window.removeEventListener('storage', handleStorageChange);
+    } catch (error) {
+      console.error('Erro ao adicionar produto:', error);
+      throw error;
     }
-  }, []);
-
-  // CRUD Produtos
-  const adicionarProduto = (produto: Omit<Produto, 'id'>) => {
-    const novoProduto = { ...produto, id: Date.now().toString() };
-    const novosProdutos = [...produtos, novoProduto];
-    setProdutos(novosProdutos);
-    salvarDados(STORAGE_KEYS.produtos, novosProdutos);
   };
 
-  const atualizarProduto = (id: string, produtoAtualizado: Partial<Produto>) => {
-    const novosProdutos = produtos.map(p => 
-      p.id === id ? { ...p, ...produtoAtualizado } : p
-    );
-    setProdutos(novosProdutos);
-    salvarDados(STORAGE_KEYS.produtos, novosProdutos);
+  const atualizarProduto = async (id: string, produtoAtualizado: Partial<Produto>) => {
+    try {
+      const response = await fetch(`/api/produtos/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(produtoAtualizado),
+      });
+
+      if (response.ok) {
+        // Recarregar dados após atualizar
+        await recarregarDados();
+      } else {
+        console.error('Erro ao atualizar produto:', response.status);
+        throw new Error('Erro ao atualizar produto');
+      }
+    } catch (error) {
+      console.error('Erro ao atualizar produto:', error);
+      throw error;
+    }
   };
 
-  const removerProduto = (id: string) => {
-    const novosProdutos = produtos.filter(p => p.id !== id);
-    setProdutos(novosProdutos);
-    salvarDados(STORAGE_KEYS.produtos, novosProdutos);
+  const removerProduto = async (id: string) => {
+    try {
+      const response = await fetch(`/api/produtos/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        // Recarregar dados após remover
+        await recarregarDados();
+      } else {
+        console.error('Erro ao remover produto:', response.status);
+        throw new Error('Erro ao remover produto');
+      }
+    } catch (error) {
+      console.error('Erro ao remover produto:', error);
+      throw error;
+    }
   };
 
-  // CRUD Categorias
-  const adicionarCategoria = (categoria: Omit<Categoria, 'id'>) => {
-    const novaCategoria = { ...categoria, id: Date.now().toString() };
-    const novasCategorias = [...categorias, novaCategoria];
-    setCategorias(novasCategorias);
-    salvarDados(STORAGE_KEYS.categorias, novasCategorias);
+  // CRUD Categorias - integrado com API
+  const adicionarCategoria = async (categoria: Omit<Categoria, 'id'>) => {
+    try {
+      const response = await fetch('/api/categorias', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(categoria),
+      });
+
+      if (response.ok) {
+        // Recarregar dados após adicionar
+        await recarregarDados();
+      } else {
+        console.error('Erro ao adicionar categoria:', response.status);
+        throw new Error('Erro ao adicionar categoria');
+      }
+    } catch (error) {
+      console.error('Erro ao adicionar categoria:', error);
+      throw error;
+    }
   };
 
-  const atualizarCategoria = (id: string, categoriaAtualizada: Partial<Categoria>) => {
-    const novasCategorias = categorias.map(c => 
-      c.id === id ? { ...c, ...categoriaAtualizada } : c
-    );
-    setCategorias(novasCategorias);
-    salvarDados(STORAGE_KEYS.categorias, novasCategorias);
+  const atualizarCategoria = async (id: string, categoriaAtualizada: Partial<Categoria>) => {
+    try {
+      const response = await fetch(`/api/categorias/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(categoriaAtualizada),
+      });
+
+      if (response.ok) {
+        // Recarregar dados após atualizar
+        await recarregarDados();
+      } else {
+        console.error('Erro ao atualizar categoria:', response.status);
+        throw new Error('Erro ao atualizar categoria');
+      }
+    } catch (error) {
+      console.error('Erro ao atualizar categoria:', error);
+      throw error;
+    }
   };
 
-  const removerCategoria = (id: string) => {
-    const novasCategorias = categorias.filter(c => c.id !== id);
-    setCategorias(novasCategorias);
-    salvarDados(STORAGE_KEYS.categorias, novasCategorias);
+  const removerCategoria = async (id: string) => {
+    try {
+      const response = await fetch(`/api/categorias/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        // Recarregar dados após remover
+        await recarregarDados();
+      } else {
+        console.error('Erro ao remover categoria:', response.status);
+        throw new Error('Erro ao remover categoria');
+      }
+    } catch (error) {
+      console.error('Erro ao remover categoria:', error);
+      throw error;
+    }
   };
 
-  // CRUD Posts
+  // CRUD Posts - mantido local por enquanto
   const adicionarPost = (post: Omit<Post, 'id'>) => {
     const novoPost = { ...post, id: Date.now().toString() };
     const novosPosts = [...posts, novoPost];
     setPosts(novosPosts);
-    salvarDados(STORAGE_KEYS.posts, novosPosts);
   };
 
   const atualizarPost = (id: string, postAtualizado: Partial<Post>) => {
@@ -211,21 +256,18 @@ export function DataProvider({ children }: { children: ReactNode }) {
       p.id === id ? { ...p, ...postAtualizado } : p
     );
     setPosts(novosPosts);
-    salvarDados(STORAGE_KEYS.posts, novosPosts);
   };
 
   const removerPost = (id: string) => {
     const novosPosts = posts.filter(p => p.id !== id);
     setPosts(novosPosts);
-    salvarDados(STORAGE_KEYS.posts, novosPosts);
   };
 
-  // CRUD Depoimentos
+  // CRUD Depoimentos - mantido local por enquanto
   const adicionarDepoimento = (depoimento: Omit<Depoimento, 'id'>) => {
     const novoDepoimento = { ...depoimento, id: Date.now().toString() };
     const novosDepoimentos = [...depoimentos, novoDepoimento];
     setDepoimentos(novosDepoimentos);
-    salvarDados(STORAGE_KEYS.depoimentos, novosDepoimentos);
   };
 
   const atualizarDepoimento = (id: string, depoimentoAtualizado: Partial<Depoimento>) => {
@@ -233,21 +275,18 @@ export function DataProvider({ children }: { children: ReactNode }) {
       d.id === id ? { ...d, ...depoimentoAtualizado } : d
     );
     setDepoimentos(novosDepoimentos);
-    salvarDados(STORAGE_KEYS.depoimentos, novosDepoimentos);
   };
 
   const removerDepoimento = (id: string) => {
     const novosDepoimentos = depoimentos.filter(d => d.id !== id);
     setDepoimentos(novosDepoimentos);
-    salvarDados(STORAGE_KEYS.depoimentos, novosDepoimentos);
   };
 
-  // CRUD Inspirações
+  // CRUD Inspirações - mantido local por enquanto
   const adicionarInspiracao = (inspiracao: Omit<Inspiracao, 'id'>) => {
     const novaInspiracao = { ...inspiracao, id: Date.now().toString() };
     const novasInspiracoes = [...inspiracoes, novaInspiracao];
     setInspiracoes(novasInspiracoes);
-    salvarDados(STORAGE_KEYS.inspiracoes, novasInspiracoes);
   };
 
   const atualizarInspiracao = (id: string, inspiracaoAtualizada: Partial<Inspiracao>) => {
@@ -255,13 +294,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
       i.id === id ? { ...i, ...inspiracaoAtualizada } : i
     );
     setInspiracoes(novasInspiracoes);
-    salvarDados(STORAGE_KEYS.inspiracoes, novasInspiracoes);
   };
 
   const removerInspiracao = (id: string) => {
     const novasInspiracoes = inspiracoes.filter(i => i.id !== id);
     setInspiracoes(novasInspiracoes);
-    salvarDados(STORAGE_KEYS.inspiracoes, novasInspiracoes);
   };
 
   const value: DataContextType = {
@@ -295,7 +332,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
     // CRUD Inspirações
     adicionarInspiracao,
     atualizarInspiracao,
-    removerInspiracao
+    removerInspiracao,
+    
+    // Função para recarregar
+    recarregarDados
   };
 
   return (

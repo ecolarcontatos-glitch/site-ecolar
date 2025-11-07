@@ -26,64 +26,49 @@ export default function HomePage() {
       try {
         setLoading(true);
         
-        // Buscar produtos
-        const produtosResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/produtos`, { 
-          cache: "no-store" 
-        });
-        if (produtosResponse.ok) {
-          const produtosData = await produtosResponse.json();
-          setProdutos(produtosData);
+        // Buscar produtos da API (URL relativa)
+        try {
+          const produtosResponse = await fetch('/api/produtos', { 
+            cache: "no-store" 
+          });
+          if (produtosResponse.ok) {
+            const produtosData = await produtosResponse.json();
+            setProdutos(produtosData || []);
+          } else {
+            console.error('Erro ao carregar produtos:', produtosResponse.status);
+            setProdutos([]);
+          }
+        } catch (error) {
+          console.error('Erro ao carregar produtos:', error);
+          setProdutos([]);
         }
 
-        // Buscar categorias
-        const categoriasResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/categorias`, { 
-          cache: "no-store" 
-        });
-        if (categoriasResponse.ok) {
-          const categoriasData = await categoriasResponse.json();
-          setCategorias(categoriasData);
+        // Buscar categorias da API (URL relativa)
+        try {
+          const categoriasResponse = await fetch('/api/categorias', { 
+            cache: "no-store" 
+          });
+          if (categoriasResponse.ok) {
+            const categoriasData = await categoriasResponse.json();
+            setCategorias(categoriasData || []);
+          } else {
+            console.error('Erro ao carregar categorias:', categoriasResponse.status);
+            setCategorias([]);
+          }
+        } catch (error) {
+          console.error('Erro ao carregar categorias:', error);
+          setCategorias([]);
         }
 
-        // Buscar depoimentos (localStorage por enquanto)
-        if (typeof window !== 'undefined') {
-          const storedDepoimentos = localStorage.getItem('ecolar_depoimentos');
-          if (storedDepoimentos) {
-            setDepoimentos(JSON.parse(storedDepoimentos));
-          }
+        // Para posts, depoimentos e inspirações, manter dados locais por enquanto
+        // (podem ser implementados com API posteriormente)
+        setDepoimentos([]);
+        setInspiracoes([]);
+        setPosts([]);
 
-          // Buscar inspirações (localStorage por enquanto)
-          const storedInspiracoes = localStorage.getItem('ecolar_inspiracoes');
-          if (storedInspiracoes) {
-            setInspiracoes(JSON.parse(storedInspiracoes));
-          }
-
-          // Buscar posts (localStorage por enquanto)
-          const storedPosts = localStorage.getItem('ecolar_posts');
-          if (storedPosts) {
-            const parsedPosts = JSON.parse(storedPosts);
-            const sortedPosts = parsedPosts.sort((a, b) => new Date(b.data) - new Date(a.data));
-            setPosts(sortedPosts);
-          }
-
-          // Buscar configurações do hero
-          const storedConfig = localStorage.getItem('ecolar_config');
-          if (storedConfig) {
-            try {
-              const parsedConfig = JSON.parse(storedConfig);
-              if (parsedConfig.heroImages && parsedConfig.heroImages.length > 0) {
-                const sortedImages = parsedConfig.heroImages
-                  .sort((a, b) => a.order - b.order)
-                  .map(img => img.url);
-                setHeroImages(sortedImages);
-              }
-            } catch (error) {
-              console.error('Erro ao carregar configurações do hero:', error);
-            }
-          }
-        }
+        setLoading(false);
       } catch (error) {
         console.error('Erro ao buscar dados:', error);
-      } finally {
         setLoading(false);
       }
     };
@@ -187,21 +172,38 @@ export default function HomePage() {
             </p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            {produtosDestaque.map((produto) => (
-              <ProductCard key={produto.id} produto={produto} />
-            ))}
-          </div>
-          
-          <div className="text-center">
-            <Link
-              href="/produtos"
-              className="inline-flex items-center space-x-2 bg-[#7FBA3D] text-white px-6 py-3 rounded-2xl hover:bg-[#0A3D2E] transition-colors duration-200 font-inter font-medium"
-            >
-              <span>Ver todos os produtos</span>
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
+          {produtosDestaque.length > 0 ? (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                {produtosDestaque.map((produto) => (
+                  <ProductCard key={produto.id} produto={produto} />
+                ))}
+              </div>
+              
+              <div className="text-center">
+                <Link
+                  href="/produtos"
+                  className="inline-flex items-center space-x-2 bg-[#7FBA3D] text-white px-6 py-3 rounded-2xl hover:bg-[#0A3D2E] transition-colors duration-200 font-inter font-medium"
+                >
+                  <span>Ver todos os produtos</span>
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
+            </>
+          ) : (
+            <div className="text-center py-12">
+              <p className="font-inter text-lg text-[#6b7280]">
+                Nenhum produto em destaque no momento.
+              </p>
+              <Link
+                href="/produtos"
+                className="inline-flex items-center space-x-2 bg-[#7FBA3D] text-white px-6 py-3 rounded-2xl hover:bg-[#0A3D2E] transition-colors duration-200 font-inter font-medium mt-4"
+              >
+                <span>Ver catálogo completo</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+          )}
         </div>
       </section>
 
@@ -217,43 +219,53 @@ export default function HomePage() {
             </p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            {categoriasPrincipais.map((categoria) => (
-              <Link
-                key={categoria.id}
-                href={`/produtos?categoria=${categoria.slug}`}
-                className="group bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)] transition-all duration-300 overflow-hidden"
-              >
-                <div className="relative aspect-[4/3]">
-                  <Image
-                    src={categoria.imagem}
-                    alt={categoria.nome}
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                </div>
-                <div className="p-6">
-                  <h3 className="font-inter font-semibold text-[#111827] text-lg mb-2">
-                    {categoria.nome}
-                  </h3>
-                  <p className="font-inter text-[#6b7280] text-sm">
-                    {categoria.descricao}
-                  </p>
-                </div>
-              </Link>
-            ))}
-          </div>
+          {categoriasPrincipais.length > 0 ? (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                {categoriasPrincipais.map((categoria) => (
+                  <Link
+                    key={categoria.id}
+                    href={`/produtos?categoria=${categoria.slug}`}
+                    className="group bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)] transition-all duration-300 overflow-hidden"
+                  >
+                    <div className="relative aspect-[4/3]">
+                      <Image
+                        src={categoria.imagem}
+                        alt={categoria.nome}
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                    </div>
+                    <div className="p-6">
+                      <h3 className="font-inter font-semibold text-[#111827] text-lg mb-2">
+                        {categoria.nome}
+                      </h3>
+                      <p className="font-inter text-[#6b7280] text-sm">
+                        {categoria.descricao}
+                      </p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
 
-          {/* Botão Ver Todas */}
-          <div className="text-center">
-            <Link
-              href="/produtos"
-              className="inline-flex items-center space-x-2 bg-[#7FBA3D] text-white px-6 py-3 rounded-2xl hover:bg-[#0A3D2E] transition-colors duration-200 font-inter font-medium"
-            >
-              <span>Ver todas as categorias</span>
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
+              {/* Botão Ver Todas */}
+              <div className="text-center">
+                <Link
+                  href="/produtos"
+                  className="inline-flex items-center space-x-2 bg-[#7FBA3D] text-white px-6 py-3 rounded-2xl hover:bg-[#0A3D2E] transition-colors duration-200 font-inter font-medium"
+                >
+                  <span>Ver todas as categorias</span>
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
+            </>
+          ) : (
+            <div className="text-center py-12">
+              <p className="font-inter text-lg text-[#6b7280]">
+                Nenhuma categoria cadastrada ainda.
+              </p>
+            </div>
+          )}
         </div>
       </section>
 
@@ -342,35 +354,43 @@ export default function HomePage() {
             </p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {inspiracoes.map((inspiracao) => (
-              <div
-                key={inspiracao.id}
-                className="group bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)] transition-all duration-300 overflow-hidden"
-              >
-                <div className="relative aspect-[4/3]">
-                  <Image
-                    src={inspiracao.imagem}
-                    alt={inspiracao.titulo}
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
+          {inspiracoes.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {inspiracoes.map((inspiracao) => (
+                <div
+                  key={inspiracao.id}
+                  className="group bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)] transition-all duration-300 overflow-hidden"
+                >
+                  <div className="relative aspect-[4/3]">
+                    <Image
+                      src={inspiracao.imagem}
+                      alt={inspiracao.titulo}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                  </div>
+                  <div className="p-6">
+                    <h3 className="font-inter font-semibold text-[#111827] text-lg mb-2">
+                      {inspiracao.titulo}
+                    </h3>
+                    <p className="font-inter text-[#6b7280] text-sm">
+                      {inspiracao.descricao}
+                    </p>
+                  </div>
                 </div>
-                <div className="p-6">
-                  <h3 className="font-inter font-semibold text-[#111827] text-lg mb-2">
-                    {inspiracao.titulo}
-                  </h3>
-                  <p className="font-inter text-[#6b7280] text-sm">
-                    {inspiracao.descricao}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <p className="font-inter text-lg text-[#6b7280]">
+                Nenhuma inspiração cadastrada ainda.
+              </p>
+            </div>
+          )}
         </div>
       </section>
 
-      {/* Depoimentos - Com imagens acima das estrelas */}
+      {/* Depoimentos */}
       <section className="py-16 md:py-20">
         <div className="max-w-[1200px] mx-auto px-5">
           <div className="text-center mb-12">
@@ -382,38 +402,46 @@ export default function HomePage() {
             </p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {depoimentos.map((depoimento) => (
-              <div
-                key={depoimento.id}
-                className="bg-white rounded-2xl p-8 shadow-[0_2px_8px_rgba(0,0,0,0.08)] text-center"
-              >
-                {/* Imagem do cliente - acima das estrelas - usando foto ou imagem */}
-                {(depoimento.foto || depoimento.imagem) && (
-                  <div className="relative w-16 h-16 mx-auto mb-4 rounded-full overflow-hidden">
-                    <Image
-                      src={depoimento.foto || depoimento.imagem || ''}
-                      alt={depoimento.nome}
-                      fill
-                      className="object-cover"
-                    />
+          {depoimentos.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {depoimentos.map((depoimento) => (
+                <div
+                  key={depoimento.id}
+                  className="bg-white rounded-2xl p-8 shadow-[0_2px_8px_rgba(0,0,0,0.08)] text-center"
+                >
+                  {/* Imagem do cliente - acima das estrelas - usando foto ou imagem */}
+                  {(depoimento.foto || depoimento.imagem) && (
+                    <div className="relative w-16 h-16 mx-auto mb-4 rounded-full overflow-hidden">
+                      <Image
+                        src={depoimento.foto || depoimento.imagem || ''}
+                        alt={depoimento.nome}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                  )}
+                  
+                  <div className="flex justify-center mb-4">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className="w-5 h-5 text-[#7FBA3D] fill-current" />
+                    ))}
                   </div>
-                )}
-                
-                <div className="flex justify-center mb-4">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-5 h-5 text-[#7FBA3D] fill-current" />
-                  ))}
+                  <blockquote className="font-inter text-[#6b7280] text-lg mb-6 italic">
+                    "{depoimento.texto}"
+                  </blockquote>
+                  <cite className="font-inter font-semibold text-[#111827]">
+                    {depoimento.nome}
+                  </cite>
                 </div>
-                <blockquote className="font-inter text-[#6b7280] text-lg mb-6 italic">
-                  "{depoimento.texto}"
-                </blockquote>
-                <cite className="font-inter font-semibold text-[#111827]">
-                  {depoimento.nome}
-                </cite>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <p className="font-inter text-lg text-[#6b7280]">
+                Nenhum depoimento cadastrado ainda.
+              </p>
+            </div>
+          )}
         </div>
       </section>
 

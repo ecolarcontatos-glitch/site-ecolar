@@ -4,6 +4,7 @@ import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import { DataProvider } from "@/contexts/DataContext";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -41,11 +42,13 @@ export default function RootLayout({
         className={`${inter.variable} ${dmSans.variable} font-inter antialiased bg-[#f5f6f7]`}
       >
         <ErrorBoundary>
-          <Header />
-          <main className="pt-16">
-            {children}
-          </main>
-          <Footer />
+          <DataProvider>
+            <Header />
+            <main className="pt-16">
+              {children}
+            </main>
+            <Footer />
+          </DataProvider>
         </ErrorBoundary>
       </body>
     </html>
