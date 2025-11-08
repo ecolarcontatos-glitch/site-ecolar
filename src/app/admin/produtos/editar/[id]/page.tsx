@@ -14,7 +14,7 @@ interface Produto {
   id: string;
   nome: string;
   descricao: string;
-  categoria: string;
+  categoria_id: string; // CORRIGIDO: mudou de 'categoria' para 'categoria_id'
   preco: number;
   desconto?: number;
   unidade: string;
@@ -39,7 +39,7 @@ export default function EditarProduto() {
   const [formData, setFormData] = useState({
     nome: '',
     descricao: '',
-    categoria: '',
+    categoria_id: '', // CORRIGIDO: mudou de 'categoria' para 'categoria_id'
     preco: '',
     desconto: '',
     unidade: 'unidade',
@@ -68,7 +68,7 @@ export default function EditarProduto() {
           setFormData({
             nome: produtoData.nome,
             descricao: produtoData.descricao,
-            categoria: produtoData.categoria,
+            categoria_id: produtoData.categoria_id || produtoData.categoria, // CORRIGIDO: suporte a ambos os campos
             preco: (Number(produtoData.preco) || 0).toString(),
             desconto: produtoData.desconto ? (Number(produtoData.desconto) || 0).toString() : '',
             unidade: produtoData.unidade || 'unidade',
@@ -105,7 +105,7 @@ export default function EditarProduto() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.nome || !formData.descricao || !formData.imagem || !formData.categoria) {
+    if (!formData.nome || !formData.descricao || !formData.imagem || !formData.categoria_id) {
       alert('Por favor, preencha todos os campos obrigatórios.');
       return;
     }
@@ -127,7 +127,7 @@ export default function EditarProduto() {
       const produtoData = {
         nome: formData.nome,
         descricao: formData.descricao,
-        categoria: formData.categoria,
+        categoria_id: formData.categoria_id, // CORRIGIDO: enviando categoria_id
         preco: parseFloat(formData.preco),
         desconto: formData.desconto ? parseFloat(formData.desconto) : undefined,
         unidade: formData.unidade,
@@ -260,8 +260,8 @@ export default function EditarProduto() {
                       Categoria *
                     </label>
                     <select
-                      value={formData.categoria}
-                      onChange={(e) => handleChange('categoria', e.target.value)}
+                      value={formData.categoria_id} 
+                      onChange={(e) => handleChange('categoria_id', e.target.value)} 
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#7FBA3D] focus:border-transparent"
                       required
                     >

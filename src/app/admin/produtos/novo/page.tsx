@@ -23,7 +23,7 @@ export default function NovoProduto() {
     nome: '',
     descricao: '',
     imagem: '',
-    categoria: '',
+    categoria_id: '', // CORRIGIDO: mudou de 'categoria' para 'categoria_id'
     preco: '',
     desconto: '',
     unidade: 'unidade',
@@ -58,7 +58,7 @@ export default function NovoProduto() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.nome || !formData.descricao || !formData.imagem || !formData.categoria) {
+    if (!formData.nome || !formData.descricao || !formData.imagem || !formData.categoria_id) {
       alert('Por favor, preencha todos os campos obrigatórios.');
       return;
     }
@@ -81,7 +81,7 @@ export default function NovoProduto() {
         nome: formData.nome,
         descricao: formData.descricao,
         imagem: formData.imagem,
-        categoria: formData.categoria,
+        categoria_id: formData.categoria_id, // CORRIGIDO: enviando categoria_id
         preco: parseFloat(formData.preco),
         desconto: formData.desconto ? parseFloat(formData.desconto) : undefined,
         unidade: formData.unidade,
@@ -184,8 +184,8 @@ export default function NovoProduto() {
                       Categoria *
                     </label>
                     <select
-                      value={formData.categoria ?? ''}
-                      onChange={(e) => handleChange('categoria', e.target.value)}
+                      value={formData.categoria_id ?? ''} 
+                      onChange={(e) => handleChange('categoria_id', e.target.value)} 
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#7FBA3D] focus:border-transparent"
                       required
                     >
