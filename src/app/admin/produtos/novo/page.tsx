@@ -23,7 +23,7 @@ export default function NovoProduto() {
     nome: '',
     descricao: '',
     imagem: '',
-    categoria_id: '', // CORRIGIDO: mudou de 'categoria' para 'categoria_id'
+    categoria_id: '',
     preco: '',
     desconto: '',
     unidade: 'unidade',
@@ -36,19 +36,26 @@ export default function NovoProduto() {
   useEffect(() => {
     const fetchCategorias = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/categorias`, {
+        console.log('🔍 Buscando categorias...');
+        
+        const response = await fetch('/api/categorias', {
           cache: "no-store",
           headers: {
-            'X-Admin-Key': process.env.NEXT_PUBLIC_ADMIN_API_KEY || ''
+            'Content-Type': 'application/json'
           }
         });
         
+        console.log('📡 Response status categorias:', response.status);
+        
         if (response.ok) {
           const data = await response.json();
+          console.log('✅ Categorias recebidas:', data.length);
           setCategorias(data);
+        } else {
+          console.error('❌ Erro ao buscar categorias:', response.status);
         }
       } catch (error) {
-        console.error('Erro ao buscar categorias:', error);
+        console.error('❌ Erro ao buscar categorias:', error);
       }
     };
 
@@ -81,7 +88,7 @@ export default function NovoProduto() {
         nome: formData.nome,
         descricao: formData.descricao,
         imagem: formData.imagem,
-        categoria_id: formData.categoria_id, // CORRIGIDO: enviando categoria_id
+        categoria_id: parseInt(formData.categoria_id), // Converter para número
         preco: parseFloat(formData.preco),
         desconto: formData.desconto ? parseFloat(formData.desconto) : undefined,
         unidade: formData.unidade,
@@ -89,22 +96,29 @@ export default function NovoProduto() {
         disponivel: true
       };
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/produtos`, {
+      console.log('📤 Enviando dados do produto:', produtoData);
+
+      const response = await fetch('/api/produtos', {
         method: "POST",
         headers: { 
-          "Content-Type": "application/json",
-          'X-Admin-Key': process.env.NEXT_PUBLIC_ADMIN_API_KEY || ''
+          "Content-Type": "application/json"
         },
         body: JSON.stringify(produtoData),
       });
 
+      console.log('📡 Response status criação:', response.status);
+
       if (response.ok) {
+        const result = await response.json();
+        console.log('✅ Produto criado:', result);
         router.push('/admin/produtos');
       } else {
-        throw new Error('Erro ao criar produto');
+        const errorData = await response.json();
+        console.error('❌ Erro na resposta:', errorData);
+        throw new Error(errorData.error || 'Erro ao criar produto');
       }
     } catch (error) {
-      console.error('Erro ao criar produto:', error);
+      console.error('❌ Erro ao criar produto:', error);
       alert('Erro ao criar produto. Tente novamente.');
     } finally {
       setIsSubmitting(false);

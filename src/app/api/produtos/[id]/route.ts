@@ -20,6 +20,7 @@ export async function GET(
     console.log(`📋 Buscando produto ID: ${id} no MySQL`);
 
     if (isNaN(id)) {
+      console.error('❌ ID inválido fornecido:', params.id);
       return NextResponse.json(
         { error: 'ID inválido' },
         { status: 400 }
@@ -36,16 +37,30 @@ export async function GET(
       WHERE p.id = ?
     `, [id]);
 
+    console.log(`🔍 Query executada para produto ID ${id}, resultados:`, produtos.length);
+
     if (produtos.length === 0) {
       console.log(`❌ Produto ID ${id} não encontrado no MySQL`);
+      
+      // Debug: verificar se existem produtos na tabela
+      const totalProdutos = await executeQuery('SELECT COUNT(*) as total FROM produtos');
+      console.log(`📊 Total de produtos na tabela: ${totalProdutos[0]?.total || 0}`);
+      
       return NextResponse.json(
         { error: 'Produto não encontrado' },
         { status: 404 }
       );
     }
 
-    console.log(`✅ Produto encontrado no MySQL: ${produtos[0].nome}`);
-    return NextResponse.json(produtos[0]);
+    const produto = produtos[0];
+    console.log(`✅ Produto encontrado no MySQL:`, {
+      id: produto.id,
+      nome: produto.nome,
+      categoria_id: produto.categoria_id,
+      categoria_nome: produto.categoria_nome
+    });
+
+    return NextResponse.json(produto);
   } catch (error) {
     console.error('❌ Erro ao buscar produto:', error);
     return NextResponse.json(
@@ -77,9 +92,15 @@ export async function PUT(
       imagem, destaque, disponivel, unidade 
     } = body;
 
-    console.log(`✏️ Atualizando produto ID: ${id} no MySQL`, { nome, categoria_id, unidade });
+    console.log(`✏️ Atualizando produto ID: ${id} no MySQL`, { 
+      nome, 
+      categoria_id: categoria_id,
+      categoria_id_type: typeof categoria_id,
+      unidade 
+    });
 
     if (isNaN(id)) {
+      console.error('❌ ID inválido fornecido:', params.id);
       return NextResponse.json(
         { error: 'ID inválido' },
         { status: 400 }
@@ -87,8 +108,33 @@ export async function PUT(
     }
 
     if (!nome || !categoria_id) {
+      console.error('❌ Dados obrigatórios faltando:', { nome: !!nome, categoria_id: !!categoria_id });
       return NextResponse.json(
         { error: 'Nome e categoria são obrigatórios' },
+        { status: 400 }
+      );
+    }
+
+    // Converter categoria_id para número se necessário
+    const categoriaIdNumero = parseInt(categoria_id.toString());
+    if (isNaN(categoriaIdNumero)) {
+      console.error('❌ categoria_id inválido:', categoria_id);
+      return NextResponse.json(
+        { error: 'ID da categoria deve ser um número válido' },
+        { status: 400 }
+      );
+    }
+
+    // Verificar se a categoria existe
+    const categoriaExiste = await executeQuery(
+      'SELECT id FROM categorias WHERE id = ?', 
+      [categoriaIdNumero]
+    );
+    
+    if (categoriaExiste.length === 0) {
+      console.error('❌ Categoria não encontrada:', categoriaIdNumero);
+      return NextResponse.json(
+        { error: 'Categoria não encontrada' },
         { status: 400 }
       );
     }
@@ -100,7 +146,7 @@ export async function PUT(
       WHERE id = ?
     `, [
       nome,
-      categoria_id,
+      categoriaIdNumero, // Usar o número convertido
       descricao || '',
       preco || 0,
       desconto || 0,
@@ -121,20 +167,29 @@ export async function PUT(
 
     console.log(`✅ Produto ID ${id} atualizado com sucesso no MySQL`);
     
-    // Verificar se o produto foi realmente atualizado
-    const produtoAtualizado = await executeQuery(
-      'SELECT * FROM produtos WHERE id = ?', 
-      [id]
-    );
+    // Verificar se o produto foi realmente atualizado com JOIN para pegar categoria
+    const produtoAtualizado = await executeQuery(`
+      SELECT 
+        p.*, 
+        c.nome as categoria_nome 
+      FROM produtos p 
+      LEFT JOIN categorias c ON p.categoria_id = c.id 
+      WHERE p.id = ?
+    `, [id]);
     
     if (produtoAtualizado.length > 0) {
-      console.log('✅ Confirmado: produto atualizado no banco:', produtoAtualizado[0]);
+      console.log('✅ Confirmado: produto atualizado no banco:', {
+        id: produtoAtualizado[0].id,
+        nome: produtoAtualizado[0].nome,
+        categoria_id: produtoAtualizado[0].categoria_id,
+        categoria_nome: produtoAtualizado[0].categoria_nome
+      });
     }
 
     return NextResponse.json({
       id,
       nome,
-      categoria_id,
+      categoria_id: categoriaIdNumero,
       descricao: descricao || '',
       preco: preco || 0,
       desconto: desconto || 0,
@@ -172,6 +227,7 @@ export async function DELETE(
     console.log(`🗑️ Deletando produto ID: ${id} do MySQL`);
 
     if (isNaN(id)) {
+      console.error('❌ ID inválido fornecido:', params.id);
       return NextResponse.json(
         { error: 'ID inválido' },
         { status: 400 }

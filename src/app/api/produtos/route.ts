@@ -53,7 +53,12 @@ export async function GET(request: NextRequest) {
     
     // Log dos primeiros produtos para debug
     if (produtos.length > 0) {
-      console.log('📦 Primeiros produtos:', produtos.slice(0, 3).map(p => ({ id: p.id, nome: p.nome })));
+      console.log('📦 Primeiros produtos:', produtos.slice(0, 3).map(p => ({ 
+        id: p.id, 
+        nome: p.nome, 
+        categoria_id: p.categoria_id,
+        categoria_nome: p.categoria_nome 
+      })));
     }
 
     return NextResponse.json(produtos);
@@ -84,11 +89,41 @@ export async function POST(request: NextRequest) {
       imagem, destaque, disponivel, unidade 
     } = body;
 
-    console.log('➕ Criando produto no MySQL:', { nome, categoria_id, unidade });
+    console.log('➕ Criando produto no MySQL:', { 
+      nome, 
+      categoria_id: categoria_id, 
+      categoria_id_type: typeof categoria_id,
+      unidade 
+    });
 
     if (!nome || !categoria_id) {
+      console.error('❌ Dados obrigatórios faltando:', { nome: !!nome, categoria_id: !!categoria_id });
       return NextResponse.json(
         { error: 'Nome e categoria são obrigatórios' },
+        { status: 400 }
+      );
+    }
+
+    // Converter categoria_id para número se necessário
+    const categoriaIdNumero = parseInt(categoria_id.toString());
+    if (isNaN(categoriaIdNumero)) {
+      console.error('❌ categoria_id inválido:', categoria_id);
+      return NextResponse.json(
+        { error: 'ID da categoria deve ser um número válido' },
+        { status: 400 }
+      );
+    }
+
+    // Verificar se a categoria existe
+    const categoriaExiste = await executeQuery(
+      'SELECT id FROM categorias WHERE id = ?', 
+      [categoriaIdNumero]
+    );
+    
+    if (categoriaExiste.length === 0) {
+      console.error('❌ Categoria não encontrada:', categoriaIdNumero);
+      return NextResponse.json(
+        { error: 'Categoria não encontrada' },
         { status: 400 }
       );
     }
@@ -100,7 +135,7 @@ export async function POST(request: NextRequest) {
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
     `, [
       nome,
-      categoria_id,
+      categoriaIdNumero, // Usar o número convertido
       descricao || '',
       preco || 0,
       desconto || 0,
@@ -112,14 +147,23 @@ export async function POST(request: NextRequest) {
 
     console.log(`✅ Produto criado no MySQL com ID: ${result.insertId}`);
 
-    // Verificar se o produto foi realmente inserido
-    const produtoInserido = await executeQuery(
-      'SELECT * FROM produtos WHERE id = ?', 
-      [result.insertId]
-    );
+    // Verificar se o produto foi realmente inserido com JOIN para pegar categoria
+    const produtoInserido = await executeQuery(`
+      SELECT 
+        p.*, 
+        c.nome as categoria_nome 
+      FROM produtos p 
+      LEFT JOIN categorias c ON p.categoria_id = c.id 
+      WHERE p.id = ?
+    `, [result.insertId]);
     
     if (produtoInserido.length > 0) {
-      console.log('✅ Confirmado: produto existe no banco:', produtoInserido[0]);
+      console.log('✅ Confirmado: produto existe no banco:', {
+        id: produtoInserido[0].id,
+        nome: produtoInserido[0].nome,
+        categoria_id: produtoInserido[0].categoria_id,
+        categoria_nome: produtoInserido[0].categoria_nome
+      });
     } else {
       console.error('❌ ERRO: produto não foi encontrado após inserção!');
     }
@@ -128,7 +172,7 @@ export async function POST(request: NextRequest) {
       { 
         id: result.insertId,
         nome,
-        categoria_id,
+        categoria_id: categoriaIdNumero,
         descricao: descricao || '',
         preco: preco || 0,
         desconto: desconto || 0,

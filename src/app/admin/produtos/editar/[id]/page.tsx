@@ -14,7 +14,7 @@ interface Produto {
   id: string;
   nome: string;
   descricao: string;
-  categoria_id: string; // CORRIGIDO: mudou de 'categoria' para 'categoria_id'
+  categoria_id: string;
   preco: number;
   desconto?: number;
   unidade: string;
@@ -39,7 +39,7 @@ export default function EditarProduto() {
   const [formData, setFormData] = useState({
     nome: '',
     descricao: '',
-    categoria_id: '', // CORRIGIDO: mudou de 'categoria' para 'categoria_id'
+    categoria_id: '',
     preco: '',
     desconto: '',
     unidade: 'unidade',
@@ -54,44 +54,57 @@ export default function EditarProduto() {
       try {
         setLoading(true);
         
-        // Buscar produto específico
-        const produtoResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/produtos/${params.id}`, {
+        console.log('🔍 Buscando produto ID:', params.id);
+        
+        // Buscar produto específico usando URL relativa
+        const produtoResponse = await fetch(`/api/produtos/${params.id}`, {
           cache: "no-store",
           headers: {
-            'X-Admin-Key': process.env.NEXT_PUBLIC_ADMIN_API_KEY || ''
+            'Content-Type': 'application/json'
           }
         });
         
+        console.log('📡 Response status produto:', produtoResponse.status);
+        
         if (produtoResponse.ok) {
           const produtoData = await produtoResponse.json();
+          console.log('✅ Produto recebido:', produtoData);
+          
           setProduto(produtoData);
           setFormData({
-            nome: produtoData.nome,
-            descricao: produtoData.descricao,
-            categoria_id: produtoData.categoria_id || produtoData.categoria, // CORRIGIDO: suporte a ambos os campos
+            nome: produtoData.nome || '',
+            descricao: produtoData.descricao || '',
+            categoria_id: (produtoData.categoria_id || produtoData.categoria || '').toString(),
             preco: (Number(produtoData.preco) || 0).toString(),
             desconto: produtoData.desconto ? (Number(produtoData.desconto) || 0).toString() : '',
             unidade: produtoData.unidade || 'unidade',
-            imagem: produtoData.imagem,
+            imagem: produtoData.imagem || '',
             destaque: produtoData.destaque || false,
             disponivel: produtoData.disponivel !== false
           });
+        } else {
+          console.error('❌ Erro ao buscar produto:', produtoResponse.status, produtoResponse.statusText);
+          const errorData = await produtoResponse.text();
+          console.error('❌ Detalhes do erro:', errorData);
         }
 
-        // Buscar categorias
-        const categoriasResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/categorias`, {
+        // Buscar categorias usando URL relativa
+        const categoriasResponse = await fetch('/api/categorias', {
           cache: "no-store",
           headers: {
-            'X-Admin-Key': process.env.NEXT_PUBLIC_ADMIN_API_KEY || ''
+            'Content-Type': 'application/json'
           }
         });
         
         if (categoriasResponse.ok) {
           const categoriasData = await categoriasResponse.json();
+          console.log('✅ Categorias recebidas:', categoriasData.length);
           setCategorias(categoriasData);
+        } else {
+          console.error('❌ Erro ao buscar categorias:', categoriasResponse.status);
         }
       } catch (error) {
-        console.error('Erro ao buscar dados:', error);
+        console.error('❌ Erro ao buscar dados:', error);
       } finally {
         setLoading(false);
       }
@@ -127,7 +140,7 @@ export default function EditarProduto() {
       const produtoData = {
         nome: formData.nome,
         descricao: formData.descricao,
-        categoria_id: formData.categoria_id, // CORRIGIDO: enviando categoria_id
+        categoria_id: parseInt(formData.categoria_id), // Converter para número
         preco: parseFloat(formData.preco),
         desconto: formData.desconto ? parseFloat(formData.desconto) : undefined,
         unidade: formData.unidade,
@@ -136,22 +149,29 @@ export default function EditarProduto() {
         disponivel: formData.disponivel
       };
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/produtos/${params.id}`, {
+      console.log('📤 Enviando dados do produto:', produtoData);
+
+      const response = await fetch(`/api/produtos/${params.id}`, {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json',
-          'X-Admin-Key': process.env.NEXT_PUBLIC_ADMIN_API_KEY || ''
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify(produtoData)
       });
 
+      console.log('📡 Response status atualização:', response.status);
+
       if (response.ok) {
+        const result = await response.json();
+        console.log('✅ Produto atualizado:', result);
         router.push('/admin/produtos');
       } else {
-        throw new Error('Erro ao atualizar produto');
+        const errorData = await response.json();
+        console.error('❌ Erro na resposta:', errorData);
+        throw new Error(errorData.error || 'Erro ao atualizar produto');
       }
     } catch (error) {
-      console.error('Erro ao atualizar produto:', error);
+      console.error('❌ Erro ao atualizar produto:', error);
       alert('Erro ao atualizar produto. Tente novamente.');
     } finally {
       setIsSubmitting(false);
@@ -183,6 +203,7 @@ export default function EditarProduto() {
       <AdminLayout>
         <div className="text-center py-12">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Produto não encontrado</h1>
+          <p className="text-gray-600 mb-4">O produto com ID {params.id} não foi encontrado.</p>
           <Link
             href="/admin/produtos"
             className="text-[#7FBA3D] hover:text-[#0A3D2E] font-medium"
