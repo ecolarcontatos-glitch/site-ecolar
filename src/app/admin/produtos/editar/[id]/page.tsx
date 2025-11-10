@@ -67,8 +67,14 @@ export default function EditarProduto() {
         console.log('📡 Response status produto:', produtoResponse.status);
         
         if (produtoResponse.ok) {
-          const produtoData = await produtoResponse.json();
-          console.log('✅ Produto recebido:', produtoData);
+          let produtoData = await produtoResponse.json();
+          console.log('✅ Produto recebido (raw):', produtoData);
+          
+          // 🔧 CORREÇÃO: Verificar se é um array e extrair o primeiro item
+          if (Array.isArray(produtoData) && produtoData.length > 0) {
+            produtoData = produtoData[0];
+            console.log('✅ Produto extraído do array:', produtoData);
+          }
           
           setProduto(produtoData);
           setFormData({
