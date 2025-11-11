@@ -89,6 +89,15 @@ export async function POST(request: NextRequest) {
       imagem, destaque, disponivel, unidade 
     } = body;
 
+    // 🧩 Compatibilidade: aceitar tanto 'categoria' quanto 'categoria_id'
+    const categoriaIdNumero = parseInt((body.categoria_id ?? body.categoria ?? '').toString());
+
+    console.log('🧠 Categoria recebida:', {
+      categoria_id,
+      categoria: body.categoria,
+      categoriaIdNumero
+    });
+
     console.log('➕ Criando produto no MySQL:', { 
       nome, 
       categoria_id: categoria_id, 
@@ -96,18 +105,17 @@ export async function POST(request: NextRequest) {
       unidade 
     });
 
-    if (!nome || !categoria_id) {
-      console.error('❌ Dados obrigatórios faltando:', { nome: !!nome, categoria_id: !!categoria_id });
-      return NextResponse.json(
-        { error: 'Nome e categoria são obrigatórios' },
-        { status: 400 }
-      );
+    if (!nome || !categoriaIdNumero) {
+    console.error('❌ Dados obrigatórios faltando:', { nome: !!nome, categoriaIdNumero });
+    return NextResponse.json(
+      { error: 'Nome e categoria são obrigatórios' },
+      { status: 400 }
+    );
     }
 
     // Converter categoria_id para número se necessário
-    const categoriaIdNumero = parseInt(categoria_id.toString());
     if (isNaN(categoriaIdNumero)) {
-      console.error('❌ categoria_id inválido:', categoria_id);
+      console.error('❌ categoria_id inválido:', categoriaIdNumero);
       return NextResponse.json(
         { error: 'ID da categoria deve ser um número válido' },
         { status: 400 }
