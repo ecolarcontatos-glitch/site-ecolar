@@ -7,9 +7,6 @@ import ImageUpload from '@/components/ImageUpload';
 import { ArrowLeft, Save } from 'lucide-react';
 import Link from 'next/link';
 
-// Forçar renderização dinâmica
-export const dynamic = "force-dynamic";
-
 interface Produto {
   id: string;
   nome: string;
