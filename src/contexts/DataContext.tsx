@@ -42,6 +42,28 @@ interface DataContextType {
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
+// Função para obter configurações da API de forma segura
+const getApiConfig = () => {
+  // No cliente, usar a API interna do Next.js
+  const baseURL = '/api';
+  // CORREÇÃO CRÍTICA: Usar a chave correta que o middleware espera
+  const apiKey = 'ecolar-API-2025@secure'; // Esta é a chave que o middleware está esperando
+
+  console.log('🔧 Configuração da API:', { 
+    baseURL, 
+    apiKey: apiKey.substring(0, 8) + '...'
+  });
+
+  return {
+    baseURL,
+    apiKey,
+    headers: {
+      'Content-Type': 'application/json',
+      'x-admin-api-key': apiKey
+    }
+  };
+};
+
 export function DataProvider({ children }: { children: ReactNode }) {
   const [produtos, setProdutos] = useState<Produto[]>([]);
   const [categorias, setCategorias] = useState<Categoria[]>([]);
@@ -50,50 +72,93 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [inspiracoes, setInspiracoes] = useState<Inspiracao[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Função para carregar dados da API
+  // Função para carregar dados da API INTERNA
   const carregarDados = async () => {
     try {
       setIsLoading(true);
+      const API_CONFIG = getApiConfig();
+      
+      console.log('🔄 Carregando dados da API interna:', API_CONFIG.baseURL);
 
-      // Carregar produtos da API
+      // Carregar produtos da API INTERNA
       try {
-        const produtosResponse = await fetch('/api/produtos');
+        const produtosURL = `${API_CONFIG.baseURL}/produtos`;
+        console.log('📦 Carregando produtos de:', produtosURL);
+        console.log('📦 Headers:', API_CONFIG.headers);
+        
+        const produtosResponse = await fetch(produtosURL, {
+          method: 'GET',
+          headers: API_CONFIG.headers,
+          cache: "no-store"
+        });
+        
         if (produtosResponse.ok) {
           const produtosData = await produtosResponse.json();
-          setProdutos(produtosData || []);
+          console.log('✅ Produtos carregados da API interna:', produtosData.length);
+          
+          // Mapear dados para garantir compatibilidade
+          const produtosMapeados = produtosData.map((produto: any) => ({
+            id: produto.id.toString(),
+            nome: produto.nome,
+            descricao: produto.descricao,
+            categoria: produto.categoria_id ? produto.categoria_id.toString() : '',
+            categoria_id: produto.categoria_id,
+            preco: Number(produto.preco) || 0,
+            desconto: Number(produto.desconto) || 0,
+            unidade: produto.unidade || 'unidade',
+            imagem: produto.imagem,
+            destaque: Boolean(produto.destaque),
+            disponivel: produto.disponivel !== false
+          }));
+          
+          setProdutos(produtosMapeados);
         } else {
-          console.error('Erro ao carregar produtos:', produtosResponse.status);
+          console.error('❌ Erro ao carregar produtos da API interna:', produtosResponse.status);
+          const errorText = await produtosResponse.text();
+          console.error('❌ Detalhes do erro:', errorText);
           setProdutos([]);
         }
       } catch (error) {
-        console.error('Erro ao carregar produtos:', error);
+        console.error('❌ Erro ao carregar produtos:', error);
         setProdutos([]);
       }
 
-      // Carregar categorias da API
+      // Carregar categorias da API INTERNA
       try {
-        const categoriasResponse = await fetch('/api/categorias');
+        const categoriasURL = `${API_CONFIG.baseURL}/categorias`;
+        console.log('📂 Carregando categorias de:', categoriasURL);
+        console.log('📂 Headers:', API_CONFIG.headers);
+        
+        const categoriasResponse = await fetch(categoriasURL, {
+          method: 'GET',
+          headers: API_CONFIG.headers,
+          cache: "no-store"
+        });
+        
         if (categoriasResponse.ok) {
           const categoriasData = await categoriasResponse.json();
+          console.log('✅ Categorias carregadas da API interna:', categoriasData.length);
           setCategorias(categoriasData || []);
         } else {
-          console.error('Erro ao carregar categorias:', categoriasResponse.status);
+          console.error('❌ Erro ao carregar categorias da API interna:', categoriasResponse.status);
+          const errorText = await categoriasResponse.text();
+          console.error('❌ Detalhes do erro:', errorText);
           setCategorias([]);
         }
       } catch (error) {
-        console.error('Erro ao carregar categorias:', error);
+        console.error('❌ Erro ao carregar categorias:', error);
         setCategorias([]);
       }
 
       // Para posts, depoimentos e inspirações, manter dados locais por enquanto
-      // (podem ser implementados com API posteriormente)
       setPosts([]);
       setDepoimentos([]);
       setInspiracoes([]);
 
       setIsLoading(false);
+      console.log('✅ Carregamento de dados concluído');
     } catch (error) {
-      console.error('Erro geral ao carregar dados:', error);
+      console.error('❌ Erro geral ao carregar dados:', error);
       setProdutos([]);
       setCategorias([]);
       setPosts([]);
@@ -112,134 +177,150 @@ export function DataProvider({ children }: { children: ReactNode }) {
     carregarDados();
   }, []);
 
-  // CRUD Produtos - integrado com API
+  // CRUD Produtos - integrado com API INTERNA
   const adicionarProduto = async (produto: Omit<Produto, 'id'>) => {
     try {
-      const response = await fetch('/api/produtos', {
+      const API_CONFIG = getApiConfig();
+      const response = await fetch(`${API_CONFIG.baseURL}/produtos`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: API_CONFIG.headers,
         body: JSON.stringify(produto),
       });
 
       if (response.ok) {
-        // Recarregar dados após adicionar
+        console.log('✅ Produto adicionado com sucesso');
         await recarregarDados();
       } else {
-        console.error('Erro ao adicionar produto:', response.status);
+        console.error('❌ Erro ao adicionar produto:', response.status);
+        const errorText = await response.text();
+        console.error('❌ Detalhes do erro:', errorText);
         throw new Error('Erro ao adicionar produto');
       }
     } catch (error) {
-      console.error('Erro ao adicionar produto:', error);
+      console.error('❌ Erro ao adicionar produto:', error);
       throw error;
     }
   };
 
   const atualizarProduto = async (id: string, produtoAtualizado: Partial<Produto>) => {
     try {
-      const response = await fetch(`/api/produtos/${id}`, {
+      const API_CONFIG = getApiConfig();
+      const response = await fetch(`${API_CONFIG.baseURL}/produtos/${id}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: API_CONFIG.headers,
         body: JSON.stringify(produtoAtualizado),
       });
 
       if (response.ok) {
-        // Recarregar dados após atualizar
+        console.log('✅ Produto atualizado com sucesso');
         await recarregarDados();
       } else {
-        console.error('Erro ao atualizar produto:', response.status);
+        console.error('❌ Erro ao atualizar produto:', response.status);
+        const errorText = await response.text();
+        console.error('❌ Detalhes do erro:', errorText);
         throw new Error('Erro ao atualizar produto');
       }
     } catch (error) {
-      console.error('Erro ao atualizar produto:', error);
+      console.error('❌ Erro ao atualizar produto:', error);
       throw error;
     }
   };
 
   const removerProduto = async (id: string) => {
     try {
-      const response = await fetch(`/api/produtos/${id}`, {
+      const API_CONFIG = getApiConfig();
+      const response = await fetch(`${API_CONFIG.baseURL}/produtos/${id}`, {
         method: 'DELETE',
+        headers: {
+          'x-admin-api-key': API_CONFIG.apiKey
+        }
       });
 
       if (response.ok) {
-        // Recarregar dados após remover
+        console.log('✅ Produto removido com sucesso');
         await recarregarDados();
       } else {
-        console.error('Erro ao remover produto:', response.status);
+        console.error('❌ Erro ao remover produto:', response.status);
+        const errorText = await response.text();
+        console.error('❌ Detalhes do erro:', errorText);
         throw new Error('Erro ao remover produto');
       }
     } catch (error) {
-      console.error('Erro ao remover produto:', error);
+      console.error('❌ Erro ao remover produto:', error);
       throw error;
     }
   };
 
-  // CRUD Categorias - integrado com API
+  // CRUD Categorias - integrado com API INTERNA
   const adicionarCategoria = async (categoria: Omit<Categoria, 'id'>) => {
     try {
-      const response = await fetch('/api/categorias', {
+      const API_CONFIG = getApiConfig();
+      const response = await fetch(`${API_CONFIG.baseURL}/categorias`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: API_CONFIG.headers,
         body: JSON.stringify(categoria),
       });
 
       if (response.ok) {
-        // Recarregar dados após adicionar
+        console.log('✅ Categoria adicionada com sucesso');
         await recarregarDados();
       } else {
-        console.error('Erro ao adicionar categoria:', response.status);
+        console.error('❌ Erro ao adicionar categoria:', response.status);
+        const errorText = await response.text();
+        console.error('❌ Detalhes do erro:', errorText);
         throw new Error('Erro ao adicionar categoria');
       }
     } catch (error) {
-      console.error('Erro ao adicionar categoria:', error);
+      console.error('❌ Erro ao adicionar categoria:', error);
       throw error;
     }
   };
 
   const atualizarCategoria = async (id: string, categoriaAtualizada: Partial<Categoria>) => {
     try {
-      const response = await fetch(`/api/categorias/${id}`, {
+      const API_CONFIG = getApiConfig();
+      const response = await fetch(`${API_CONFIG.baseURL}/categorias/${id}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: API_CONFIG.headers,
         body: JSON.stringify(categoriaAtualizada),
       });
 
       if (response.ok) {
-        // Recarregar dados após atualizar
+        console.log('✅ Categoria atualizada com sucesso');
         await recarregarDados();
       } else {
-        console.error('Erro ao atualizar categoria:', response.status);
+        console.error('❌ Erro ao atualizar categoria:', response.status);
+        const errorText = await response.text();
+        console.error('❌ Detalhes do erro:', errorText);
         throw new Error('Erro ao atualizar categoria');
       }
     } catch (error) {
-      console.error('Erro ao atualizar categoria:', error);
+      console.error('❌ Erro ao atualizar categoria:', error);
       throw error;
     }
   };
 
   const removerCategoria = async (id: string) => {
     try {
-      const response = await fetch(`/api/categorias/${id}`, {
+      const API_CONFIG = getApiConfig();
+      const response = await fetch(`${API_CONFIG.baseURL}/categorias/${id}`, {
         method: 'DELETE',
+        headers: {
+          'x-admin-api-key': API_CONFIG.apiKey
+        }
       });
 
       if (response.ok) {
-        // Recarregar dados após remover
+        console.log('✅ Categoria removida com sucesso');
         await recarregarDados();
       } else {
-        console.error('Erro ao remover categoria:', response.status);
+        console.error('❌ Erro ao remover categoria:', response.status);
+        const errorText = await response.text();
+        console.error('❌ Detalhes do erro:', errorText);
         throw new Error('Erro ao remover categoria');
       }
     } catch (error) {
-      console.error('Erro ao remover categoria:', error);
+      console.error('❌ Erro ao remover categoria:', error);
       throw error;
     }
   };

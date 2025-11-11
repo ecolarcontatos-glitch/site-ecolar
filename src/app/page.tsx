@@ -5,14 +5,13 @@ import Image from 'next/image';
 import { ArrowRight, MessageCircle, Star, Users, Truck, Clock } from 'lucide-react';
 import ProductCard from '@/components/ProductCard';
 import { useState, useEffect } from 'react';
+import { useData } from '@/contexts/DataContext';
 
 export default function HomePage() {
-  const [produtos, setProdutos] = useState([]);
-  const [categorias, setCategorias] = useState([]);
+  const { produtos, categorias, isLoading } = useData();
   const [depoimentos, setDepoimentos] = useState([]);
   const [inspiracoes, setInspiracoes] = useState([]);
   const [posts, setPosts] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [heroImages, setHeroImages] = useState([
     "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=1920&h=1080&fit=crop",
     "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=1920&h=1080&fit=crop",
@@ -20,62 +19,6 @@ export default function HomePage() {
     "https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=1920&h=1080&fit=crop"
   ]);
 
-  // Buscar dados da API
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        
-        // Buscar produtos da API (URL relativa)
-        try {
-          const produtosResponse = await fetch('/api/produtos', { 
-            cache: "no-store" 
-          });
-          if (produtosResponse.ok) {
-            const produtosData = await produtosResponse.json();
-            setProdutos(produtosData || []);
-          } else {
-            console.error('Erro ao carregar produtos:', produtosResponse.status);
-            setProdutos([]);
-          }
-        } catch (error) {
-          console.error('Erro ao carregar produtos:', error);
-          setProdutos([]);
-        }
-
-        // Buscar categorias da API (URL relativa)
-        try {
-          const categoriasResponse = await fetch('/api/categorias', { 
-            cache: "no-store" 
-          });
-          if (categoriasResponse.ok) {
-            const categoriasData = await categoriasResponse.json();
-            setCategorias(categoriasData || []);
-          } else {
-            console.error('Erro ao carregar categorias:', categoriasResponse.status);
-            setCategorias([]);
-          }
-        } catch (error) {
-          console.error('Erro ao carregar categorias:', error);
-          setCategorias([]);
-        }
-
-        // Para posts, depoimentos e inspirações, manter dados locais por enquanto
-        // (podem ser implementados com API posteriormente)
-        setDepoimentos([]);
-        setInspiracoes([]);
-        setPosts([]);
-
-        setLoading(false);
-      } catch (error) {
-        console.error('Erro ao buscar dados:', error);
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-  
   // FILTRO CRÍTICO: Apenas produtos disponíveis aparecem no site
   const produtosDisponiveis = produtos.filter(p => p.disponivel !== false);
   const produtosDestaque = produtosDisponiveis.filter(p => p.destaque).slice(0, 6);
@@ -93,7 +36,7 @@ export default function HomePage() {
     return () => clearInterval(interval);
   }, [heroImages.length]);
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
