@@ -56,19 +56,26 @@ export default function EditarProduto() {
         
         console.log('🔍 Buscando produto ID:', params.id);
         
-        // Buscar produto específico usando URL relativa
-        const produtoResponse = await fetch(`/api/produtos/${params.id}`, {
+        // Buscar produto específico usando URL absoluta
+        const produtoResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/produtos/${params.id}`, {
           cache: "no-store",
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'x-api-key': process.env.NEXT_PUBLIC_ADMIN_API_KEY || ''
           }
         });
         
         console.log('📡 Response status produto:', produtoResponse.status);
         
         if (produtoResponse.ok) {
-          const produtoData = await produtoResponse.json();
-          console.log('✅ Produto recebido:', produtoData);
+          let produtoData = await produtoResponse.json();
+          console.log('✅ Produto recebido (raw):', produtoData);
+          
+          // 🔧 CORREÇÃO: Verificar se é um array e extrair o primeiro item
+          if (Array.isArray(produtoData) && produtoData.length > 0) {
+            produtoData = produtoData[0];
+            console.log('✅ Produto extraído do array:', produtoData);
+          }
           
           setProduto(produtoData);
           setFormData({
@@ -88,11 +95,12 @@ export default function EditarProduto() {
           console.error('❌ Detalhes do erro:', errorData);
         }
 
-        // Buscar categorias usando URL relativa
-        const categoriasResponse = await fetch('/api/categorias', {
+        // Buscar categorias usando URL absoluta
+        const categoriasResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/categorias`, {
           cache: "no-store",
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'x-api-key': process.env.NEXT_PUBLIC_ADMIN_API_KEY || ''
           }
         });
         
@@ -151,10 +159,11 @@ export default function EditarProduto() {
 
       console.log('📤 Enviando dados do produto:', produtoData);
 
-      const response = await fetch(`/api/produtos/${params.id}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/produtos/${params.id}`, {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'x-api-key': process.env.NEXT_PUBLIC_ADMIN_API_KEY || ''
         },
         body: JSON.stringify(produtoData)
       });
