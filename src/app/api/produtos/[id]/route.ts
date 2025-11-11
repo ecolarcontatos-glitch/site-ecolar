@@ -88,9 +88,13 @@ export async function PUT(
     const id = parseInt(params.id);
     const body = await request.json();
     const { 
-      nome, categoria_id, descricao, preco, desconto, 
+      nome, categoria_id, categoria, descricao, preco, desconto, 
       imagem, destaque, disponivel, unidade 
     } = body;
+
+    console.log('🧠 Categoria recebida (PUT):', {
+      categoria_id, categoria
+    });
 
     console.log(`✏️ Atualizando produto ID: ${id} no MySQL`, { 
       nome, 
@@ -107,23 +111,28 @@ export async function PUT(
       );
     }
 
-    if (!nome || !categoria_id) {
-      console.error('❌ Dados obrigatórios faltando:', { nome: !!nome, categoria_id: !!categoria_id });
+    // consolidar a categoria vindade do front: aceita 'categoria_id' OU 'categoria'
+    const categoriaIdNumero = parseInt((categoria_id ?? categoria ?? '').toString());
+
+    if (!nome || !categoriaIdNumero) {
+      console.error('❌ Dados obrigatórios faltando:', { nome: !!nome, categoriaIdNumero });
       return NextResponse.json(
         { error: 'Nome e categoria são obrigatórios' },
         { status: 400 }
       );
     }
 
-    // Converter categoria_id para número se necessário
-    const categoriaIdNumero = parseInt(categoria_id.toString());
+
+    // Já temos categoriaIdNumero calculado acima.
+    // Só validamos se é número válido:
     if (isNaN(categoriaIdNumero)) {
-      console.error('❌ categoria_id inválido:', categoria_id);
+      console.error('❌ categoria_id inválido:', categoriaIdNumero);
       return NextResponse.json(
         { error: 'ID da categoria deve ser um número válido' },
         { status: 400 }
       );
     }
+
 
     // Verificar se a categoria existe
     const categoriaExiste = await executeQuery(
