@@ -111,8 +111,14 @@ export async function PUT(
       );
     }
 
-    // consolidar a categoria vindade do front: aceita 'categoria_id' OU 'categoria'
-    const categoriaIdNumero = parseInt((categoria_id ?? categoria ?? '').toString());
+    // ✅ Consolidar categoria vinda do front: aceita 'categoria_id' OU 'categoria'
+    let categoriaIdNumero: number | null = Number(body.categoria_id || body.categoria);
+
+    // Se o valor for inválido, define como null
+    if (!categoriaIdNumero || isNaN(categoriaIdNumero)) {
+      console.warn('⚠️ Categoria inválida recebida:', body.categoria_id, body.categoria);
+      categoriaIdNumero = null;
+    }
 
     if (!nome || !categoriaIdNumero) {
       console.error('❌ Dados obrigatórios faltando:', { nome: !!nome, categoriaIdNumero });
