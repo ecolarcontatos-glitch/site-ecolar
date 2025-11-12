@@ -89,8 +89,14 @@ export async function POST(request: NextRequest) {
       imagem, destaque, disponivel, unidade 
     } = body;
 
-    // 🧩 Compatibilidade: aceitar tanto 'categoria' quanto 'categoria_id'
-    const categoriaIdNumero = parseInt((body.categoria_id ?? body.categoria ?? '').toString());
+   // ✅ Compatibilidade: aceitar tanto 'categoria_id' quanto 'categoria' vindos do front
+    let categoriaIdNumero: number | null = Number(body.categoria_id || body.categoria);
+
+    // Se vier inválido, define como null (para gerar erro controlado)
+    if (!categoriaIdNumero || isNaN(categoriaIdNumero)) {
+      console.warn('⚠️ Categoria inválida recebida no POST:', body.categoria_id, body.categoria);
+      categoriaIdNumero = null;
+    }
 
     console.log('🧠 Categoria recebida:', {
       categoria_id,
