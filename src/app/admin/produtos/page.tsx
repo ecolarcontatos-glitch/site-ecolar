@@ -14,7 +14,7 @@ interface Produto {
   nome: string;
   descricao: string;
   imagem: string;
-  categoria: string;
+  categoria_id: string;
   preco: number;
   desconto?: number;
   unidade: string;
@@ -225,7 +225,7 @@ export default function ProdutosPage() {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {filteredProdutos.map((produto) => {
-                    const categoria = getCategoriaById(produto.categoria);
+                    const categoria = getCategoriaById(produto.categoria_id);
                     const preco = Number(produto?.preco) || 0;
                     const desconto = Number(produto?.desconto) || 0;
                     const precoFinal = desconto > 0 ? preco * (1 - desconto / 100) : preco;
