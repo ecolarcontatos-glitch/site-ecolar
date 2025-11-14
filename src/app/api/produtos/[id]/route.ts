@@ -88,12 +88,13 @@ export async function PUT(
     const id = parseInt(params.id);
     const body = await request.json();
     const { 
-      nome, categoria_id, categoria, descricao, preco, desconto, 
+      nome, categoria_id, descricao, preco, desconto, 
       imagem, destaque, disponivel, unidade 
     } = body;
 
+
     console.log('🧠 Categoria recebida (PUT):', {
-      categoria_id, categoria
+      categoria_id
     });
 
     console.log(`✏️ Atualizando produto ID: ${id} no MySQL`, { 
@@ -111,19 +112,12 @@ export async function PUT(
       );
     }
 
-    // ✅ Consolidar categoria vinda do front: aceita 'categoria_id' OU 'categoria'
-    let categoriaIdNumero: number | null = Number(body.categoria_id || body.categoria);
+    // 🔥 NOVO MODO: só aceita categoria_id direto
+    const categoriaIdNumero = Number(categoria_id);
 
-    // Se o valor for inválido, define como null
-    if (!categoriaIdNumero || isNaN(categoriaIdNumero)) {
-      console.warn('⚠️ Categoria inválida recebida:', body.categoria_id, body.categoria);
-      categoriaIdNumero = null;
-    }
-
-    if (!nome || !categoriaIdNumero) {
-      console.error('❌ Dados obrigatórios faltando:', { nome: !!nome, categoriaIdNumero });
+    if (!nome || isNaN(categoriaIdNumero)) {
       return NextResponse.json(
-        { error: 'Nome e categoria são obrigatórios' },
+        { error: 'Nome e categoria_id são obrigatórios' },
         { status: 400 }
       );
     }
