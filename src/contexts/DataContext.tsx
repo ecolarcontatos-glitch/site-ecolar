@@ -22,8 +22,8 @@ interface DataContextType {
   removerCategoria: (id: string) => Promise<void>;
   
   // CRUD Posts
-  adicionarPost: (post: Omit<Post, 'id'>) => void;
-  atualizarPost: (id: string, post: Partial<Post>) => void;
+  adicionarPost: (post: Omit<Post, 'id'>) => Promise<void>;
+  atualizarPost: (id: string, post: Partial<Post>) => Promise<void>;
   removerPost: (id: string) => void;
   
   // CRUD Depoimentos
@@ -150,10 +150,38 @@ export function DataProvider({ children }: { children: ReactNode }) {
         setCategorias([]);
       }
 
-      // Para posts, depoimentos e inspirações, manter dados locais por enquanto
+    // Carregar POSTS da API interna
+    try {
+      const postsURL = `${API_CONFIG.baseURL}/posts`;
+      console.log('📝 Carregando posts de:', postsURL);
+
+      const postsResponse = await fetch(postsURL, {
+        method: 'GET',
+        headers: API_CONFIG.headers,
+        cache: 'no-store'
+      });
+
+      if (postsResponse.ok) {
+        const postsData = await postsResponse.json();
+        console.log('✅ Posts carregados:', postsData.length);
+
+        // Se os campos do banco são os mesmos, não precisa mapear
+        setPosts(postsData);
+      } else {
+        console.error('❌ Erro ao carregar posts:', postsResponse.status);
+        const err = await postsResponse.text();
+        console.error('❌ Detalhes:', err);
+        setPosts([]);
+      }
+    } catch (error) {
+      console.error('❌ Erro ao carregar posts:', error);
       setPosts([]);
-      setDepoimentos([]);
-      setInspiracoes([]);
+    }
+
+    // OBS: depoimentos e inspirações continuam desligados por enquanto
+    setDepoimentos([]);
+    setInspiracoes([]);
+
 
       setIsLoading(false);
       console.log('✅ Carregamento de dados concluído');
@@ -325,24 +353,82 @@ export function DataProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // CRUD Posts - mantido local por enquanto
-  const adicionarPost = (post: Omit<Post, 'id'>) => {
-    const novoPost = { ...post, id: Date.now().toString() };
-    const novosPosts = [...posts, novoPost];
-    setPosts(novosPosts);
+  // CRUD Posts - AGORA INTEGRADO COM A API
+  const adicionarPost = async (post: Omit<Post, 'id'>) => {
+    const API_CONFIG = getApiConfig();
+
+    const response = await fetch(`${API_CONFIG.baseURL}/posts`, {
+      method: 'POST',
+      headers: API_CONFIG.headers,
+      body: JSON.stringify({
+        titulo: post.titulo,
+        descricao: post.descricao,        // campo correto do banco
+        resumo: post.resumo,
+        imagem: post.imagem,
+        autor: post.autor,
+        data_publicacao: new Date().toISOString(),
+        status: 'publicado'
+      })
+    });
+
+    if (!response.ok) {
+      const err = await response.text();
+      console.error("❌ Erro ao criar post:", err);
+      throw new Error("Erro ao criar post.");
+    }
+
+    await recarregarDados();
   };
 
-  const atualizarPost = (id: string, postAtualizado: Partial<Post>) => {
-    const novosPosts = posts.map(p => 
-      p.id === id ? { ...p, ...postAtualizado } : p
-    );
-    setPosts(novosPosts);
+
+  const atualizarPost = async (id: string, postAtualizado: Partial<Post>) => {
+    const API_CONFIG = getApiConfig();
+
+    const response = await fetch(`${API_CONFIG.baseURL}/posts`, {
+      method: 'PUT',
+      headers: API_CONFIG.headers,
+      body: JSON.stringify({
+        id, // 🔥 IMPORTANTE
+        titulo: postAtualizado.titulo,
+        descricao: postAtualizado.descricao,
+        resumo: postAtualizado.resumo,
+        imagem: postAtualizado.imagem,
+        autor: postAtualizado.autor,
+        data_publicacao: postAtualizado.data_publicacao,
+        status: postAtualizado.status
+      })
+    });
+
+    if (!response.ok) {
+      const err = await response.text();
+      console.error("❌ Erro ao atualizar post:", err);
+      throw new Error("Erro ao atualizar post.");
+    }
+
+    await recarregarDados();
   };
 
-  const removerPost = (id: string) => {
-    const novosPosts = posts.filter(p => p.id !== id);
-    setPosts(novosPosts);
+
+
+  const removerPost = async (id: string) => {
+    const API_CONFIG = getApiConfig();
+
+    const response = await fetch(`${API_CONFIG.baseURL}/posts?id=${id}`, {
+      method: 'DELETE',
+      headers: {
+        'x-admin-api-key': API_CONFIG.apiKey
+      }
+    });
+
+    if (!response.ok) {
+      const err = await response.text();
+      console.error("❌ Erro ao remover post:", err);
+      throw new Error("Erro ao remover post.");
+    }
+
+    await recarregarDados();
   };
+
 
   // CRUD Depoimentos - mantido local por enquanto
   const adicionarDepoimento = (depoimento: Omit<Depoimento, 'id'>) => {

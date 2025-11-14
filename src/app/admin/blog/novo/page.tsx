@@ -15,7 +15,7 @@ export default function NovoPost() {
   const [formData, setFormData] = useState({
     titulo: '',
     resumo: '',
-    conteudo: '',
+    descricao: '',
     imagem: '',
     autor: 'ECOLAR'
   });
@@ -28,14 +28,15 @@ export default function NovoPost() {
     setIsSubmitting(true);
 
     try {
-      const post = {
-        titulo: formData.titulo,
-        resumo: formData.resumo,
-        conteudo: formData.conteudo,
-        imagem: formData.imagem || 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=800&h=600&fit=crop',
-        autor: formData.autor,
-        data: new Date().toISOString()
-      };
+    const post = {
+      titulo: formData.titulo,
+      resumo: formData.resumo,
+      descricao: formData.descricao, // antes era conteudo
+      imagem: formData.imagem,
+      autor: formData.autor,
+      data_publicacao: new Date().toISOString(),
+      status: "publicado"
+    };
 
       adicionarPost(post);
       router.push('/admin/blog');
@@ -146,8 +147,8 @@ export default function NovoPost() {
                         Conteúdo *
                       </label>
                       <textarea
-                        value={formData.conteudo ?? ''}
-                        onChange={(e) => handleChange('conteudo', e.target.value)}
+                        value={formData.descricao ?? ''}
+                        onChange={(e) => handleChange('descricao', e.target.value)}
                         required
                         rows={15}
                         className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent font-inter resize-none"
@@ -241,8 +242,8 @@ export default function NovoPost() {
 
               {/* Conteúdo */}
               <div className="prose prose-lg max-w-none">
-                {formData.conteudo ? (
-                  formData.conteudo.split('\n').map((paragraph, index) => (
+                {formData.descricao ? (
+                  formData.descricao.split('\n').map((paragraph, index) => (
                     paragraph.trim() && (
                       <p key={index} className="font-inter text-[#111827] text-lg leading-relaxed mb-6">
                         {paragraph}
