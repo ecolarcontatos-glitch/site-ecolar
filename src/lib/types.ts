@@ -39,11 +39,12 @@ export interface Inspiracao {
 export interface Post {
   id: string;
   titulo: string;
-  imagem: string;
+  descricao: string;        // era conteudo
   resumo: string;
-  conteudo: string;
+  imagem: string;
   autor: string;
-  data: string;
+  data_publicacao: string;  // era data
+  status: string;           // publicado / rascunho
 }
 
 export interface ItemOrcamento {
