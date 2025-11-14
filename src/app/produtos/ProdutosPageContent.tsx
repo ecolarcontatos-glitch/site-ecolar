@@ -12,7 +12,7 @@ export default function ProdutosPageContent() {
   const { produtos, categorias } = useData();
   const [filteredProdutos, setFilteredProdutos] = useState<Produto[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState(searchParams.get('categoria') || '');
+  const [selectedCategory, setSelectedCategory] = useState(searchParams.get('categoria.id') || '');
   const [sortBy, setSortBy] = useState('relevancia');
 
   useEffect(() => {
@@ -22,11 +22,11 @@ export default function ProdutosPageContent() {
     
     // Filtro por categoria
     if (selectedCategory) {
-      filtered = filtered.filter(produto => {
-        const categoria = categorias.find(c => c.id === produto.categoria);
-        return categoria?.slug === selectedCategory;
-      });
+      filtered = filtered.filter(produto =>
+        String(produto.categoria) === String(selectedCategory)
+      );
     }
+
 
     // Filtro por busca
     if (searchTerm) {
@@ -122,9 +122,9 @@ export default function ProdutosPageContent() {
               >
                 <option value="">Todas as categorias</option>
                 {categorias.map((categoria) => (
-                  <option key={categoria.id} value={categoria.slug}>
-                    {categoria.nome}
-                  </option>
+                  <option key={categoria.id} value={categoria.id}>
+                  {categoria.nome}
+                </option>
                 ))}
               </select>
             </div>
