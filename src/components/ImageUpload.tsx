@@ -34,8 +34,8 @@ export default function ImageUpload({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Usar value/onChange se fornecidos, senão usar currentImage/onImageUploaded
-  const currentImageUrl = value || currentImage || '';
-  const handleImageChange = onChange || onImageUploaded;
+  const currentImageUrl = value ?? imageUrl;
+  const handleImageChange = onChange ?? onImageUploaded;
 
   const handleFileSelect = async (file: File) => {
     if (!file.type.startsWith('image/')) {
