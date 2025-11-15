@@ -96,17 +96,14 @@ export default function ImageUpload({
 
   const isValidImageUrl = (url: string) => {
     try {
+      // Se for uma URL válida, retorna true
       new URL(url);
-      return /\.(jpg|jpeg|png|gif|webp|svg)(\?.*)?$/i.test(url) || 
-             url.includes('imgur.com') || 
-             url.includes('unsplash.com') ||
-             url.includes('pexels.com') ||
-             url.includes('pixabay.com') ||
-             url.includes('blob.vercel-storage.com');
+      return true;
     } catch {
       return false;
     }
   };
+
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
