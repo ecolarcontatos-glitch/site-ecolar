@@ -357,16 +357,18 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const adicionarPost = async (post: Omit<Post, 'id'>) => {
     const API_CONFIG = getApiConfig();
 
+    const dataMySQL = new Date().toISOString().slice(0, 19).replace('T', ' ');
+
     const response = await fetch(`${API_CONFIG.baseURL}/posts`, {
       method: 'POST',
       headers: API_CONFIG.headers,
       body: JSON.stringify({
         titulo: post.titulo,
-        descricao: post.descricao,        // campo correto do banco
+        descricao: post.descricao,
         resumo: post.resumo,
         imagem: post.imagem,
         autor: post.autor,
-        data_publicacao: new Date().toISOString(),
+        data_publicacao: dataMySQL,
         status: 'publicado'
       })
     });
@@ -379,7 +381,6 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
     await recarregarDados();
   };
-
 
   const atualizarPost = async (id: string, postAtualizado: Partial<Post>) => {
     const API_CONFIG = getApiConfig();
@@ -394,7 +395,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         resumo: postAtualizado.resumo,
         imagem: postAtualizado.imagem,
         autor: postAtualizado.autor,
-        data_publicacao: postAtualizado.data_publicacao,
+        data_publicacao: postAtualizado.data_publicacao?.slice(0, 19).replace('T', ' '),
         status: postAtualizado.status
       })
     });
