@@ -217,7 +217,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
       if (response.ok) {
         console.log('✅ Produto adicionado com sucesso');
-        await recarregarDados();
+        // await recarregarDados();
       } else {
         console.error('❌ Erro ao adicionar produto:', response.status);
         const errorText = await response.text();
@@ -241,7 +241,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
       if (response.ok) {
         console.log('✅ Produto atualizado com sucesso');
-        await recarregarDados();
+        // await recarregarDados();
       } else {
         console.error('❌ Erro ao atualizar produto:', response.status);
         const errorText = await response.text();
@@ -266,7 +266,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
       if (response.ok) {
         console.log('✅ Produto removido com sucesso');
-        await recarregarDados();
+        // await recarregarDados();
       } else {
         console.error('❌ Erro ao remover produto:', response.status);
         const errorText = await response.text();
@@ -291,7 +291,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
       if (response.ok) {
         console.log('✅ Categoria adicionada com sucesso');
-        await recarregarDados();
+        // await recarregarDados();
       } else {
         console.error('❌ Erro ao adicionar categoria:', response.status);
         const errorText = await response.text();
@@ -315,7 +315,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
       if (response.ok) {
         console.log('✅ Categoria atualizada com sucesso');
-        await recarregarDados();
+        // await recarregarDados();
       } else {
         console.error('❌ Erro ao atualizar categoria:', response.status);
         const errorText = await response.text();
@@ -340,7 +340,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
       if (response.ok) {
         console.log('✅ Categoria removida com sucesso');
-        await recarregarDados();
+        // await recarregarDados();
       } else {
         console.error('❌ Erro ao remover categoria:', response.status);
         const errorText = await response.text();
@@ -379,7 +379,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       throw new Error("Erro ao criar post.");
     }
 
-    await recarregarDados();
+   // await recarregarDados();
   };
 
   const atualizarPost = async (id: string, postAtualizado: Partial<Post>) => {
@@ -406,7 +406,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       throw new Error("Erro ao atualizar post.");
     }
 
-    await recarregarDados();
+    //await recarregarDados();
   };
 
 
@@ -427,7 +427,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       throw new Error("Erro ao remover post.");
     }
 
-    await recarregarDados();
+    // await recarregarDados();
   };
 
 
