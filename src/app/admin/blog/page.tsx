@@ -80,7 +80,7 @@ export default function BlogPage() {
       console.error('Erro ao atualizar publicação:', error);
     }
   };
-
+ 
   const removerPost = async (postId: string) => {
     if (!confirm('Tem certeza que deseja excluir este post?')) {
       return;

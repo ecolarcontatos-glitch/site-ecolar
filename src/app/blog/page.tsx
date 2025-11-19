@@ -5,20 +5,56 @@ import Image from 'next/image';
 import { ArrowRight, Calendar, User } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
-export default function BlogPage() {
-  const [posts, setPosts] = useState([]);
+// Tipagem dos posts que vêm da API
+interface Post {
+  id: string;
+  titulo: string;
+  resumo: string;
+  imagem: string;
+  autor: string;
+  data: string;
+}
 
-  // Carregar posts do localStorage
+export default function BlogPage() {
+  const [posts, setPosts] = useState<Post[]>([]);
+
+  // Buscar posts da API
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const storedPosts = localStorage.getItem('ecolar_posts');
-      if (storedPosts) {
-        const parsedPosts = JSON.parse(storedPosts);
-        // Ordenar por data decrescente (mais recente primeiro)
-        const sortedPosts = parsedPosts.sort((a, b) => new Date(b.data) - new Date(a.data));
-        setPosts(sortedPosts);
+    const loadPosts = async () => {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/posts`,
+          { cache: 'no-store' }
+        );
+
+        if (!response.ok) {
+          console.error('Erro ao carregar posts:', response.status);
+          return;
+        }
+
+        const data = await response.json();
+
+        // Ajustar formato para coincidir com o front
+        const formatted = data
+          .filter((p: any) => p.status === 'publicado')
+          .map((post: any): Post => ({
+            id: post.id,
+            titulo: post.titulo,
+            resumo: post.resumo,
+            imagem: post.imagem,
+            autor: post.autor,
+            data: post.data_publicacao,
+          }))
+          .sort((a: Post, b: Post) => new Date(b.data).getTime() - new Date(a.data).getTime());
+
+
+        setPosts(formatted);
+      } catch (error) {
+        console.error('Erro ao buscar posts:', error);
       }
-    }
+    };
+
+    loadPosts();
   }, []);
 
   return (
@@ -34,14 +70,15 @@ export default function BlogPage() {
           </p>
         </div>
 
-        {/* Grid de Posts ou Mensagem Vazia */}
+        {/* Grid */}
         {posts.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {posts.map((post) => (
               <Link
                 key={post.id}
                 href={`/blog/${post.id}`}
-                className="group bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)] transition-all duration-300 overflow-hidden"
+                className="group bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.08)]
+                hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)] transition-all duration-300 overflow-hidden"
               >
                 <div className="relative aspect-[4/3]">
                   <Image
@@ -51,23 +88,28 @@ export default function BlogPage() {
                     className="object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                 </div>
+
                 <div className="p-6">
                   <h2 className="font-inter font-semibold text-[#111827] text-xl mb-3 line-clamp-2 group-hover:text-[#7FBA3D] transition-colors">
                     {post.titulo}
                   </h2>
+
                   <p className="font-inter text-[#6b7280] text-sm mb-4 line-clamp-3">
                     {post.resumo}
                   </p>
+
                   <div className="flex items-center justify-between text-xs text-[#6b7280] font-inter mb-4">
                     <div className="flex items-center space-x-1">
                       <User className="w-3 h-3" />
                       <span>{post.autor}</span>
                     </div>
+
                     <div className="flex items-center space-x-1">
                       <Calendar className="w-3 h-3" />
                       <span>{new Date(post.data).toLocaleDateString('pt-BR')}</span>
                     </div>
                   </div>
+
                   <div className="flex items-center space-x-2 text-[#7FBA3D] group-hover:text-[#0A3D2E] font-inter font-medium text-sm">
                     <span>Ler mais</span>
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -96,7 +138,7 @@ export default function BlogPage() {
           </div>
         )}
 
-        {/* CTA - apenas se houver posts */}
+        {/* CTA */}
         {posts.length > 0 && (
           <div className="mt-16 text-center">
             <div className="bg-[#f1f5f9] rounded-2xl p-8 md:p-12">
