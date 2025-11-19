@@ -9,9 +9,35 @@ import { useData } from '@/contexts/DataContext';
 
 export default function HomePage() {
   const { produtos, categorias, isLoading } = useData();
-  const [depoimentos, setDepoimentos] = useState([]);
-  const [inspiracoes, setInspiracoes] = useState([]);
-  const [posts, setPosts] = useState([]);
+  // Tipos básicos para evitar erro do TS
+  interface Depoimento {
+    id: number;
+    nome: string;
+    texto: string;
+    foto?: string;
+    imagem?: string;
+  }
+
+  interface Inspiracao {
+    id: number;
+    titulo: string;
+    descricao: string;
+    imagem: string;
+  }
+
+  interface Post {
+    id: number;
+    titulo: string;
+    resumo: string;
+    imagem: string;
+    autor: string;
+    data: string;
+  }
+
+  // Agora sim, com tipagem correta
+  const [depoimentos, setDepoimentos] = useState<Depoimento[]>([]);
+  const [inspiracoes, setInspiracoes] = useState<Inspiracao[]>([]);
+  const [posts, setPosts] = useState<Post[]>([]);
   const [heroImages, setHeroImages] = useState([
     "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=1920&h=1080&fit=crop",
     "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=1920&h=1080&fit=crop",
@@ -20,11 +46,50 @@ export default function HomePage() {
   ]);
 
   // FILTRO CRÍTICO: Apenas produtos disponíveis aparecem no site
-  const produtosDisponiveis = produtos.filter(p => p.disponivel !== false);
-  const produtosDestaque = produtosDisponiveis.filter(p => p.destaque).slice(0, 6);
+  const produtosDestaque = produtos.filter(p => p.destaque).slice(0, 6);
   const categoriasPrincipais = categorias.slice(0, 4); // Apenas 4 categorias
 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  // Buscar posts do blog
+  useEffect(() => {
+    const loadPosts = async () => {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/posts`,
+          { cache: 'no-store' }
+        );
+
+        if (!response.ok) {
+          console.error('Erro ao carregar posts:', response.status);
+          return;
+        }
+
+        const data = await response.json();
+
+        // Formatar igual à página /blog
+        const formatted = data
+          .filter((p: any) => p.status === 'publicado')
+          .map((post: any) => ({
+            id: post.id,
+            titulo: post.titulo,
+            resumo: post.resumo,
+            imagem: post.imagem,
+            autor: post.autor,
+            data: post.data_publicacao,
+          }))
+          .sort((a: any, b: any) =>
+            new Date(b.data).getTime() - new Date(a.data).getTime()
+          );
+
+        setPosts(formatted);
+      } catch (error) {
+        console.error('Erro ao buscar posts:', error);
+      }
+    };
+
+    loadPosts();
+  }, []);
 
   useEffect(() => {
     const interval = setInterval(() => {
