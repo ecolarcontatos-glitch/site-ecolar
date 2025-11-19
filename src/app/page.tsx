@@ -31,7 +31,7 @@ export default function HomePage() {
     resumo: string;
     imagem: string;
     autor: string;
-    data: string;
+    data: string | null;
   }
 
   // Agora sim, com tipagem correta
@@ -46,8 +46,9 @@ export default function HomePage() {
   ]);
 
   // FILTRO CRÍTICO: Apenas produtos disponíveis aparecem no site
-  const produtosDestaque = produtos.filter(p => p.destaque).slice(0, 6);
-  const categoriasPrincipais = categorias.slice(0, 4); // Apenas 4 categorias
+  const produtosDestaque = (produtos ?? []).filter(p => p.destaque).slice(0, 6);
+  const categoriasPrincipais = (categorias ?? []).slice(0, 4);
+
 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
@@ -70,17 +71,21 @@ export default function HomePage() {
         // Formatar igual à página /blog
         const formatted = data
           .filter((p: any) => p.status === 'publicado')
-          .map((post: any) => ({
+        .map((post: any) => ({
             id: post.id,
             titulo: post.titulo,
             resumo: post.resumo,
             imagem: post.imagem,
             autor: post.autor,
-            data: post.data_publicacao,
-          }))
-          .sort((a: any, b: any) =>
-            new Date(b.data).getTime() - new Date(a.data).getTime()
-          );
+            data: post.data_publicacao ?? null,
+        }))
+
+    .sort((a: any, b: any) => {
+      const dateA = a.data ? new Date(a.data).getTime() : 0;
+      const dateB = b.data ? new Date(b.data).getTime() : 0;
+      return dateB - dateA;
+    })
+
 
         setPosts(formatted);
       } catch (error) {
@@ -491,7 +496,7 @@ export default function HomePage() {
                       </p>
                       <div className="flex items-center justify-between text-xs text-[#6b7280] font-inter">
                         <span>{post.autor}</span>
-                        <span>{new Date(post.data).toLocaleDateString('pt-BR')}</span>
+                        <span>{post.data ? new Date(post.data).toLocaleDateString('pt-BR') : ''}</span>
                       </div>
                     </div>
                   </Link>
