@@ -61,11 +61,13 @@ export default function BlogPage() {
 
   const togglePublicacao = async (postId: string, publicado: boolean) => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/posts?id=${postId}`, {
-        method: 'DELETE',
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/posts/${postId}`, {
+        method: 'PUT',
         headers: {
+          'Content-Type': 'application/json',
           'X-Admin-Key': process.env.NEXT_PUBLIC_ADMIN_API_KEY || ''
-        }
+        },
+        body: JSON.stringify({ publicado: !publicado })
       });
 
       if (response.ok) {
@@ -85,7 +87,7 @@ export default function BlogPage() {
     }
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/posts/${postId}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/posts?id=${postId}`, {
         method: 'DELETE',
         headers: {
           'X-Admin-Key': process.env.NEXT_PUBLIC_ADMIN_API_KEY || ''
