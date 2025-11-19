@@ -251,7 +251,7 @@ export default function BlogPage() {
                         {/* Ações */}
                         <div className="flex space-x-2 ml-4">
                           <Link
-                            href={`/admin/blog/${post.id}/editar`}
+                            href={`/admin/blog/editar/${post.id}`}
                             className="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50"
                           >
                             <Edit className="w-4 h-4" />
