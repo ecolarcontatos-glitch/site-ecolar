@@ -2,14 +2,12 @@
 
 import AdminLayout from '@/components/AdminLayout';
 import ImageUpload from '@/components/ImageUpload';
-import { useData } from '@/contexts/DataContext';
 import { ArrowLeft, Save, Image as ImageIcon } from 'lucide-react';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 
 export default function EditarInspiracao() {
-  const { inspiracoes, atualizarInspiracao } = useData();
   const router = useRouter();
   const params = useParams();
   const id = params.id as string;
@@ -24,20 +22,40 @@ export default function EditarInspiracao() {
   const [inspiracao, setInspiracao] = useState(null);
 
   useEffect(() => {
-    const inspiracaoEncontrada = inspiracoes.find(i => i.id === id);
-    if (inspiracaoEncontrada) {
-      setInspiracao(inspiracaoEncontrada);
-      setFormData({
-        titulo: inspiracaoEncontrada.titulo || '',
-        descricao: inspiracaoEncontrada.descricao || '',
-        imagem: inspiracaoEncontrada.imagem || ''
-      });
+    async function carregarInspiracao() {
+      try {
+        const res = await fetch(`/api/inspiracoes/${id}`, {
+          cache: 'no-store',
+        });
+
+        if (!res.ok) {
+          setInspiracao(null);
+          return;
+        }
+
+        const data = await res.json();
+
+        setInspiracao(data);
+        setFormData({
+          titulo: data.titulo || '',
+          descricao: data.descricao || '',
+          imagem: data.imagem || '',
+        });
+      } catch (error) {
+        console.error('Erro ao carregar inspiração:', error);
+        setInspiracao(null);
+      }
     }
-  }, [id, inspiracoes]);
+
+    if (id) {
+      carregarInspiracao();
+    }
+  }, [id]);
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.titulo || !formData.descricao || !formData.imagem) {
       alert('Por favor, preencha todos os campos obrigatórios.');
       return;
@@ -46,13 +64,22 @@ export default function EditarInspiracao() {
     setIsSubmitting(true);
 
     try {
-      atualizarInspiracao(id, {
-        titulo: formData.titulo,
-        descricao: formData.descricao,
-        imagem: formData.imagem
+      const res = await fetch(`/api/inspiracoes/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
       });
 
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        alert(body?.error || 'Erro ao atualizar inspiração.');
+        return;
+      }
+
       router.push('/admin/inspiracoes');
+      router.refresh();
     } catch (error) {
       console.error('Erro ao atualizar inspiração:', error);
       alert('Erro ao atualizar inspiração. Tente novamente.');
@@ -60,6 +87,7 @@ export default function EditarInspiracao() {
       setIsSubmitting(false);
     }
   };
+
 
   const handleChange = (field: string, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
