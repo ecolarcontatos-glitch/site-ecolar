@@ -1,5 +1,3 @@
-// src/app/api/depoimentos/[id]/route.ts
-
 import { NextRequest, NextResponse } from 'next/server';
 import { executeQuery, executeUpdate, executeDelete } from '@/lib/db';
 
@@ -10,7 +8,7 @@ export async function GET(
   try {
     const depoimentos = await executeQuery(
       `
-      SELECT id, nome, comentario, imagem, foto, data, created_at, updated_at 
+      SELECT id, nome, comentario, estrelas, imagem, created_at, updated_at
       FROM depoimentos 
       WHERE id = ?
       `,
@@ -34,7 +32,7 @@ export async function PUT(
 ) {
   try {
     const body = await request.json();
-    const { nome, comentario, imagem, foto, data } = body;
+    const { nome, comentario, estrelas, foto } = body;
 
     if (!nome || !comentario) {
       return NextResponse.json(
@@ -46,15 +44,14 @@ export async function PUT(
     const result = await executeUpdate(
       `
       UPDATE depoimentos
-      SET nome = ?, comentario = ?, imagem = ?, foto = ?, data = ?, updated_at = NOW()
+      SET nome = ?, comentario = ?, estrelas = ?, imagem = ?, updated_at = NOW()
       WHERE id = ?
       `,
       [
         nome,
         comentario,
-        imagem || '',
+        estrelas ?? 5,
         foto || '',
-        data || new Date().toISOString(),
         params.id,
       ]
     );
@@ -70,9 +67,8 @@ export async function PUT(
       id: params.id,
       nome,
       comentario,
-      imagem: imagem || '',
-      foto: foto || '',
-      data: data || new Date().toISOString(),
+      imagem: foto || '',
+      estrelas: estrelas ?? 5,
       message: 'Depoimento atualizado com sucesso',
     });
   } catch (error) {
