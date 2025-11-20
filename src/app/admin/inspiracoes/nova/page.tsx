@@ -2,14 +2,12 @@
 
 import AdminLayout from '@/components/AdminLayout';
 import ImageUpload from '@/components/ImageUpload';
-import { useData } from '@/contexts/DataContext';
 import { ArrowLeft, Save, Image as ImageIcon } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function NovaInspiracao() {
-  const { adicionarInspiracao } = useData();
   const router = useRouter();
   
   const [formData, setFormData] = useState({
@@ -20,9 +18,9 @@ export default function NovaInspiracao() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.titulo || !formData.descricao || !formData.imagem) {
       alert('Por favor, preencha todos os campos obrigatórios.');
       return;
@@ -31,14 +29,22 @@ export default function NovaInspiracao() {
     setIsSubmitting(true);
 
     try {
-      const inspiracao = {
-        titulo: formData.titulo,
-        descricao: formData.descricao,
-        imagem: formData.imagem
-      };
+      const res = await fetch('/api/inspiracoes', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
 
-      adicionarInspiracao(inspiracao);
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        alert(body?.error || 'Erro ao salvar inspiração.');
+        return;
+      }
+
       router.push('/admin/inspiracoes');
+      router.refresh();
     } catch (error) {
       console.error('Erro ao salvar inspiração:', error);
       alert('Erro ao salvar inspiração. Tente novamente.');
@@ -46,6 +52,7 @@ export default function NovaInspiracao() {
       setIsSubmitting(false);
     }
   };
+
 
   const handleChange = (field: string, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
