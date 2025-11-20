@@ -17,7 +17,7 @@ export interface Produto {
   desconto?: number; // Desconto em porcentagem (0-100), opcional
   destaque: boolean;
   unidade?: string;
-  // Campos removidos: preco_fabrica, preco_pronta_entrega, disponivel_fabrica, disponivel_pronta_entrega, disponivel
+  disponivel: number | boolean;
 }
 
 export interface Depoimento {

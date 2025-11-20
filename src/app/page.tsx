@@ -9,15 +9,56 @@ import { useData } from '@/contexts/DataContext';
 
 export default function HomePage() {
   const { produtos, categorias, isLoading } = useData();
-  const [depoimentos, setDepoimentos] = useState([]);
-  const [inspiracoes, setInspiracoes] = useState([]);
-  const [posts, setPosts] = useState([]);
+  const [depoimentos, setDepoimentos] = useState<any[]>([]);
+  const [inspiracoes, setInspiracoes] = useState<any[]>([]);
+  const [posts, setPosts] = useState<any[]>([])
   const [heroImages, setHeroImages] = useState([
     "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=1920&h=1080&fit=crop",
     "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=1920&h=1080&fit=crop",
     "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1920&h=1080&fit=crop",
     "https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=1920&h=1080&fit=crop"
   ]);
+
+  // Buscar depoimentos, inspirações e posts do blog
+  useEffect(() => {
+    async function fetchContent() {
+      try {
+        // Depoimentos
+        const resDep = await fetch('/api/depoimentos', { cache: 'no-store' });
+        if (resDep.ok) {
+          const dataDep = await resDep.json();
+          // Normaliza para ter sempre texto, estrelas, foto/imagem
+          const normalizados = (dataDep || []).map((item: any) => ({
+            id: item.id,
+            nome: item.nome ?? '',
+            texto: item.comentario ?? item.texto ?? '',
+            estrelas: item.estrelas ?? 5,
+            foto: item.foto ?? '',
+            imagem: item.imagem ?? '',
+          }));
+          setDepoimentos(normalizados.slice(0, 3)); // mostra até 3 na home
+        }
+
+        // Inspirações
+        const resInsp = await fetch('/api/inspiracoes', { cache: 'no-store' });
+        if (resInsp.ok) {
+          const dataInsp = await resInsp.json();
+          setInspiracoes((dataInsp || []).slice(0, 6));
+        }
+
+        // Posts do blog
+        const resPosts = await fetch('/api/posts', { cache: 'no-store' });
+        if (resPosts.ok) {
+          const dataPosts = await resPosts.json();
+          setPosts(dataPosts || []);
+        }
+      } catch (error) {
+        console.error('Erro ao carregar dados da home:', error);
+      }
+    }
+
+    fetchContent();
+  }, []);
 
   // FILTRO CRÍTICO: Apenas produtos disponíveis aparecem no site
   const produtosDisponiveis = produtos.filter(p => p.disponivel !== false);
@@ -366,9 +407,17 @@ export default function HomePage() {
                   
                   <div className="flex justify-center mb-4">
                     {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="w-5 h-5 text-[#7FBA3D] fill-current" />
+                      <Star
+                        key={i}
+                        className={`w-5 h-5 ${
+                          i < (depoimento.estrelas ?? 5)
+                            ? 'text-[#7FBA3D] fill-current'
+                            : 'text-gray-300'
+                        }`}
+                      />
                     ))}
                   </div>
+
                   <blockquote className="font-inter text-[#6b7280] text-lg mb-6 italic">
                     "{depoimento.texto}"
                   </blockquote>
