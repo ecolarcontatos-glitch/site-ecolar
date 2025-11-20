@@ -22,7 +22,7 @@ export default function EditarDepoimento() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [notFound, setNotFound] = useState(false);
 
-  // Carrega o depoimento da API
+  // Buscar depoimento ao carregar
   useEffect(() => {
     const fetchDepoimento = async () => {
       try {
@@ -86,9 +86,9 @@ export default function EditarDepoimento() {
     } catch (error) {
       console.error('Erro ao salvar depoimento:', error);
       alert('Erro ao salvar depoimento. Tente novamente.');
+    } finally {
+      setIsSubmitting(false);
     }
-
-    setIsSubmitting(false);
   };
 
   const renderStars = (rating: number, interactive = false) => {
@@ -100,7 +100,9 @@ export default function EditarDepoimento() {
         className={`${interactive ? 'cursor-pointer hover:scale-110' : 'cursor-default'} transition-transform`}
       >
         <Star
-          className={`w-6 h-6 ${i < rating ? 'text-[#7FBA3D] fill-current' : 'text-gray-300'}`}
+          className={`w-6 h-6 ${
+            i < rating ? 'text-[#7FBA3D] fill-current' : 'text-gray-300'
+          }`}
         />
       </button>
     ));
@@ -125,6 +127,7 @@ export default function EditarDepoimento() {
             >
               <ArrowLeft className="w-6 h-6" />
             </Link>
+
             <div>
               <h1 className="font-inter font-bold text-3xl text-[#111827] mb-2">
                 Depoimento não encontrado
@@ -148,6 +151,7 @@ export default function EditarDepoimento() {
           >
             <ArrowLeft className="w-6 h-6" />
           </Link>
+
           <div>
             <h1 className="font-inter font-bold text-3xl text-[#111827] mb-2">
               Editar Depoimento
@@ -155,16 +159,21 @@ export default function EditarDepoimento() {
           </div>
         </div>
 
+        {/* Formulário */}
         <form onSubmit={handleSubmit} className="space-y-8">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            
-            {/* Informações */}
+
+            {/* Coluna Principal */}
             <div className="lg:col-span-2 space-y-6">
+
               <div className="bg-white rounded-2xl p-6 shadow">
-                <h2 className="font-inter font-semibold text-lg mb-6">Informações do Depoimento</h2>
+                <h2 className="font-inter font-semibold text-lg mb-6">
+                  Informações do Depoimento
+                </h2>
 
                 <div className="space-y-4">
-                  
+
+                  {/* Nome */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Nome *
@@ -178,10 +187,12 @@ export default function EditarDepoimento() {
                     />
                   </div>
 
+                  {/* Estrelas */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-3">
                       Avaliação *
                     </label>
+
                     <div className="flex items-center space-x-2">
                       {renderStars(formData.estrelas, true)}
                       <span className="ml-4 text-sm text-gray-600">
@@ -190,6 +201,7 @@ export default function EditarDepoimento() {
                     </div>
                   </div>
 
+                  {/* Depoimento */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Depoimento *
@@ -205,11 +217,13 @@ export default function EditarDepoimento() {
 
                 </div>
               </div>
+
             </div>
 
             {/* Sidebar */}
             <div className="space-y-6">
 
+              {/* Foto */}
               <div className="bg-white rounded-2xl p-6 shadow">
                 <h2 className="font-inter font-semibold text-lg mb-6">
                   Foto do Cliente
@@ -222,6 +236,7 @@ export default function EditarDepoimento() {
                 />
               </div>
 
+              {/* Botão Salvar */}
               <div className="bg-white rounded-2xl p-6 shadow">
                 <button
                   type="submit"
@@ -236,8 +251,8 @@ export default function EditarDepoimento() {
             </div>
 
           </div>
-
         </form>
+
       </div>
     </AdminLayout>
   );

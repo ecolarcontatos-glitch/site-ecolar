@@ -44,9 +44,8 @@ export default function DepoimentosPage() {
           nome: item.nome ?? '',
           comentario: item.comentario ?? '',
           imagem: item.imagem ?? '',
-          foto: item.foto ?? '',
           estrelas: item.estrelas ?? 5,
-          data: item.data ?? item.created_at ?? null,
+          data: item.created_at ?? null,
         }));
 
         setDepoimentos(normalizados);
@@ -137,10 +136,10 @@ export default function DepoimentosPage() {
                   <div className="flex items-start space-x-4">
 
                     <div className="flex-shrink-0">
-                      {depoimento.foto ? (
+                      {depoimento.imagem ? (
                         <div className="relative w-16 h-16 rounded-full overflow-hidden">
                           <Image
-                            src={depoimento.foto}
+                            src={depoimento.imagem}
                             alt={depoimento.nome}
                             fill
                             className="object-cover"
