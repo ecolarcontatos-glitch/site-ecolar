@@ -2,14 +2,12 @@
 
 import AdminLayout from '@/components/AdminLayout';
 import ImageUpload from '@/components/ImageUpload';
-import { useData } from '@/contexts/DataContext';
-import { ArrowLeft, Save, MessageSquare, Star } from 'lucide-react';
+import { ArrowLeft, Save, Star } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function NovoDepoimento() {
-  const { adicionarDepoimento } = useData();
   const router = useRouter();
   
   const [formData, setFormData] = useState({
@@ -22,32 +20,40 @@ export default function NovoDepoimento() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!formData.nome || !formData.texto) {
-      alert('Por favor, preencha todos os campos obrigatórios.');
-      return;
-    }
+  e.preventDefault();
 
-    setIsSubmitting(true);
+  if (!formData.nome || !formData.texto) {
+    alert('Por favor, preencha todos os campos obrigatórios.');
+    return;
+  }
 
-    try {
-      const depoimento = {
+  setIsSubmitting(true);
+
+  try {
+    const response = await fetch('/api/depoimentos', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
         nome: formData.nome,
-        texto: formData.texto,
+        comentario: formData.texto,
         estrelas: formData.estrelas,
         foto: formData.foto
-      };
+      })
+    });
 
-      adicionarDepoimento(depoimento);
-      router.push('/admin/depoimentos');
-    } catch (error) {
-      console.error('Erro ao salvar depoimento:', error);
-      alert('Erro ao salvar depoimento. Tente novamente.');
-    } finally {
-      setIsSubmitting(false);
+    if (!response.ok) {
+      throw new Error('Erro ao salvar depoimento');
     }
-  };
+
+    router.push('/admin/depoimentos');
+
+  } catch (error) {
+    console.error('Erro ao salvar depoimento:', error);
+    alert('Erro ao salvar depoimento. Tente novamente.');
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   const handleChange = (field: string, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
