@@ -16,6 +16,7 @@ export default function HomePage() {
     texto: string;
     foto?: string;
     imagem?: string;
+    estrelas?: number;
   }
 
   interface Inspiracao {
