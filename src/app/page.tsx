@@ -170,9 +170,8 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen">
-      {/* Hero Section com Carrossel */}
-      <section className="relative h-[600px] md:h-[700px] flex items-center justify-center overflow-hidden">
-        {/* Carrossel de imagens */}
+      {/* Hero Section apenas com banners */}
+      <section className="relative h-[600px] md:h-[700px] overflow-hidden">
         <div className="absolute inset-0">
           {heroImages.map((image, index) => (
             <div
@@ -183,46 +182,16 @@ export default function HomePage() {
             >
               <Image
                 src={image.url}
-                alt={`Materiais de construção ${index + 1}`}
+                alt={`Banner ${index + 1}`}
                 fill
                 className="object-cover"
                 priority={index === 0}
               />
             </div>
           ))}
-          {/* Camada preta translúcida para contraste - MAIS ESCURA */}
-          <div className="absolute inset-0 bg-[rgba(0,0,0,0.7)]" />
-        </div>
-        
-        <div className="relative z-10 max-w-[1200px] mx-auto px-5 text-center text-white">
-          <h1 className="font-inter font-bold text-4xl md:text-6xl lg:text-7xl mb-6 leading-tight" style={{ textShadow: '0 2px 4px rgba(0,0,0,0.3)' }}>
-            Materiais de construção
-            <br />
-            <span className="text-[#7FBA3D]">& decoração</span>
-          </h1>
-          <p className="font-inter text-lg md:text-xl text-gray-200 mb-8 max-w-2xl mx-auto leading-relaxed" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.3)' }}>
-            Telhas, tijolos, pisos e sob medida — orçamento rápido e entrega por carrada.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Link
-              href="/produtos"
-              className="flex items-center space-x-2 bg-[#7FBA3D] text-white px-8 py-4 rounded-2xl hover:bg-white hover:text-[#7FBA3D] font-inter font-semibold text-lg shadow-lg"
-            >
-              <span>Ver Produtos</span>
-              <ArrowRight className="w-5 h-5" />
-            </Link>
-            <a
-              href="https://wa.me/558393661690"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center space-x-2 border-2 border-white text-white px-8 py-4 rounded-2xl hover:bg-white hover:text-[#0A3D2E] transition-all duration-200 font-inter font-semibold text-lg"
-            >
-              <MessageCircle className="w-5 h-5" />
-              <span>Falar no WhatsApp</span>
-            </a>
-          </div>
         </div>
       </section>
+
 
       {/* Produtos em Destaque */}
       <section className="py-16 md:py-20">
