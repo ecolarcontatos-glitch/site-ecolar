@@ -39,12 +39,7 @@ export default function HomePage() {
   const [depoimentos, setDepoimentos] = useState<Depoimento[]>([]);
   const [inspiracoes, setInspiracoes] = useState<Inspiracao[]>([]);
   const [posts, setPosts] = useState<Post[]>([]);
-  const [heroImages, setHeroImages] = useState([
-    "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=1920&h=1080&fit=crop",
-    "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=1920&h=1080&fit=crop",
-    "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1920&h=1080&fit=crop",
-    "https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=1920&h=1080&fit=crop"
-  ]);
+  const [heroImages, setHeroImages] = useState<any[]>([]);
 
     useEffect(() => {
     async function fetchHero() {
@@ -187,7 +182,7 @@ export default function HomePage() {
               }`}
             >
               <Image
-                src={image}
+                src={image.url}
                 alt={`Materiais de construção ${index + 1}`}
                 fill
                 className="object-cover"
