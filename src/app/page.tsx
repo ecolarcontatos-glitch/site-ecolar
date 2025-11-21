@@ -16,6 +16,7 @@ export default function HomePage() {
     texto: string;
     foto?: string;
     imagem?: string;
+    estrelas?: number;
   }
 
   interface Inspiracao {
@@ -44,6 +45,25 @@ export default function HomePage() {
     "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1920&h=1080&fit=crop",
     "https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=1920&h=1080&fit=crop"
   ]);
+
+    useEffect(() => {
+    async function fetchHero() {
+      try {
+        const res = await fetch('/api/configuracoes', { cache: 'no-store' });
+        if (!res.ok) return;
+
+        const data = await res.json();
+
+        if (data.hero_images && Array.isArray(data.hero_images)) {
+          setHeroImages(data.hero_images);
+        }
+      } catch (error) {
+        console.error("Erro ao carregar hero_images:", error);
+      }
+    }
+
+    fetchHero();
+  }, []);
 
   // Buscar depoimentos, inspirações e posts do blog
   useEffect(() => {
