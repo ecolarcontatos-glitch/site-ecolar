@@ -37,38 +37,74 @@ export default function ConfiguracoesPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [newHeroImage, setNewHeroImage] = useState('');
 
-  // Carregar configurações do localStorage na inicialização
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const storedConfig = localStorage.getItem('ecolar_config');
-      if (storedConfig) {
-        try {
-          const parsedConfig = JSON.parse(storedConfig);
-          setConfig(parsedConfig);
-        } catch (error) {
-          console.error('Erro ao carregar configurações:', error);
-        }
-      }
-    }
-  }, []);
-
-  const handleSave = async () => {
-    setIsSaving(true);
+// 🔥 Carregar configurações do banco ao abrir o painel
+useEffect(() => {
+  async function loadConfig() {
     try {
-      // Salvar no localStorage
-      localStorage.setItem('ecolar_config', JSON.stringify(config));
-      
-      alert('Configurações salvas com sucesso!');
-      
-      // Opcional: recarregar a página para aplicar as mudanças
-      // window.location.reload();
+      const res = await fetch("/api/configuracoes", { cache: "no-store" });
+      if (!res.ok) return;
+
+      const data = await res.json();
+
+      setConfig({
+        logoHeader: data.logo_header || "",
+        logoFooter: data.logo_footer || "",
+        telefone: data.telefone || "",
+        email: data.email || "",
+        endereco: data.endereco || "",
+        whatsapp: data.whatsapp || "",
+        textoRodape: data.texto_rodape || "",
+        heroImages: Array.isArray(data.hero_images)
+          ? data.hero_images
+          : typeof data.hero_images === "string"
+            ? JSON.parse(data.hero_images)
+            : []
+      });
+
     } catch (error) {
-      console.error('Erro ao salvar:', error);
-      alert('Erro ao salvar configurações. Tente novamente.');
-    } finally {
-      setIsSaving(false);
+      console.error("Erro ao carregar configurações:", error);
     }
-  };
+  }
+
+  loadConfig();
+}, []);
+
+
+const handleSave = async () => {
+  setIsSaving(true);
+
+  try {
+    const payload = {
+      logo_header: config.logoHeader,
+      logo_footer: config.logoFooter,
+      telefone: config.telefone,
+      email: config.email,
+      endereco: config.endereco,
+      whatsapp: config.whatsapp,
+      texto_rodape: config.textoRodape,
+      hero_images: JSON.stringify(config.heroImages)
+    };
+
+    const res = await fetch("/api/configuracoes", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) {
+      throw new Error("Erro ao salvar configurações");
+    }
+
+    alert("Configurações salvas com sucesso!");
+
+  } catch (error) {
+    console.error("Erro ao salvar configurações:", error);
+    alert("Erro ao salvar as configurações.");
+  }
+
+  setIsSaving(false);
+};
+
 
   const handleLogoHeaderUpload = (url: string) => {
     setConfig({ ...config, logoHeader: url });
