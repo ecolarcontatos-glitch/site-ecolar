@@ -171,26 +171,39 @@ export default function HomePage() {
   return (
     <div className="min-h-screen">
       {/* Hero Section apenas com banners */}
-      <section className="relative h-[380px] md:h-[420px] lg:h-[460px] overflow-hidden">
-        <div className="absolute inset-0">
-          {heroImages.map((image, index) => (
-            <div
-              key={index}
-              className={`absolute inset-0 transition-opacity duration-1000 ${
-                index === currentImageIndex ? 'opacity-100' : 'opacity-0'
-              }`}
-            >
-              <Image
-                src={image.url}
-                alt={`Banner ${index + 1}`}
-                fill
-                className="object-cover"
-                priority={index === 0}
-              />
-            </div>
-          ))}
+{/* HERO RESPONSIVO COM <picture> E 3 QUEBRAS */}
+<section className="relative h-[380px] md:h-[420px] lg:h-[460px] overflow-hidden">
+  <div className="absolute inset-0">
+    {heroImages
+      .sort((a: any, b: any) => (a.ordem ?? 0) - (b.ordem ?? 0))
+      .map((banner: any, index: number) => (
+        <div
+          key={index}
+          className={`absolute inset-0 transition-opacity duration-1000 ${
+            index === currentImageIndex ? 'opacity-100' : 'opacity-0'
+          }`}
+        >
+
+          <picture>
+            {/* Desktop */}
+            <source media="(min-width: 1024px)" srcSet={banner.desktop} />
+
+            {/* Tablet */}
+            <source media="(min-width: 640px)" srcSet={banner.tablet} />
+
+            {/* Mobile */}
+            <img
+              src={banner.mobile}
+              alt={`Banner ${index + 1}`}
+              className="w-full h-full object-cover"
+            />
+          </picture>
+
         </div>
-      </section>
+      ))}
+  </div>
+</section>
+
 
 
       {/* Produtos em Destaque */}

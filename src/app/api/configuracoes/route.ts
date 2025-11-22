@@ -60,10 +60,25 @@ export async function PUT(request: NextRequest) {
 
     console.log('✏️ Atualizando configurações...');
 
-    // Verificar se já existe configuração
-    const existingConfigs = await executeQuery(`
-      SELECT id FROM configuracoes ORDER BY id DESC LIMIT 1
-    `);
+// Validação: garantir que hero_images contenha desktop/tablet/mobile
+if (Array.isArray(hero_images)) {
+  for (const banner of hero_images) {
+    if (!banner.desktop || !banner.tablet || !banner.mobile) {
+      return NextResponse.json(
+        { error: "Cada banner precisa conter desktop, tablet e mobile." },
+        { status: 400 }
+      );
+    }
+  }
+}
+
+console.log("✔ Validação dos banners concluída");
+
+// Verificar se já existe configuração
+const existingConfigs = await executeQuery(`
+  SELECT id FROM configuracoes ORDER BY id DESC LIMIT 1
+`);
+
 
     let heroImagesJson = hero_images;
     if (typeof hero_images === 'object') {

@@ -9,7 +9,7 @@ import ImageUpload from '@/components/ImageUpload';
 interface SiteConfig {
   logoHeader: string;
   logoFooter: string;
-  heroImages: { url: string; order: number }[];
+  heroImages: { desktop: string; tablet: string; mobile: string; order: number }[];
   telefone: string;
   email: string;
   endereco: string;
@@ -21,12 +21,7 @@ export default function ConfiguracoesPage() {
   const [config, setConfig] = useState<SiteConfig>({
     logoHeader: 'https://k6hrqrxuu8obbfwn.public.blob.vercel-storage.com/temp/fa155124-8442-4fa3-aede-ff541b4163a7.png',
     logoFooter: 'https://k6hrqrxuu8obbfwn.public.blob.vercel-storage.com/temp/fa155124-8442-4fa3-aede-ff541b4163a7.png',
-    heroImages: [
-      { url: 'https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=1920&h=1080&fit=crop', order: 1 },
-      { url: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=1920&h=1080&fit=crop', order: 2 },
-      { url: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1920&h=1080&fit=crop', order: 3 },
-      { url: 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=1920&h=1080&fit=crop', order: 4 }
-    ],
+    heroImages: [],
     telefone: '(83) 2177-7553',
     email: 'ecolar.contatos@gmail.com',
     endereco: 'R. Pres. Washington Luís, 592 - Bessa, João Pessoa - PB, 58035-340',
@@ -82,7 +77,7 @@ const handleSave = async () => {
       endereco: config.endereco,
       whatsapp: config.whatsapp,
       texto_rodape: config.textoRodape,
-      hero_images: JSON.stringify(config.heroImages)
+      hero_images: config.heroImages
     };
 
     const res = await fetch("/api/configuracoes", {
@@ -122,24 +117,55 @@ const handleSave = async () => {
     setConfig({ ...config, logoFooter: '' });
   };
 
-  const addHeroImage = () => {
-    if (newHeroImage.trim()) {
-      const newOrder = Math.max(...config.heroImages.map(img => img.order), 0) + 1;
-      setConfig({
-        ...config,
-        heroImages: [...config.heroImages, { url: newHeroImage.trim(), order: newOrder }]
-      });
-      setNewHeroImage('');
-    }
-  };
+const addHeroImage = () => {
+  if (newHeroImage.trim()) {
+    const currentMax = config.heroImages.length > 0
+  ? Math.max(...config.heroImages.map(img => img.order))
+  : 0;
 
-  const addHeroImageUpload = (url: string) => {
-    const newOrder = Math.max(...config.heroImages.map(img => img.order), 0) + 1;
+const newOrder = currentMax + 1;
+
+
     setConfig({
       ...config,
-      heroImages: [...config.heroImages, { url, order: newOrder }]
+      heroImages: [
+        ...config.heroImages,
+        {
+          desktop: newHeroImage.trim(),
+          tablet: "",
+          mobile: "",
+          order: newOrder
+        }
+      ]
     });
-  };
+
+    setNewHeroImage('');
+  }
+};
+
+
+const addHeroImageUpload = (url: string) => {
+  const currentMax = config.heroImages.length > 0
+  ? Math.max(...config.heroImages.map(img => img.order))
+  : 0;
+
+const newOrder = currentMax + 1;
+
+
+  setConfig({
+    ...config,
+    heroImages: [
+      ...config.heroImages,
+      {
+        desktop: url,
+        tablet: "",
+        mobile: "",
+        order: newOrder
+      }
+    ]
+  });
+};
+
 
   const removeHeroImage = (index: number) => {
     setConfig({
@@ -451,7 +477,7 @@ const handleSave = async () => {
             <div key={index} className="relative bg-gray-100 rounded-lg overflow-hidden">
               <div className="relative aspect-video">
                 <Image
-                  src={image.url}
+                  src={image.desktop}
                   alt={`Hero ${index + 1}`}
                   fill
                   className="object-cover"
@@ -488,17 +514,48 @@ const handleSave = async () => {
                   </button>
                 </div>
                 
-                <input
-                  type="text"
-                  value={image.url ?? ''}
-                  onChange={(e) => {
-                    const newImages = [...config.heroImages];
-                    newImages[index].url = e.target.value;
-                    setConfig({ ...config, heroImages: newImages });
-                  }}
-                  className="w-full mt-2 px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-[#7FBA3D]"
-                  placeholder="URL da imagem"
-                />
+{/* Desktop */}
+<label className="block text-xs text-gray-600 mt-2">Desktop</label>
+<input
+  type="text"
+  value={image.desktop ?? ''}
+  onChange={(e) => {
+    const newImages = [...config.heroImages];
+    newImages[index].desktop = e.target.value;
+    setConfig({ ...config, heroImages: newImages });
+  }}
+  className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
+  placeholder="URL da imagem Desktop"
+/>
+
+{/* Tablet */}
+<label className="block text-xs text-gray-600 mt-2">Tablet</label>
+<input
+  type="text"
+  value={image.tablet ?? ''}
+  onChange={(e) => {
+    const newImages = [...config.heroImages];
+    newImages[index].tablet = e.target.value;
+    setConfig({ ...config, heroImages: newImages });
+  }}
+  className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
+  placeholder="URL da imagem Tablet"
+/>
+
+{/* Mobile */}
+<label className="block text-xs text-gray-600 mt-2">Mobile</label>
+<input
+  type="text"
+  value={image.mobile ?? ''}
+  onChange={(e) => {
+    const newImages = [...config.heroImages];
+    newImages[index].mobile = e.target.value;
+    setConfig({ ...config, heroImages: newImages });
+  }}
+  className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
+  placeholder="URL da imagem Mobile"
+/>
+
               </div>
             </div>
           ))}
