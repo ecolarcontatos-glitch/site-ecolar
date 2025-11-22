@@ -171,7 +171,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen">
       {/* Hero Section apenas com banners */}
-      <section className="relative h-[600px] md:h-[700px] overflow-hidden">
+      <section className="relative h-[380px] md:h-[420px] lg:h-[460px] overflow-hidden">
         <div className="absolute inset-0">
           {heroImages.map((image, index) => (
             <div
