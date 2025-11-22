@@ -172,7 +172,7 @@ export default function HomePage() {
     <div className="min-h-screen">
       {/* Hero Section apenas com banners */}
 {/* HERO RESPONSIVO COM <picture> E 3 QUEBRAS */}
-<section className="relative h-[380px] md:h-[420px] lg:h-[460px] overflow-hidden">
+<section className="relative h-[450px] md:h-[420px] lg:h-[460px] overflow-hidden">
   <div className="absolute inset-0">
     {heroImages
       .sort((a: any, b: any) => (a.ordem ?? 0) - (b.ordem ?? 0))
