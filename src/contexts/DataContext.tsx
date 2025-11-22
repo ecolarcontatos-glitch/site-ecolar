@@ -9,7 +9,9 @@ interface DataContextType {
   posts: Post[];
   depoimentos: Depoimento[];
   inspiracoes: Inspiracao[];
+  configuracoes: any | null;   // ✅ adicionar linha
   isLoading: boolean;
+
   
   // CRUD Produtos
   adicionarProduto: (produto: Omit<Produto, 'id'>) => Promise<void>;
@@ -71,6 +73,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [depoimentos, setDepoimentos] = useState<Depoimento[]>([]);
   const [inspiracoes, setInspiracoes] = useState<Inspiracao[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+// ✅ Novo estado para CONFIGURAÇÕES DO SITE
+const [configuracoes, setConfiguracoes] = useState<any>(null);
+
 
   // Função para carregar dados da API INTERNA
   const carregarDados = async () => {
@@ -141,6 +147,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
           setCategorias(categoriasData || []);
         } else {
           console.error('❌ Erro ao carregar categorias da API interna:', categoriasResponse.status);
+
           const errorText = await categoriasResponse.text();
           console.error('❌ Detalhes do erro:', errorText);
           setCategorias([]);
@@ -149,6 +156,53 @@ export function DataProvider({ children }: { children: ReactNode }) {
         console.error('❌ Erro ao carregar categorias:', error);
         setCategorias([]);
       }
+
+      // ==========================
+// 🔥 CARREGAR CONFIGURAÇÕES
+// ==========================
+try {
+  const configURL = `${API_CONFIG.baseURL}/configuracoes`;
+  console.log("⚙ Buscando configurações do site...");
+
+  const configResponse = await fetch(configURL, {
+    method: "GET",
+    headers: API_CONFIG.headers,
+    cache: "no-store",
+  });
+
+  if (configResponse.ok) {
+    const data = await configResponse.json();
+
+    const heroImages =
+      Array.isArray(data.hero_images)
+        ? data.hero_images
+        : typeof data.hero_images === "string"
+          ? JSON.parse(data.hero_images)
+          : [];
+
+    setConfiguracoes({
+      logoHeader: data.logo_header || "",
+      logoFooter: data.logo_footer || "",
+      telefone: data.telefone || "",
+      email: data.email || "",
+      endereco: data.endereco || "",
+      whatsapp: data.whatsapp || "",
+      textoRodape: data.texto_rodape || "",
+      heroImages
+    });
+
+    console.log("⚙ Configurações carregadas:", heroImages.length, "banners");
+
+  } else {
+    console.error("❌ Erro ao carregar configurações", configResponse.status);
+    setConfiguracoes(null);
+  }
+
+} catch (err) {
+  console.error("❌ Erro ao carregar configurações:", err);
+  setConfiguracoes(null);
+}
+
 
     // Carregar POSTS da API interna
     try {
@@ -475,7 +529,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
     posts,
     depoimentos,
     inspiracoes,
+    configuracoes, // ✅ adicionar aqui
     isLoading,
+
     
     // CRUD Produtos
     adicionarProduto,
