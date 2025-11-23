@@ -30,14 +30,25 @@ export async function GET() {
 
     const config = configs[0];
     
-    // Parse do JSON das hero_images se necessário
-    if (typeof config.hero_images === 'string') {
-      try {
-        config.hero_images = JSON.parse(config.hero_images);
-      } catch (e) {
-        config.hero_images = [];
-      }
-    }
+// Parse seguro do hero_images garantindo que todos os campos existam
+if (typeof config.hero_images === 'string') {
+  try {
+    const parsed = JSON.parse(config.hero_images);
+
+    config.hero_images = Array.isArray(parsed)
+      ? parsed.map((b: any) => ({
+          desktop: b.desktop || "",
+          tablet: b.tablet || "",
+          mobile: b.mobile || "",
+          link: b.link || "",
+          order: b.order || 1
+        }))
+      : [];
+  } catch (e) {
+    config.hero_images = [];
+  }
+}
+
 
     console.log('✅ Configurações encontradas');
     return NextResponse.json(config);
@@ -60,17 +71,18 @@ export async function PUT(request: NextRequest) {
 
     console.log('✏️ Atualizando configurações...');
 
-// Validação: garantir que hero_images contenha desktop/tablet/mobile
+// Validação: garantir que cada banner tenha desktop/tablet/mobile/link
 if (Array.isArray(hero_images)) {
   for (const banner of hero_images) {
-    if (!banner.desktop || !banner.tablet || !banner.mobile) {
+    if (!banner.desktop || !banner.tablet || !banner.mobile || !banner.link) {
       return NextResponse.json(
-        { error: "Cada banner precisa conter desktop, tablet e mobile." },
+        { error: "Cada banner precisa conter desktop, tablet, mobile e link." },
         { status: 400 }
       );
     }
   }
 }
+
 
 console.log("✔ Validação dos banners concluída");
 
@@ -80,10 +92,19 @@ const existingConfigs = await executeQuery(`
 `);
 
 
-    let heroImagesJson = hero_images;
-    if (typeof hero_images === 'object') {
-      heroImagesJson = JSON.stringify(hero_images);
-    }
+// Serializar banners corretamente
+const heroImagesJson = JSON.stringify(
+  Array.isArray(hero_images)
+    ? hero_images.map((b) => ({
+        desktop: b.desktop || "",
+        tablet: b.tablet || "",
+        mobile: b.mobile || "",
+        link: b.link || "",
+        order: b.order || 1
+      }))
+    : []
+);
+
 
     if (existingConfigs.length === 0) {
       // Criar nova configuração
@@ -136,7 +157,7 @@ const existingConfigs = await executeQuery(`
       whatsapp: whatsapp || '558393661690',
       texto_footer: texto_footer || 'Materiais de construção com qualidade e sustentabilidade.',
       texto_rodape: texto_rodape || 'Materiais de construção com qualidade e sustentabilidade.',
-      hero_images: typeof hero_images === 'string' ? JSON.parse(hero_images || '[]') : (hero_images || []),
+      hero_images: JSON.parse(heroImagesJson),
       logo_header: logo_header || 'https://k6hrqrxuu8obbfwn.public.blob.vercel-storage.com/temp/fa155124-8442-4fa3-aede-ff541b4163a7.png',
       logo_footer: logo_footer || 'https://k6hrqrxuu8obbfwn.public.blob.vercel-storage.com/temp/fa155124-8442-4fa3-aede-ff541b4163a7.png',
       message: 'Configurações atualizadas com sucesso'

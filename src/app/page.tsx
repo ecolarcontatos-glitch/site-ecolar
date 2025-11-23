@@ -175,31 +175,27 @@ export default function HomePage() {
 <section className="relative h-[500px] md:h-[420px] lg:h-[460px] overflow-hidden">
   <div className="absolute inset-0">
     {heroImages
-      .sort((a: any, b: any) => (a.ordem ?? 0) - (b.ordem ?? 0))
+      .sort((a: any, b: any) => (a.order ?? 0) - (b.order ?? 0))
       .map((banner: any, index: number) => (
-        <div
-          key={index}
-          className={`absolute inset-0 transition-opacity duration-1000 ${
-            index === currentImageIndex ? 'opacity-100' : 'opacity-0'
-          }`}
-        >
+<div
+  key={index}
+  className={`absolute inset-0 transition-opacity duration-1000 ${
+    index === currentImageIndex ? 'opacity-100' : 'opacity-0'
+  }`}
+>
+  <Link href={banner.link || "#"} className="block w-full h-full">
+    <picture>
+      <source media="(min-width: 1024px)" srcSet={banner.desktop} />
+      <source media="(min-width: 640px)" srcSet={banner.tablet} />
+      <img
+        src={banner.mobile}
+        alt={`Banner ${index + 1}`}
+        className="w-full h-full object-cover cursor-pointer"
+      />
+    </picture>
+  </Link>
+</div>
 
-          <picture>
-            {/* Desktop */}
-            <source media="(min-width: 1024px)" srcSet={banner.desktop} />
-
-            {/* Tablet */}
-            <source media="(min-width: 640px)" srcSet={banner.tablet} />
-
-            {/* Mobile */}
-            <img
-              src={banner.mobile}
-              alt={`Banner ${index + 1}`}
-              className="w-full h-full object-cover"
-            />
-          </picture>
-
-        </div>
       ))}
   </div>
 </section>

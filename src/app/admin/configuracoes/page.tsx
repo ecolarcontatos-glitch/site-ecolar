@@ -9,7 +9,14 @@ import ImageUpload from '@/components/ImageUpload';
 interface SiteConfig {
   logoHeader: string;
   logoFooter: string;
-  heroImages: { desktop: string; tablet: string; mobile: string; order: number }[];
+  heroImages: { 
+  desktop: string; 
+  tablet: string; 
+  mobile: string; 
+  link: string;
+  order: number 
+}[];
+
   telefone: string;
   email: string;
   endereco: string;
@@ -129,14 +136,16 @@ const newOrder = currentMax + 1;
     setConfig({
       ...config,
       heroImages: [
-        ...config.heroImages,
-        {
-          desktop: newHeroImage.trim(),
-          tablet: "",
-          mobile: "",
-          order: newOrder
-        }
-      ]
+  ...config.heroImages,
+  {
+    desktop: newHeroImage.trim(),
+    tablet: "",
+    mobile: "",
+    link: "",
+    order: newOrder
+  }
+]
+
     });
 
     setNewHeroImage('');
@@ -160,6 +169,7 @@ const newOrder = currentMax + 1;
         desktop: url,
         tablet: "",
         mobile: "",
+        link: "",
         order: newOrder
       }
     ]
@@ -542,19 +552,20 @@ const newOrder = currentMax + 1;
   placeholder="URL da imagem Tablet"
 />
 
-{/* Mobile */}
-<label className="block text-xs text-gray-600 mt-2">Mobile</label>
+{/* Link */}
+<label className="block text-xs text-gray-600 mt-2">Link do Banner</label>
 <input
   type="text"
-  value={image.mobile ?? ''}
+  value={image.link ?? ''}
   onChange={(e) => {
     const newImages = [...config.heroImages];
-    newImages[index].mobile = e.target.value;
+    newImages[index].link = e.target.value;
     setConfig({ ...config, heroImages: newImages });
   }}
   className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
-  placeholder="URL da imagem Mobile"
+  placeholder="https://seudominio.com/pagina"
 />
+
 
               </div>
             </div>
