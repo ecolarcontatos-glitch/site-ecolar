@@ -552,6 +552,21 @@ const newOrder = currentMax + 1;
   placeholder="URL da imagem Tablet"
 />
 
+{/* Mobile */}
+<label className="block text-xs text-gray-600 mt-2">Mobile</label>
+<input
+  type="text"
+  value={image.mobile ?? ''}  
+  onChange={(e) => {
+    const newImages = [...config.heroImages];
+    newImages[index].mobile = e.target.value;
+    setConfig({ ...config, heroImages: newImages });
+  }}
+  className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
+  placeholder="URL da imagem Mobile"
+/>
+
+
 {/* Link */}
 <label className="block text-xs text-gray-600 mt-2">Link do Banner</label>
 <input
