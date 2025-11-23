@@ -108,49 +108,35 @@
 }
 
 /* =======================================================
-   HERO – SWIPER PAGINATION (bolinhas)
+   HERO – SWIPER PAGINATION (bolinhas pequenas e limpas)
 ======================================================= */
 
 .swiper-pagination-bullet {
-  width: 8px !important;
-  height: 8px !important;
+  width: 10px !important;
+  height: 10px !important;
   background: #C7D8BE !important; /* verde claro apagado */
   opacity: 1 !important;
-  transition: all 0.3s ease;
+  border-radius: 9999px !important;
+  transition: background 0.25s ease;
 }
 
 .swiper-pagination-bullet-active {
   background: #7FBA3D !important; /* verde ECOLAR */
-  width: 22px !important;
-  border-radius: 999px !important;
-  transition: all 0.3s ease;
 }
 
 /* =======================================================
-   HERO – SWIPER NAVIGATION (setas minimalistas ECOLAR)
+   HERO – SWIPER NAVIGATION (setas minimalistas verdes)
 ======================================================= */
 
 .swiper-button-next,
 .swiper-button-prev {
-  color: white !important;
-  width: 38px !important;
-  height: 38px !important;
-  background: rgba(127, 186, 61, 0.75); /* verde ecolar */
-  border-radius: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  backdrop-filter: blur(3px);
-  transition: 0.2s ease-in-out;
-}
-
-.swiper-button-next:hover,
-.swiper-button-prev:hover {
-  background: rgba(127, 186, 61, 1); /* verde mais forte */
-  transform: scale(1.12);
+  color: #7FBA3D !important; /* Ícone verde ECOLAR */
+  width: 28px !important;
+  height: 28px !important;
+  background: none !important; /* sem fundo */
 }
 
 .swiper-button-next::after,
 .swiper-button-prev::after {
-  font-size: 16px !important;
+  font-size: 22px !important; /* seta menor */
 }
