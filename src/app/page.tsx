@@ -6,6 +6,9 @@ import { ArrowRight, MessageCircle, Star, Users, Truck, Clock } from 'lucide-rea
 import ProductCard from '@/components/ProductCard';
 import { useState, useEffect } from 'react';
 import { useData } from '@/contexts/DataContext';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Navigation, Pagination, Autoplay } from 'swiper/modules';
+
 
 export default function HomePage() {
   const { produtos, categorias, isLoading } = useData();
@@ -105,8 +108,6 @@ export default function HomePage() {
   const produtosDestaque = produtos.filter(p => p.destaque).slice(0, 6);
   const categoriasPrincipais = categorias.slice(0, 4); // Apenas 4 categorias
 
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-
   // Buscar posts do blog
   useEffect(() => {
     const loadPosts = async () => {
@@ -147,15 +148,6 @@ export default function HomePage() {
     loadPosts();
   }, []);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentImageIndex((prevIndex) => 
-        prevIndex === heroImages.length - 1 ? 0 : prevIndex + 1
-      );
-    }, 7000); // Troca a cada 7 segundos
-
-    return () => clearInterval(interval);
-  }, [heroImages.length]);
 
   if (isLoading) {
     return (
@@ -170,36 +162,51 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen">
-      {/* Hero Section apenas com banners */}
-{/* HERO RESPONSIVO COM <picture> E 3 QUEBRAS */}
+{/* HERO COM SWIPER (carrossel responsivo) */}
 <section className="relative h-[500px] md:h-[420px] lg:h-[460px] overflow-hidden">
-  <div className="absolute inset-0">
-    {heroImages
-      .sort((a: any, b: any) => (a.order ?? 0) - (b.order ?? 0))
-      .map((banner: any, index: number) => (
-<div
-  key={index}
-  className={`absolute inset-0 transition-opacity duration-1000 ${
-    index === currentImageIndex ? 'opacity-100' : 'opacity-0'
-  }`}
->
-  <Link href={banner.link || "#"} className="block w-full h-full">
-    <picture>
-      <source media="(min-width: 1024px)" srcSet={banner.desktop} />
-      <source media="(min-width: 640px)" srcSet={banner.tablet} />
-      <img
-        src={banner.mobile}
-        alt={`Banner ${index + 1}`}
-        className="w-full h-full object-cover cursor-pointer"
-      />
-    </picture>
-  </Link>
-</div>
-
-      ))}
-  </div>
+  {/* Só renderiza o Swiper se tiver pelo menos 1 banner */}
+  {heroImages && heroImages.length > 0 && (
+    <Swiper
+      modules={[Navigation, Pagination, Autoplay]}
+      navigation={heroImages.length > 1}        // setas só se tiver mais de 1
+      pagination={{ clickable: true }}          // bolinhas clicáveis
+      autoplay={{
+        delay: 7000,
+        disableOnInteraction: false,
+      }}
+      loop={heroImages.length > 1}
+      className="w-full h-full"
+    >
+      {heroImages
+        .slice() // evita mutar o array original
+        .sort((a: any, b: any) => (a.order ?? 0) - (b.order ?? 0))
+        .map((banner: any, index: number) => (
+          <SwiperSlide key={index}>
+            <Link href={banner.link || '#'} className="block w-full h-full">
+              <picture>
+                {/* Desktop */}
+                <source
+                  media="(min-width: 1024px)"
+                  srcSet={banner.desktop || banner.tablet || banner.mobile}
+                />
+                {/* Tablet */}
+                <source
+                  media="(min-width: 640px)"
+                  srcSet={banner.tablet || banner.desktop || banner.mobile}
+                />
+                {/* Mobile (fallback) */}
+                <img
+                  src={banner.mobile || banner.tablet || banner.desktop}
+                  alt={`Banner ${index + 1}`}
+                  className="w-full h-full object-cover cursor-pointer"
+                />
+              </picture>
+            </Link>
+          </SwiperSlide>
+        ))}
+    </Swiper>
+  )}
 </section>
-
 
 
       {/* Produtos em Destaque */}
