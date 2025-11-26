@@ -1,138 +1,166 @@
-import mysql from 'mysql2/promise';
+import mysql, { Pool, PoolOptions, ResultSetHeader } from "mysql2/promise";
 
-let pool: mysql.Pool | null = null;
+let pool: Pool | null = null;
 
-export function getPool() {
+/**
+ * Valida as variáveis de ambiente antes de usar
+ */
+function validateEnv() {
+  const required = [
+    "DB_HOST",
+    "DB_PORT",
+    "DB_USER",
+    "DB_PASSWORD",
+    "DB_NAME"
+  ];
+
+  const missing = required.filter((key) => !process.env[key]);
+
+  if (missing.length > 0) {
+    throw new Error(
+      `❌ Variáveis de ambiente faltando: ${missing.join(", ")}`
+    );
+  }
+}
+
+/**
+ * Retorna um pool MySQL singleton
+ */
+export function getPool(): Pool {
   if (!pool) {
-    // Log das variáveis de ambiente para debug
-    console.log('🔧 Configurando conexão MySQL:', {
-      host: process.env.DB_HOST,
-      port: process.env.DB_PORT,
-      user: process.env.DB_USER,
-      database: process.env.DB_NAME,
-      // Não loggar a senha por segurança
-      passwordSet: !!process.env.DB_PASSWORD
-    });
+    validateEnv();
 
-    pool = mysql.createPool({
-      host: process.env.DB_HOST,
-      port: parseInt(process.env.DB_PORT || '3306'),
-      user: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME,
+    const config: PoolOptions = {
+      host: process.env.DB_HOST!,
+      port: Number(process.env.DB_PORT!) || 3306,
+      user: process.env.DB_USER!,
+      password: process.env.DB_PASSWORD!,
+      database: process.env.DB_NAME!,
       waitForConnections: true,
       connectionLimit: 10,
       queueLimit: 0,
-      acquireTimeout: 10000,
-      // Configurações adicionais para HostGator
-      ssl: false,
-      charset: 'utf8mb4',
-      timezone: '+00:00'
+      connectTimeout: 10000,
+      charset: "utf8mb4",
+      timezone: "+00:00"
+      // ssl removido pois a tipagem não aceita "false"
+    };
+
+    console.log("🔧 Criando pool MySQL:", {
+      host: config.host,
+      port: config.port,
+      user: config.user,
+      database: config.database
     });
 
-    // Log da conexão estabelecida
-    pool.on('connection', (connection) => {
-      console.log('✅ DB Connected:', connection.config.host);
-    });
+    pool = mysql.createPool(config);
 
-    pool.on('error', (err) => {
-      console.error('❌ DB Pool Error:', err);
+    pool.on("connection", (conn) => {
+      console.log("✅ Conexão estabelecida com MySQL:", conn.config.host);
     });
   }
+
   return pool;
 }
 
+/**
+ * Execução padrão para SELECT
+ */
 export async function executeQuery<T = any>(
   query: string,
   params: any[] = []
 ): Promise<T[]> {
   try {
-    const pool = getPool();
-    console.log('🔍 Executando query:', query.substring(0, 100) + '...');
-    const [rows] = await pool.execute(query, params);
-    console.log('✅ Query executada com sucesso, linhas retornadas:', (rows as any[]).length);
+    const connection = getPool();
+
+    const [rows] = await connection.execute(query, params);
+
     return rows as T[];
   } catch (error) {
-    console.error('❌ Erro na execução da query:', error);
-    console.error('Query:', query);
-    console.error('Params:', params);
+    console.error("❌ Erro executeQuery:", error);
+    console.error("Query:", query);
+    console.error("Params:", params);
     throw error;
   }
 }
 
+/**
+ * Execução para INSERT
+ */
 export async function executeInsert(
   query: string,
   params: any[] = []
 ): Promise<{ insertId: number; affectedRows: number }> {
   try {
-    const pool = getPool();
-    console.log('➕ Executando insert:', query.substring(0, 100) + '...');
-    const [result] = await pool.execute(query, params);
-    const insertResult = result as mysql.ResultSetHeader;
-    console.log('✅ Insert executado com sucesso, ID:', insertResult.insertId);
+    const connection = getPool();
+    const [result] = await connection.execute<ResultSetHeader>(query, params);
+
     return {
-      insertId: insertResult.insertId,
-      affectedRows: insertResult.affectedRows
+      insertId: result.insertId,
+      affectedRows: result.affectedRows
     };
   } catch (error) {
-    console.error('❌ Erro na execução do insert:', error);
-    console.error('Query:', query);
-    console.error('Params:', params);
+    console.error("❌ Erro executeInsert:", error);
+    console.error("Query:", query);
+    console.error("Params:", params);
     throw error;
   }
 }
 
+/**
+ * Execução para UPDATE
+ */
 export async function executeUpdate(
   query: string,
   params: any[] = []
 ): Promise<{ affectedRows: number }> {
   try {
-    const pool = getPool();
-    console.log('✏️ Executando update:', query.substring(0, 100) + '...');
-    const [result] = await pool.execute(query, params);
-    const updateResult = result as mysql.ResultSetHeader;
-    console.log('✅ Update executado com sucesso, linhas afetadas:', updateResult.affectedRows);
+    const connection = getPool();
+    const [result] = await connection.execute<ResultSetHeader>(query, params);
+
     return {
-      affectedRows: updateResult.affectedRows
+      affectedRows: result.affectedRows
     };
   } catch (error) {
-    console.error('❌ Erro na execução do update:', error);
-    console.error('Query:', query);
-    console.error('Params:', params);
+    console.error("❌ Erro executeUpdate:", error);
+    console.error("Query:", query);
+    console.error("Params:", params);
     throw error;
   }
 }
 
+/**
+ * Execução para DELETE
+ */
 export async function executeDelete(
   query: string,
   params: any[] = []
 ): Promise<{ affectedRows: number }> {
   try {
-    const pool = getPool();
-    console.log('🗑️ Executando delete:', query.substring(0, 100) + '...');
-    const [result] = await pool.execute(query, params);
-    const deleteResult = result as mysql.ResultSetHeader;
-    console.log('✅ Delete executado com sucesso, linhas afetadas:', deleteResult.affectedRows);
+    const connection = getPool();
+    const [result] = await connection.execute<ResultSetHeader>(query, params);
+
     return {
-      affectedRows: deleteResult.affectedRows
+      affectedRows: result.affectedRows
     };
   } catch (error) {
-    console.error('❌ Erro na execução do delete:', error);
-    console.error('Query:', query);
-    console.error('Params:', params);
+    console.error("❌ Erro executeDelete:", error);
+    console.error("Query:", query);
+    console.error("Params:", params);
     throw error;
   }
 }
 
+/**
+ * Teste manual da conexão
+ */
 export async function testConnection(): Promise<boolean> {
   try {
-    const pool = getPool();
-    console.log('🔍 Testando conexão com o banco...');
-    await pool.execute('SELECT 1 as test');
-    console.log('✅ Conexão com MySQL estabelecida com sucesso');
+    const connection = getPool();
+    await connection.execute("SELECT 1");
+    console.log("✅ MySQL OK");
     return true;
   } catch (error) {
-    console.error('❌ Erro ao conectar com MySQL:', error);
+    console.error("❌ Falha ao conectar no MySQL:", error);
     return false;
   }
 }
