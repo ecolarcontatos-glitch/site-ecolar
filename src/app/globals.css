@@ -102,10 +102,6 @@
    BASE GLOBAL
 ============================ */
 
-@layer base {
-  * {}
-  body {}
-}
 
 /* =======================================================
    HERO – SWIPER PAGINATION (bolinhas pequenas e limpas)
