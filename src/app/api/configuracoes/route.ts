@@ -45,8 +45,15 @@ export async function GET() {
     let heroImages: HeroImage[] = [];
 
     try {
-      const raw = config.hero_images ?? "[]";
-      const parsed = JSON.parse(raw);
+      let parsed = [];
+
+      try {
+        parsed = JSON.parse(config.hero_images || "[]");
+      } catch (e) {
+        console.error("Falha ao parsear hero_images:", config.hero_images);
+        parsed = [];
+      }
+
 
       heroImages = Array.isArray(parsed)
         ? parsed.map((b: any): HeroImage => ({
@@ -71,7 +78,7 @@ export async function GET() {
       whatsapp: config.whatsapp,
       texto_footer: config.texto_footer,
       texto_rodape: config.texto_rodape,
-      hero_images: heroImages,
+      heroImages: heroImages,   // 👈 AQUI O SEGREDO
       logo_header: config.logo_header,
       logo_footer: config.logo_footer
     });
@@ -85,13 +92,21 @@ export async function GET() {
   }
 }
 
-export async function PUT(request: NextRequest) {
-  try {
-    const body = await request.json();
-    const { 
-      telefone, email, endereco, whatsapp, texto_footer, texto_rodape,
-      hero_images, logo_header, logo_footer 
+    export async function PUT(request: NextRequest) {
+      try {
+        const body = await request.json();
+    const {
+      telefone,
+      email,
+      endereco,
+      whatsapp,
+      texto_footer,
+      texto_rodape,
+      hero_images,     // 👈 É ISSO QUE VEM DO FRONT
+      logo_header,
+      logo_footer
     } = body;
+
 
     console.log('✏️ Atualizando configurações...');
 
@@ -179,7 +194,7 @@ export async function PUT(request: NextRequest) {
       whatsapp,
       texto_footer,
       texto_rodape,
-      hero_images: JSON.parse(heroImagesJson),
+      heroImages: JSON.parse(heroImagesJson),
       logo_header,
       logo_footer,
       message: 'Configurações atualizadas com sucesso'
