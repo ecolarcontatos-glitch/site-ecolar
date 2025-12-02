@@ -1,20 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { executeQuery, executeUpdate, executeDelete, testConnection } from '@/lib/db';
+import { executeQuery, executeUpdate, executeDelete } from '@/lib/db';
 
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    // Teste de conexão antes de executar queries
-    const connectionOk = await testConnection();
-    if (!connectionOk) {
-      console.error('❌ Falha na conexão com o banco de dados');
-      return NextResponse.json(
-        { error: 'Erro de conexão com banco de dados' },
-        { status: 500 }
-      );
-    }
 
     const id = parseInt(params.id);
     console.log(`📋 Buscando produto ID: ${id} no MySQL`);
@@ -75,15 +66,6 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    // Teste de conexão antes de executar queries
-    const connectionOk = await testConnection();
-    if (!connectionOk) {
-      console.error('❌ Falha na conexão com o banco de dados');
-      return NextResponse.json(
-        { error: 'Erro de conexão com banco de dados' },
-        { status: 500 }
-      );
-    }
 
     const id = parseInt(params.id);
     const body = await request.json();
@@ -222,15 +204,6 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    // Teste de conexão antes de executar queries
-    const connectionOk = await testConnection();
-    if (!connectionOk) {
-      console.error('❌ Falha na conexão com o banco de dados');
-      return NextResponse.json(
-        { error: 'Erro de conexão com banco de dados' },
-        { status: 500 }
-      );
-    }
 
     const id = parseInt(params.id);
     console.log(`🗑️ Deletando produto ID: ${id} do MySQL`);

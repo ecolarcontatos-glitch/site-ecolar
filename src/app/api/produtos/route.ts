@@ -1,17 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { executeQuery, executeInsert, testConnection } from '@/lib/db';
+import { executeQuery, executeInsert } from '@/lib/db';
 
 export async function GET(request: NextRequest) {
   try {
-    // Teste de conexão antes de executar queries
-    const connectionOk = await testConnection();
-    if (!connectionOk) {
-      console.error('❌ Falha na conexão com o banco de dados');
-      return NextResponse.json(
-        { error: 'Erro de conexão com banco de dados' },
-        { status: 500 }
-      );
-    }
 
     const { searchParams } = new URL(request.url);
     const categoria = searchParams.get('categoria');
@@ -73,15 +64,6 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    // Teste de conexão antes de executar queries
-    const connectionOk = await testConnection();
-    if (!connectionOk) {
-      console.error('❌ Falha na conexão com o banco de dados');
-      return NextResponse.json(
-        { error: 'Erro de conexão com banco de dados' },
-        { status: 500 }
-      );
-    }
 
     const body = await request.json();
     const { 
