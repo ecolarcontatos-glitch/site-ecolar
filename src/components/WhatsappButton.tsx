@@ -18,16 +18,17 @@ export default function WhatsappButton({
       target="_blank"
       rel="noopener noreferrer"
       className="
-        fixed bottom-5 right-5
+        fixed bottom-4 right-4
         z-50
-        w-14 h-14
+        w-16 h-16
         rounded-full
-        bg-[#7FBA3D]        /* COR OFICIAL DA ECOLAR */
+        bg-[#7FBA3D]
         flex items-center justify-center
-        shadow-lg shadow-black/30
-        hover:scale-110
-        transition-transform duration-200
-      "
+        shadow-md
+        active:scale-95
+        transition-all duration-200
+        "
+
       aria-label="Falar com a ECOLAR pelo WhatsApp"
     >
       <svg
