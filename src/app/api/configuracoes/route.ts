@@ -78,7 +78,7 @@ export async function GET() {
       whatsapp: config.whatsapp,
       texto_footer: config.texto_footer,
       texto_rodape: config.texto_rodape,
-      hero_images: heroImages,
+      heroImages: heroImages,
       logo_header: config.logo_header,
       logo_footer: config.logo_footer
     });
