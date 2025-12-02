@@ -5,6 +5,8 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { DataProvider } from "@/contexts/DataContext";
+import WhatsappButton from "@/components/WhatsappButton";
+
 
 const inter = Inter({
   variable: "--font-inter",
@@ -50,6 +52,7 @@ export default function RootLayout({
             <Footer />
           </DataProvider>
         </ErrorBoundary>
+        <WhatsappButton />
       </body>
     </html>
   );
