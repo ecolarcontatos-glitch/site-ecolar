@@ -52,9 +52,10 @@ export default function HomePage() {
 
         const data = await res.json();
 
-        if (data.hero_images && Array.isArray(data.hero_images)) {
-          setHeroImages(data.hero_images);
-        }
+    if (data.heroImages && Array.isArray(data.heroImages)) {
+      setHeroImages(data.heroImages);
+    }
+
       } catch (error) {
         console.error("Erro ao carregar hero_images:", error);
       }
