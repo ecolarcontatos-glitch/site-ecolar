@@ -112,17 +112,16 @@ try {
       try {
         const body = await request.json();
     const {
-      telefone,
-      email,
-      endereco,
-      whatsapp,
-      texto_footer,
-      texto_rodape,
-      hero_images,     // 👈 É ISSO QUE VEM DO FRONT
-      logo_header,
-      logo_footer
-    } = body;
-
+  telefone = "",
+  email = "",
+  endereco = "",
+  whatsapp = "",
+  texto_footer = "",
+  texto_rodape = "",
+  hero_images = [],
+  logo_header = "",
+  logo_footer = ""
+} = body;
 
     console.log('✏️ Atualizando configurações...');
 
