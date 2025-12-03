@@ -183,10 +183,10 @@ try {
     const data = await configResponse.json();
 
     const heroImages =
-      Array.isArray(data.hero_images)
-        ? data.hero_images
-        : typeof data.hero_images === "string"
-          ? JSON.parse(data.hero_images)
+      Array.isArray(data.heroImages)
+        ? data.heroImages
+        : typeof data.heroImages === "string"
+          ? JSON.parse(data.heroImages)
           : [];
 
     setConfiguracoes({
@@ -200,6 +200,7 @@ try {
       textoFooter: data.texto_footer || "",
       heroImages: heroImages.sort((a: any, b: any) => (a.order ?? 0) - (b.order ?? 0)),
     });
+
 
     console.log("⚙ Configurações carregadas:", heroImages.length, "banners");
 

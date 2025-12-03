@@ -107,7 +107,7 @@ export default function Header() {
           </Link>
 
           {/* NAV DESKTOP */}
-          <nav className="hidden md:flex items-center space-x-8 ml-auto mr-6">
+          <nav className="hidden md:flex flex-1 items-center justify-center space-x-8">
             <Link href="/" className="font-inter text-[#111827] hover:text-[#7FBA3D] transition-colors duration-200">
               Início
             </Link>

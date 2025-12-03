@@ -94,7 +94,7 @@ try {
       whatsapp: config.whatsapp,
       texto_footer: config.texto_footer,
       texto_rodape: config.texto_rodape,
-      hero_images: heroImages,
+      heroImages: heroImages,
       logo_header: config.logo_header,
       logo_footer: config.logo_footer
     });
@@ -108,13 +108,21 @@ try {
   }
 }
 
-export async function PUT(request: NextRequest) {
-  try {
-    const body = await request.json();
-    const { 
-      telefone, email, endereco, whatsapp, texto_footer, texto_rodape,
-      hero_images, logo_header, logo_footer 
+    export async function PUT(request: NextRequest) {
+      try {
+        const body = await request.json();
+    const {
+      telefone,
+      email,
+      endereco,
+      whatsapp,
+      texto_footer,
+      texto_rodape,
+      hero_images,     // 👈 É ISSO QUE VEM DO FRONT
+      logo_header,
+      logo_footer
     } = body;
+
 
     console.log('✏️ Atualizando configurações...');
 
@@ -202,7 +210,7 @@ export async function PUT(request: NextRequest) {
       whatsapp,
       texto_footer,
       texto_rodape,
-      hero_images: JSON.parse(heroImagesJson),
+      heroImages: JSON.parse(heroImagesJson),
       logo_header,
       logo_footer,
       message: 'Configurações atualizadas com sucesso'
