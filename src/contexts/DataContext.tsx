@@ -174,10 +174,10 @@ try {
     const data = await configResponse.json();
 
     const heroImages =
-      Array.isArray(data.hero_images)
-        ? data.hero_images
-        : typeof data.hero_images === "string"
-          ? JSON.parse(data.hero_images)
+      Array.isArray(data.heroImages)
+        ? data.heroImages
+        : typeof data.heroImages === "string"
+          ? JSON.parse(data.heroImages)
           : [];
 
     setConfiguracoes({
@@ -190,6 +190,7 @@ try {
       textoRodape: data.texto_rodape || "",
       heroImages
     });
+
 
     console.log("⚙ Configurações carregadas:", heroImages.length, "banners");
 
