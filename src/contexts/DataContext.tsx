@@ -3,6 +3,14 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Produto, Categoria, Post, Depoimento, Inspiracao } from '@/lib/types';
 
+interface HeroImage {
+  desktop: string;
+  tablet: string;
+  mobile: string;
+  link: string;
+  order: number;
+}
+
 interface DataContextType {
   produtos: Produto[];
   categorias: Categoria[];
@@ -73,6 +81,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [depoimentos, setDepoimentos] = useState<Depoimento[]>([]);
   const [inspiracoes, setInspiracoes] = useState<Inspiracao[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  
 
 // ✅ Novo estado para CONFIGURAÇÕES DO SITE
 const [configuracoes, setConfiguracoes] = useState<any>(null);
@@ -188,7 +197,8 @@ try {
       endereco: data.endereco || "",
       whatsapp: data.whatsapp || "",
       textoRodape: data.texto_rodape || "",
-      heroImages
+      textoFooter: data.texto_footer || "",
+      heroImages: heroImages.sort((a: any, b: any) => (a.order ?? 0) - (b.order ?? 0)),
     });
 
     console.log("⚙ Configurações carregadas:", heroImages.length, "banners");
