@@ -40,33 +40,49 @@ export async function GET() {
     }
 
     const config = configs[0];
+// Garantir que os banners sejam parseados CORRETAMENTE
+let heroImages: HeroImage[] = [];
 
-    // Garantir que os banners sejam parseados CORRETAMENTE
-    let heroImages: HeroImage[] = [];
+try {
+  const rawHero = config.hero_images;
+  let parsed: any[] = [];
 
-    try {
-      let parsed = [];
-
+  if (Array.isArray(rawHero)) {
+    // Caso a coluna seja JSON e o driver já devolva array pronto
+    parsed = rawHero;
+  } else if (typeof rawHero === "string") {
+    // Caso ainda esteja como string JSON
+    if (rawHero.trim() === "") {
+      parsed = [];
+    } else {
       try {
-        parsed = JSON.parse(config.hero_images || "[]");
+        parsed = JSON.parse(rawHero);
       } catch (e) {
-        console.error("Falha ao parsear hero_images:", config.hero_images);
+        console.error("❌ Falha ao parsear hero_images (string inválida):", rawHero);
         parsed = [];
       }
-
-
-      heroImages = Array.isArray(parsed)
-        ? parsed.map((b: any): HeroImage => ({
-            desktop: b.desktop || "",
-            tablet: b.tablet || "",
-            mobile: b.mobile || "",
-            link: b.link || "",
-            order: b.order || 1
-          }))
-        : [];
-    } catch {
-      heroImages = [];
     }
+  } else if (rawHero == null) {
+    parsed = [];
+  } else {
+    console.warn("⚠ hero_images em formato inesperado:", typeof rawHero, rawHero);
+    parsed = [];
+  }
+
+  heroImages = Array.isArray(parsed)
+    ? parsed.map((b: any): HeroImage => ({
+        desktop: b.desktop || "",
+        tablet: b.tablet || "",
+        mobile: b.mobile || "",
+        link: b.link || "",
+        order: b.order || 1,
+      }))
+    : [];
+} catch (err) {
+  console.error("❌ Erro geral ao processar hero_images:", err);
+  heroImages = [];
+}
+
 
     console.log('✅ Configurações encontradas');
 

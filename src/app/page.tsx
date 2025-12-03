@@ -42,7 +42,8 @@ export default function HomePage() {
   const [depoimentos, setDepoimentos] = useState<Depoimento[]>([]);
   const [inspiracoes, setInspiracoes] = useState<Inspiracao[]>([]);
   const [posts, setPosts] = useState<Post[]>([]);
-  const [heroImages, setHeroImages] = useState<any[]>([]);
+  const { configuracoes } = useData();
+  const heroImages = configuracoes?.heroImages || [];
 
     useEffect(() => {
     async function fetchHero() {
