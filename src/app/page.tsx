@@ -45,25 +45,6 @@ export default function HomePage() {
   const { configuracoes } = useData();
   const heroImages = configuracoes?.heroImages || [];
 
-    useEffect(() => {
-    async function fetchHero() {
-      try {
-        const res = await fetch('/api/configuracoes', { cache: 'no-store' });
-        if (!res.ok) return;
-
-        const data = await res.json();
-
-    if (data.heroImages && Array.isArray(data.heroImages)) {
-      setHeroImages(data.heroImages);
-    }
-
-      } catch (error) {
-        console.error("Erro ao carregar hero_images:", error);
-      }
-    }
-
-    fetchHero();
-  }, []);
 
   // Buscar depoimentos, inspirações e posts do blog
   useEffect(() => {
