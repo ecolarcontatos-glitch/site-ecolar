@@ -1,6 +1,6 @@
-import type { NextConfig } from "next";
+/** @type {import('next').NextConfig} */
+const nextConfig = {
 
-const nextConfig: NextConfig = {
   devIndicators: false, // Remove widget de desenvolvimento Next.js
   
   // Ignorar erros durante build (compatibilidade Vercel)
