@@ -6,6 +6,8 @@ import Footer from "@/components/Footer";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { DataProvider } from "@/contexts/DataContext";
 import WhatsappButton from "@/components/WhatsappButton";
+import { Analytics } from "@vercel/analytics/react";
+
 
 
 const inter = Inter({
@@ -53,6 +55,8 @@ export default function RootLayout({
           </DataProvider>
         </ErrorBoundary>
         <WhatsappButton />
+
+        <Analytics />
       </body>
     </html>
   );
