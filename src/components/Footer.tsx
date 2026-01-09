@@ -20,7 +20,7 @@ export default function Footer() {
     telefone: '(83) 2177-7553',
     email: 'ecolar.contatos@gmail.com',
     endereco: 'R. Pres. Washington Luís, 592 - Bessa, João Pessoa - PB, 58035-340',
-    whatsapp: '55 (83) 9 21489515',
+    whatsapp: 'https://wa.me/5583921489515',
     textoRodape: 'Materiais de construção com qualidade e sustentabilidade.'
   });
 
@@ -205,7 +205,7 @@ export default function Footer() {
               © 2025 ECOLAR. Todos os direitos reservados.
             </p>
             <p className="font-inter text-gray-400 text-sm mt-2 md:mt-0">
-              60065227000147
+              Cnpj - 60.065.227/0001-47
             </p>
           </div>
         </div>

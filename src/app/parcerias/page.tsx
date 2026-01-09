@@ -51,7 +51,7 @@ export default function ParceriasPage() {
 
                 <div className="text-center">
                   <a
-                    href="https://wa.me/558393661690?text=Olá! Sou um profissional da construção e gostaria de saber sobre as parcerias da ECOLAR."
+                    href="https://wa.me/558321489515?text=Olá! Sou um profissional da construção e gostaria de saber sobre as parcerias da ECOLAR."
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center space-x-2 bg-[#7FBA3D] text-white px-6 py-3 rounded-2xl hover:bg-[#0A3D2E] transition-colors duration-200 font-inter font-medium"
@@ -140,7 +140,7 @@ export default function ParceriasPage() {
                 </div>
               </div>
               <a
-                href="https://wa.me/558393661690?text=Olá! Gostaria de saber sobre a entrega por carrada."
+                href="https://wa.me/5583921489515?text=Olá! Gostaria de saber sobre a entrega por carrada."
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center space-x-2 text-[#C05A2B] hover:text-[#0A3D2E] font-inter font-medium"
@@ -231,7 +231,7 @@ export default function ParceriasPage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <a
-                href="https://wa.me/558393661690?text=Olá! Gostaria de saber mais sobre as parcerias da ECOLAR."
+                href="https://wa.me/5583921489515?text=Olá! Gostaria de saber mais sobre as parcerias da ECOLAR."
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center space-x-2 bg-white text-[#7FBA3D] px-8 py-4 rounded-2xl hover:bg-gray-100 transition-colors duration-200 font-inter font-semibold text-lg"
