@@ -141,11 +141,11 @@ export default function ContatoPage() {
                 <div className="space-y-4">
                   <div className="flex justify-between items-center py-2 border-b border-[#f1f5f9]">
                     <span className="font-inter font-medium text-[#111827]">Segunda a Sexta</span>
-                    <span className="font-inter text-[#6b7280]">7:00 - 18:00</span>
+                    <span className="font-inter text-[#6b7280]">8:00 - 17:00</span>
                   </div>
                   <div className="flex justify-between items-center py-2 border-b border-[#f1f5f9]">
                     <span className="font-inter font-medium text-[#111827]">Sábado</span>
-                    <span className="font-inter text-[#6b7280]">7:00 - 12:00</span>
+                    <span className="font-inter text-[#6b7280]">8:00 - 12:00</span>
                   </div>
                   <div className="flex justify-between items-center py-2">
                     <span className="font-inter font-medium text-[#111827]">Domingo</span>
