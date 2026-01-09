@@ -6,7 +6,7 @@ interface WhatsappButtonProps {
 }
 
 export default function WhatsappButton({
-  phone = '558393661690', // Número oficial da ECOLAR
+  phone = '5583921489515', // Número oficial da ECOLAR
   message = 'Olá! Vim pelo site da ECOLAR e gostaria de tirar uma dúvida.'
 }: WhatsappButtonProps) {
 

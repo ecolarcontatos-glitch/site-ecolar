@@ -39,13 +39,13 @@ export default function ContatoPage() {
                       Atendimento rápido e orçamento em até 1 hora
                     </p>
                     <a
-                      href="https://wa.me/558393661690"
+                      href="https://wa.me/5583921489515"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center space-x-2 bg-[#25D366] text-white px-4 py-2 rounded-2xl hover:bg-[#128C7E] transition-colors duration-200 font-inter font-medium"
                     >
                       <MessageCircle className="w-4 h-4" />
-                      <span>(83) 9366-1690</span>
+                      <span>(83)9 2148-9515</span>
                     </a>
                   </div>
                 </div>
@@ -169,7 +169,7 @@ export default function ContatoPage() {
                   Fale conosco pelo WhatsApp e receba sua cotação em até 1 hora!
                 </p>
                 <a
-                  href="https://wa.me/558393661690?text=Olá! Preciso de um orçamento rápido."
+                  href="https://wa.me/5583921489515?text=Olá! Preciso de um orçamento rápido."
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center space-x-2 bg-white text-[#7FBA3D] px-6 py-3 rounded-2xl hover:bg-gray-100 transition-colors duration-200 font-inter font-semibold"
